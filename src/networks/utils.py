@@ -1,6 +1,8 @@
+import inspect
 import torch
 from torch import nn
 import warnings
+
 from data import utils as data_utils
 
 
@@ -66,6 +68,7 @@ def train(
     optimizer, 
     loss_fn=nn.CrossEntropyLoss(),
     h_0=None,
+    sample_h_0=False,
     early_stopping_params=None, # Dict with delta, epsilon, and criterion_fn keys, corresponding to parameters for early_stopping function
     num_epochs=20, 
     device='cuda',
@@ -125,6 +128,26 @@ def train(
             'accuracy' : []
         }
 
+        # Check for valid input of h_0 and sample_h_0.
+        if sample_h_0:
+            if not isinstance(sample_h_0, dict): raise TypeError(
+                "sample_h_0 should be either None, or a dict with keys 'distr' " 
+                "and 'distr_params'."
+            )
+            if 'distr' not in sample_h_0: raise KeyError(
+                "sample_h_0 shoule be a dict with keys 'distr' and 'distr_params'."
+            )
+            if not inspect.ismethoddescriptor(sample_h_0['distr']): raise ValueError(
+                "Unrecognized value for sample_h_0['distr']. Should be a "
+                "sampling method such as torch.Tensor.normal_, or None."
+            )
+            if h_0 is not None: warnings.warn(
+                "h_0 was not passed in as None, but sample_h_0 was passed in "
+                "as True, requesting random sampling of initial hidden states "
+                "for each batch. This will be carried out, overriding the "
+                "passed in value of h_0."
+            )
+
         for batch, labels, lengths, masks, seq_ind in dataloader:
             batch, labels, masks = batch.to(device), labels.to(device), masks.to(device)
 
@@ -138,6 +161,16 @@ def train(
                     "sequences should be of the same length."
                 )
                 lengths = None
+
+            # Optionally randomly sample initial hidden states.
+            if sample_h_0:
+                h_0 = sample_h_0['distr'](
+                    torch.full(
+                        model.get_h_0_shape(batch_size=batch.shape[0]), 
+                        torch.nan
+                    ),
+                    **sample_h_0['distr_params'],
+                ).to(device)
 
             logits, rnn_output, _ = model(
                 batch, h_0=h_0, lengths=lengths, output_type='many_to_many'

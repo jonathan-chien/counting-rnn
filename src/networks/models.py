@@ -494,6 +494,25 @@ class AutoRNN(nn.Module):
           
         return generated, on_input, joined
     
+    def get_h_0_shape(self, batch_size=False):
+        """ 
+        Get shape of initial hidden state h_0 based on network parameters and
+        whether or not input is batched.
+        """
+        if not batch_size:
+            h_0_shape = (
+                (self.rnn.bidirectional+1)*self.rnn.num_layers, 
+                self.rnn_config['hidden_size']
+            )
+        else:
+            h_0_shape = (
+                (self.rnn.bidirectional+1)*self.rnn.num_layers, 
+                batch_size, 
+                self.rnn_config['hidden_size']
+            )
+
+        return h_0_shape
+    
     def initialize_h_0(self, input_shape, device):
         """ 
         Initialize hidden state to all zeros.
@@ -512,20 +531,13 @@ class AutoRNN(nn.Module):
         """
         if len(input_shape) == 2:
             h_0 = torch.zeros(
-                (
-                    (self.rnn.bidirectional+1)*self.rnn.num_layers, 
-                    self.rnn_config['hidden_size']
-                ),
+                self.get_h_0_shape(batch_size=False),
                 device=device
             )
         elif len(input_shape) == 3:
             batch_size = input_shape[0]
             h_0 = torch.zeros(
-                (
-                    (self.rnn.bidirectional+1)*self.rnn.num_layers, 
-                    batch_size, 
-                    self.rnn_config['hidden_size']
-                ),
+                self.get_h_0_shape(batch_size=batch_size),
                 device=device
             )
         else:
@@ -534,6 +546,30 @@ class AutoRNN(nn.Module):
                 f"{len(input_shape)}d."
             )
         return h_0
+        # if len(input_shape) == 2:
+        #     h_0 = torch.zeros(
+        #         (
+        #             (self.rnn.bidirectional+1)*self.rnn.num_layers, 
+        #             self.rnn_config['hidden_size']
+        #         ),
+        #         device=device
+        #     )
+        # elif len(input_shape) == 3:
+        #     batch_size = input_shape[0]
+        #     h_0 = torch.zeros(
+        #         (
+        #             (self.rnn.bidirectional+1)*self.rnn.num_layers, 
+        #             batch_size, 
+        #             self.rnn_config['hidden_size']
+        #         ),
+        #         device=device
+        #     )
+        # else:
+        #     raise ValueError(
+        #         "input to network should be a 2D or 3D tensor but was " 
+        #         f"{len(input_shape)}d."
+        #     )
+        # return h_0
     
     @staticmethod
     def join_input_gen_resp(input, input_lengths, resp, resp_lengths):
