@@ -5,121 +5,158 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from data import utils as data_utils
 
 
-class FeedForward(nn.Module):
+class FFN(nn.Module):
+    """
+    Feedfoward network constructed from a list using nn.Sequential.
+    """
+    def __init__(self, layers):
+        super().__init__()
+        self.model = nn.Sequential(*layers)
+
+    def forward(self, input):
+        return self.model(input)
+
+
+class FCN(nn.Module):
     """ 
-    Feedforward network with N layers (including input layer), where each
-    non-input layer may have some activation function and dropout.
+    Feedforward network with an input layer and N-1 linear layers, where 
+    each non-input layer may have some activation function and dropout.
     """
 
-    def __init__(self, layer_sizes, nonlinearities, dropouts):
+    def __init__(self, layer_sizes, nonlinearities=None, dropouts=None):
         """ 
         Parameters
         ----------
-        layers : list
+        layer_sizes : list or None
             Of length N. k_th element is int size of k_th layer including input 
-            layer.
-        nonlinearities : list
+            layer. If None, the network is set as a single nn.Identity layer.
+        nonlinearities : list or None, optional
             Of length N - 1. k_th element corresponds to k_th non-input layer
-            and is either an activation function object like nn.ReLU(), or
-            None.
-        dropouts : list
-            Of length N - 1. k_th element corresponds to k_th non-input layer
-            and is either an nn.Dropout object instantiated with desired
-            parameters, or None.
+            and is either an activation function object like nn.ReLU(). If 
+            None, defaults to ReLU for all non-input layers. Default is None.
+        dropouts : list, float/int, or None, optional
+            Of length N - 1. For list input, k_th element corresponds to k_th
+            non-input layer and should be an nn.Dropout object instantiated
+            with desired parameters. If a float/int, should be in [0, 1] and
+            will be used as the `p` parameter to instantiate a nn.Dropout
+            object for all non-input layers. If None, no dropout will be
+            applied. Default is None.
         """
         super().__init__()
 
-        # Check for correct size of inputs.
+        # Validate layer sizes.
+        if layer_sizes is None:
+            self.model = nn.Identity()
+            return
+        elif (
+            not isinstance(layer_sizes, list) 
+            or not all(isinstance(size, int) for size in layer_sizes)
+        ):
+            raise ValueError(
+                "`layer_sizes` must be a list of integers."
+            )
         if len(layer_sizes) < 2:
             raise ValueError(
-                "`layer_sizes` must be of length at least 2 but is of length "
-                f"{len(layer_sizes)}."
+                f"`layer_sizes` must have at least 2 elements, got {len(layer_sizes)}."
             )
-        if len(nonlinearities) != len(layer_sizes) - 1:
+        num_layers = len(layer_sizes)
+
+        # Validate nonlinearities and dropouts or use default values.
+        if nonlinearities is None:
+            nonlinearities = [nn.ReLU()] * (num_layers - 1)
+        elif len(nonlinearities) != num_layers - 1:
             raise ValueError(
                 f"The length of 'nonlinearities' ({len(nonlinearities)}) must be " 
                 f"one less than that of 'layer_sizes' ({len(layer_sizes)})."
             )
-        if len(dropouts) != len(layer_sizes) - 1:
+        if dropouts is None:
+            dropouts = [None] * (num_layers - 1)
+        elif isinstance(dropouts, (float, int)):
+            if not 0.0 <= dropouts <= 1.0:
+                raise ValueError(
+                    "If passed as a float/int, `dropouts` must be in [0, 1] "
+                    f"but got {dropouts}."
+                )
+            else:
+                dropouts = [
+                    nn.Dropout(p=dropouts, inplace=False) 
+                    for _ in range(num_layers-1)
+                ]
+        elif len(dropouts) != num_layers - 1:
             raise ValueError(
                 f"The length of 'dropouts' ({len(dropouts)}) must be one less" 
                 f"than that of 'layer_sizes' ({len(layer_sizes)})."
             )
         
+        # Construct network.
+        layers = []
+        for in_dim, out_dim, nonlinearity, dropout in zip(
+            layer_sizes[:-1], layer_sizes[1:], nonlinearities, dropouts
+        ):
+            layers.append(nn.Linear(in_dim, out_dim))
+            if nonlinearity is not None: layers.append(nonlinearity)
+            if dropout is not None: layers.append(dropout)
+        self.model = nn.Sequential(*layers)
+
         self.layer_sizes = layer_sizes
         self.nonlinearities = nonlinearities
         self.dropouts = dropouts
-        
-        # Construct network.
-        layers = []
-        for i_layer in range(len(self.layer_sizes)-1):
-            layers.append(
-                nn.Linear(self.layer_sizes[i_layer], self.layer_sizes[i_layer+1])
-            )
-            if self.nonlinearities[i_layer] is not None:
-                layers.append(self.nonlinearities[i_layer])
-            if self.dropouts[i_layer] is not None:
-                layers.append(self.dropouts[i_layer])
-        self.network = nn.Sequential(*layers)
 
     def forward(self, input):
         """Pass input through model."""
-        return self.network(input)
-        
+        return self.model(input)
+    
 
 class AutoRNN(nn.Module):
     """ 
-    Recurrent neural network with an arbitrary number of FF input and readout 
+    Recurrent neural network with an arbitrary number of FC input and readout 
     layers preceding and following, respectively, a torch.nn.RNNBase subclass.
     Capable of autoregressive generation upon being provided an input sequence.
     """
 
     def __init__(
             self, 
-            input_transform_config, 
+            input_network_config, 
             rnn_config,
-            readout_config,
-            network_type,
+            readout_network_config,
+            rnn_type,
             tokens 
         ):
         """ 
         Parameters
         ----------
-        input_transform_config : dict 
+        input_network_config : dict 
             Dict containing key-value pairs that correspond to param-arg pairs
             for the FeedForward class. Used to configure input layers of
             network. May be None. 
         rnn_config : dict
             Dict containing key-value pairs that correspond to param-arg pairs
-            for the torch.nn.RNNBAse subclass specified by `network_type`.
-        readout_config : dict
+            for the torch.nn.RNNBAse subclass specified by `rnn_type`.
+        readout_network_config : dict
             Dict containing key-value pairs that correspond to param-arg pairs
             for the FeedForward class. Used to configure readout layers of
             network. May not be None.
-        network_type : torch.nn.RNNBase subclass) 
+        rnn_type : torch.nn.RNNBase subclass) 
             Class of RNN, recurrent core between input and readout layers.
         tokens : torch.Tensor
             Of shape (V, F), where F is the input size of the first layer of
-            the entire network (first input layer if input_transform_config is
+            the entire network (first input layer if input_network_config is
             not None, else first layer of the recurrent core network), V is the
             number of tokens in the generating vocabulary of the network, and
             the k_th row corresponds to the k_th token.
         """
         super().__init__()
 
-        self.input_transform_config = input_transform_config
+        self.input_network_config = input_network_config
         self.rnn_config = rnn_config
-        self.readout_config = readout_config
-        self.network_type = network_type
+        self.readout_network_config = readout_network_config
+        self.rnn_type = rnn_type
         self.tokens = tokens
 
-        # Set up optional input transformation network, as well as RNN, and readout network.
-        if self.input_transform_config is not None:
-            self.input_transform = FeedForward(**self.input_transform_config)
-        else:
-            self.input_transform = None
-        self.rnn = self.network_type(**self.rnn_config)
-        self.readout = FeedForward(**self.readout_config)
+        # Set up input transformation network, RNN, and readout network.
+        self.input_network = FCN(**self.input_network_config)
+        self.rnn = self.rnn_type(**self.rnn_config)
+        self.readout_network = FCN(**self.readout_network_config)
 
         # Can be used to generate tokens probabilistically.
         self.softmax = nn.Softmax(dim=-1)
@@ -134,8 +171,8 @@ class AutoRNN(nn.Module):
         ----------
         B : Batch size.
         L : (Padded) sequence length.
-        F : Size of first layer in full network (either input to input FF or to 
-            recurrent network).
+        F : Size of first layer in full network (either input to input FCN or 
+            to recurrent network).
         
         Parameters
         ----------
@@ -158,8 +195,7 @@ class AutoRNN(nn.Module):
         h_n : torch.Tensor 
         rnn_output : torch.Tensor
         """
-        if self.input_transform is not None: 
-            input = self.input_transform(input)
+        input = self.input_network(input)
 
         if h_0 is None: 
             h_0 = self.initialize_h_0(input.shape, input.device)
@@ -179,9 +215,9 @@ class AutoRNN(nn.Module):
             rnn_output, _ = pad_packed_sequence(rnn_output, batch_first=True)
 
         if output_type == 'many_to_many':
-            logits = self.readout(rnn_output) 
+            logits = self.readout_network(rnn_output) 
         elif output_type == 'many_to_one' :
-            logits = self.readout(rnn_output[:, -1, :]) # (batch_size, 2)
+            logits = self.readout_network(rnn_output[:, -1, :]) # (batch_size, 2)
         
         return logits, rnn_output, h_n
 
@@ -194,11 +230,12 @@ class AutoRNN(nn.Module):
         ----------
         B : Batch size.
         T : Number of timepoints.
+        V : Generating vocabulary size.
 
         Parameters
         ----------
         logits : torch.Tensor
-            2D or 3D. Either logits of shape (B, 2) or (B, T, 2), where the 
+            2D or 3D. Either logits of shape (B, V) or (B, T, V), where the 
             former is for single timepoints per batch.
 
         Returns
@@ -371,7 +408,7 @@ class AutoRNN(nn.Module):
                 torch.nan
             ).to(input_device),
             'logits' : torch.full(
-                (batch_size, max_resp_len, self.readout_config['layer_sizes'][-1]),
+                (batch_size, max_resp_len, self.readout_network.model[-1].out_features),
                 torch.nan
             ).to(input_device),
             'tokens' : torch.full(
@@ -444,12 +481,12 @@ class AutoRNN(nn.Module):
                 on_input[key],
                 (   
                     input_lengths if input_lengths is not None 
-                    else max_input_length.repeat(batch_size,)
+                    else torch.tensor(max_input_length).repeat(batch_size,)
                 )-1,
                 generated[key],
                 (
                     resp_lengths if resp_lengths is not None 
-                    else max_resp_len.repeat(batch_size,) 
+                    else torch.tensor(max_resp_len).repeat(batch_size,) 
                 )
             )
             for key in ['hidden', 'logits']
@@ -493,7 +530,7 @@ class AutoRNN(nn.Module):
             )
         else:
             raise ValueError(
-                "input to network should be a 2d or 3d tensor but was " 
+                "input to network should be a 2D or 3D tensor but was " 
                 f"{len(input_shape)}d."
             )
         return h_0

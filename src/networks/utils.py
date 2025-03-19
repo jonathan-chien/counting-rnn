@@ -139,7 +139,7 @@ def train(
                 )
                 lengths = None
 
-            logits, _, rnn_output = model(
+            logits, rnn_output, _ = model(
                 batch, h_0=h_0, lengths=lengths, output_type='many_to_many'
             )
 
