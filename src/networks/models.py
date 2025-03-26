@@ -104,8 +104,7 @@ class FCN(nn.Module):
 
     def forward(self, input):
         """Pass input through model."""
-        return self.model(input)
-    
+        return self.model(input)   
 
 class AutoRNN(nn.Module):
     """ 
@@ -116,28 +115,34 @@ class AutoRNN(nn.Module):
 
     def __init__(
             self, 
+            input_network_type,
             input_network_config, 
-            rnn_config,
-            readout_network_config,
             rnn_type,
+            rnn_config,
+            readout_network_type,
+            readout_network_config,
             tokens 
         ):
         """ 
         Parameters
         ----------
+        input_network_type : nn.Module
+            Neural network class for processing inputs before passing result to 
+            the recurrent network.
         input_network_config : dict 
-            Dict containing key-value pairs that correspond to param-arg pairs
-            for the FeedForward class. Used to configure input layers of
-            network. May be None. 
+            Dict whose key-value pairs are param-arg pairs for the class
+            specified by `input_network_class`.
+        rnn_type : nn.Module 
+            RNN class, recurrent core between input and readout layers.
         rnn_config : dict
-            Dict containing key-value pairs that correspond to param-arg pairs
-            for the torch.nn.RNNBAse subclass specified by `rnn_type`.
+            Dict whose key-value pairs are param-arg pairs for the class
+            specified by `rnn_type`.
+        readout_network_type : nn.Module
+            Neural network class for reading out recurrent hidden activity. 
+            Output of this network are logits.
         readout_network_config : dict
-            Dict containing key-value pairs that correspond to param-arg pairs
-            for the FeedForward class. Used to configure readout layers of
-            network. May not be None.
-        rnn_type : torch.nn.RNNBase subclass) 
-            Class of RNN, recurrent core between input and readout layers.
+            Dict whose key-value pairs are param-arg pairs
+            for class specified by `readout_network_type`.
         tokens : torch.Tensor
             Of shape (V, F), where F is the input size of the first layer of
             the entire network (first input layer if input_network_config is
@@ -146,17 +151,18 @@ class AutoRNN(nn.Module):
             the k_th row corresponds to the k_th token.
         """
         super().__init__()
-
+        self.input_network_type = input_network_type
+        self.rnn_type = rnn_type
+        self.readout_network_type = readout_network_type
         self.input_network_config = input_network_config
         self.rnn_config = rnn_config
         self.readout_network_config = readout_network_config
-        self.rnn_type = rnn_type
         self.tokens = tokens
 
         # Set up input transformation network, RNN, and readout network.
-        self.input_network = FCN(**self.input_network_config)
+        self.input_network = self.input_network_type(**self.input_network_config)
         self.rnn = self.rnn_type(**self.rnn_config)
-        self.readout_network = FCN(**self.readout_network_config)
+        self.readout_network = self.readout_network_type(**self.readout_network_config)
 
         # Can be used to generate tokens probabilistically.
         self.softmax = nn.Softmax(dim=-1)
