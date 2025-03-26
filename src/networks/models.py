@@ -151,18 +151,20 @@ class AutoRNN(nn.Module):
             the k_th row corresponds to the k_th token.
         """
         super().__init__()
-        self.input_network_type = input_network_type
-        self.rnn_type = rnn_type
-        self.readout_network_type = readout_network_type
-        self.input_network_config = input_network_config
-        self.rnn_config = rnn_config
-        self.readout_network_config = readout_network_config
-        self.tokens = tokens
 
         # Set up input transformation network, RNN, and readout network.
-        self.input_network = self.input_network_type(**self.input_network_config)
-        self.rnn = self.rnn_type(**self.rnn_config)
-        self.readout_network = self.readout_network_type(**self.readout_network_config)
+        self.input_network = input_network_type(**input_network_config)
+        self.rnn = rnn_type(**rnn_config)
+        self.readout_network = readout_network_type(**readout_network_config)
+
+        # Store arguments.
+        self.input_network_type = input_network_type
+        self.input_network_config = input_network_config
+        self.rnn_type = rnn_type
+        self.rnn_config = rnn_config
+        self.readout_network_type = readout_network_type
+        self.readout_network_config = readout_network_config
+        self.tokens = tokens
 
         # Can be used to generate tokens probabilistically.
         self.softmax = nn.Softmax(dim=-1)
