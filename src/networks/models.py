@@ -546,31 +546,7 @@ class AutoRNN(nn.Module):
                 f"{len(input_shape)}d."
             )
         return h_0
-        # if len(input_shape) == 2:
-        #     h_0 = torch.zeros(
-        #         (
-        #             (self.rnn.bidirectional+1)*self.rnn.num_layers, 
-        #             self.rnn_config['hidden_size']
-        #         ),
-        #         device=device
-        #     )
-        # elif len(input_shape) == 3:
-        #     batch_size = input_shape[0]
-        #     h_0 = torch.zeros(
-        #         (
-        #             (self.rnn.bidirectional+1)*self.rnn.num_layers, 
-        #             batch_size, 
-        #             self.rnn_config['hidden_size']
-        #         ),
-        #         device=device
-        #     )
-        # else:
-        #     raise ValueError(
-        #         "input to network should be a 2D or 3D tensor but was " 
-        #         f"{len(input_shape)}d."
-        #     )
-        # return h_0
-    
+       
     @staticmethod
     def join_input_gen_resp(input, input_lengths, resp, resp_lengths):
         """ 
