@@ -1,0 +1,4 @@
+*.ipynb linguist-generated=true
+*.csv linguist-generated=true
+*.log linguist-generated=true
+*.html linguist-generated=true
