@@ -115,37 +115,37 @@ class AutoRNN(nn.Module):
 
     def __init__(
             self, 
-            input_network_type,
-            input_network_config, 
-            rnn_type,
-            rnn_config,
-            readout_network_type,
-            readout_network_config,
+            input_network_class,
+            input_network_args, 
+            rnn_class,
+            rnn_args,
+            readout_network_class,
+            readout_network_args,
             tokens 
         ):
         """ 
         Parameters
         ----------
-        input_network_type : nn.Module
+        input_network_class : nn.Module
             Neural network class for processing inputs before passing result to 
             the recurrent network.
-        input_network_config : dict 
+        input_network_args : dict 
             Dict whose key-value pairs are param-arg pairs for the class
             specified by `input_network_class`.
-        rnn_type : nn.Module 
+        rnn_class : nn.Module 
             RNN class, recurrent core between input and readout layers.
-        rnn_config : dict
+        rnn_args : dict
             Dict whose key-value pairs are param-arg pairs for the class
-            specified by `rnn_type`.
-        readout_network_type : nn.Module
+            specified by `rnn_class`.
+        readout_network_class : nn.Module
             Neural network class for reading out recurrent hidden activity. 
             Output of this network are logits.
-        readout_network_config : dict
+        readout_network_args : dict
             Dict whose key-value pairs are param-arg pairs
-            for class specified by `readout_network_type`.
+            for class specified by `readout_network_class`.
         tokens : torch.Tensor
             Of shape (V, F), where F is the input size of the first layer of
-            the entire network (first input layer if input_network_config is
+            the entire network (first input layer if input_network_args is
             not None, else first layer of the recurrent core network), V is the
             number of tokens in the generating vocabulary of the network, and
             the k_th row corresponds to the k_th token.
@@ -153,17 +153,17 @@ class AutoRNN(nn.Module):
         super().__init__()
 
         # Set up input transformation network, RNN, and readout network.
-        self.input_network = input_network_type(**input_network_config)
-        self.rnn = rnn_type(**rnn_config)
-        self.readout_network = readout_network_type(**readout_network_config)
+        self.input_network = input_network_class(**input_network_args)
+        self.rnn = rnn_class(**rnn_args)
+        self.readout_network = readout_network_class(**readout_network_args)
 
         # Store arguments.
-        self.input_network_type = input_network_type
-        self.input_network_config = input_network_config
-        self.rnn_type = rnn_type
-        self.rnn_config = rnn_config
-        self.readout_network_type = readout_network_type
-        self.readout_network_config = readout_network_config
+        self.input_network_class = input_network_class
+        self.input_network_args = input_network_args
+        self.rnn_class = rnn_class
+        self.rnn_args = rnn_args
+        self.readout_network_class = readout_network_class
+        self.readout_network_args = readout_network_args
         self.tokens = tokens
 
         # Can be used to generate tokens probabilistically.
@@ -380,7 +380,7 @@ class AutoRNN(nn.Module):
         else:
             tokens_moved = False
         
-        # Process demonstration phase and final token fed in is switch token. 
+        # Forward pass on input sequence, e.g. demo phase with final token being switch. 
         input_seqs_logits, input_seqs_rnn_output, h_n = self.forward(
             input_seqs, 
             h_0=h_0, 
@@ -482,8 +482,8 @@ class AutoRNN(nn.Module):
         generated['resp_lengths'] = resp_lengths
 
         # Join hidden states and logits from input and generated output. Minus
-        # one on second argument because last input timestep will also be the 
-        # first generated timestep.
+        # one on second argument bc last input timestep will also be the first
+        # generated timestep.
         joined = {
             key : self.join_input_gen_resp(
                 on_input[key],
@@ -510,13 +510,13 @@ class AutoRNN(nn.Module):
         if not batch_size:
             h_0_shape = (
                 (self.rnn.bidirectional+1)*self.rnn.num_layers, 
-                self.rnn_config['hidden_size']
+                self.rnn_args['hidden_size']
             )
         else:
             h_0_shape = (
                 (self.rnn.bidirectional+1)*self.rnn.num_layers, 
                 batch_size, 
-                self.rnn_config['hidden_size']
+                self.rnn_args['hidden_size']
             )
 
         return h_0_shape
