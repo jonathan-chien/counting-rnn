@@ -197,7 +197,7 @@ def train(
 
             # Compute loss. 
             loss = loss_fn(logits[shifted_masks], labels[masks])
-            running_loss += loss
+            running_loss += loss.item()
             batch_counter += 1 # TODO: should maybe count samples to get unbiased estimate of loss
 
             loss.backward()
