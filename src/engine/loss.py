@@ -106,9 +106,6 @@ def wrapped_cross_entropy_loss(output, target, model=None):
         raise ValueError(invalid_input_message(model, 'model'))
     return F.cross_entropy(output, target)
 
-def wrapped_cross_entropy_loss_factory():
-    return wrapped_cross_entropy_loss
-
 def get_weight_hh(model):
     """ 
     """
@@ -156,9 +153,6 @@ def spectral_entropy(output, target, model):
     h = -torch.sum(p * torch.log2(p + EPS))
     return h
 
-def spectral_entropy_factory():
-    return spectral_entropy
-
 def nuclear_norm(output, target, model):
     if output is not None:
         raise ValueError(invalid_input_message(output, 'output'))
@@ -168,7 +162,4 @@ def nuclear_norm(output, target, model):
     weight_hh = get_weight_hh(model)
     _, s, _ = torch.linalg.svd(weight_hh)
     return torch.sum(s)
-
-def nuclear_norm_factory():
-    return nuclear_norm
 
