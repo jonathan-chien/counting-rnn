@@ -14,8 +14,6 @@ class Logger:
             self, 
             log_dir: str, 
             log_name: str, 
-            verbose_epoch: bool = True, 
-            verbose_batch: bool = False,
             print_flush_epoch: bool = False, 
             print_flush_batch: bool = False
     ):
@@ -24,29 +22,27 @@ class Logger:
         self.log_name = log_name
         self.batch_logs = []
         self.epoch_logs = []
-        self.verbose_epoch = verbose_epoch
-        self.verbose_batch = verbose_batch
         self.print_flush_epoch = print_flush_epoch
         self.print_flush_batch = print_flush_batch
     
-    def log_batch(self, *, epoch: int, batch: int, **kwargs):
+    def log_batch(self, *, epoch: int, batch: int, verbose=False, **kwargs):
         entry = {'epoch' : epoch, 'batch': batch}
         kwargs = {key : tensor_utils.to_python_scalar(val) for key, val in kwargs}
         entry.update(kwargs)
         self.batch_logs.append(entry)
-        if self.verbose_batch:
+        if verbose:
             for key, value in kwargs.items():
                 print(
                     f"{key} for epoch {epoch}, batch {batch}: {value}.", 
                     flush=self.print_flush_batch
                 )
 
-    def log_epoch(self, *, epoch: int, **kwargs):
+    def log_epoch(self, *, epoch: int, verbose=True, **kwargs):
         entry = {'epoch' : epoch}
         kwargs = {key : tensor_utils.to_python_scalar(val) for key, val in kwargs}
         entry.update(kwargs)
         self.epoch_logs.append(entry)
-        if self.verbose_epoch:
+        if verbose:
             for key, value in kwargs.items():
                 print(
                     f"{key} for epoch {epoch}: {value}.", 
