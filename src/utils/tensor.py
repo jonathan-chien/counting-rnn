@@ -1,0 +1,71 @@
+import torch
+
+def validate_tensor(tensor, dim, dtype=None):
+    """ 
+    Ensure that input is a torch tensor of specified dimension.
+    """
+    if not isinstance(tensor, torch.Tensor): 
+        raise TypeError(f"Must be torch.Tensor but got {type(tensor)}.") 
+    if tensor.dim() != dim: 
+        raise ValueError(f"Must be {dim}d torch.Tensor.")
+    if dtype is not None and tensor.dtype != dtype:
+        raise ValueError(f"Expected data type {dtype}, but got {tensor.dtype}.")
+    
+def make_sampler(distr, device=None):
+    """ 
+    Given a torch.distributions.Distribution subclass object, configures and 
+    returns a function capable of acceptin a sample size argument and returning 
+    samples from this distribution.
+
+    Parameters
+    ----------
+    distr : torch.distributions.Distribution subclass instance
+        Instance of torch.distributions.Distribution subclass, e.g. an instance
+        of the torch.distributions.Normal class.
+
+    Returns
+    -------
+    sampler : function
+        Function accepting a sample shape tuple and returning sample tensor
+        of that shape, each element of which is drawn from the specified 
+        distribution.
+    """
+    def sampler(sample_shape):
+        if hasattr(distr, 'rsample'):
+            sample = distr.rsample(sample_shape=sample_shape)
+        else:
+            sample = distr.sample(sample_shape=sample_shape)
+        return sample.to(device) if device is not None else sample
+    
+    return sampler
+
+def move_to_device(data, device):
+    """ 
+    Utility for moving tensors, including tensors in arbitrarily nested lists/tuple/dicts.
+    """
+    if isinstance(data, torch.Tensor): 
+        return data.to(device, non_blocking=True)
+    elif isinstance(data, (list, tuple)): 
+        return type(data)(move_to_device(elem, device) for elem in data)
+    elif isinstance(data, dict):
+        return {key : move_to_device(value, device) for key, value in data.items()}
+    else:
+        return data
+    
+def to_python_scalar(x):
+    """ 
+    If input is a one element tensor, it is extracted as a python scalar and
+    move to CPU; otherwise it is returned unchanged.
+    """
+    if isinstance(x, torch.Tensor):
+        if x.numel() == 1: 
+            y = x.cpu().item()
+        else:
+            raise ValueError(
+                "Valid log entries may have only 1 element but got " 
+                f"{x.numel()} elements with shape {x.shape}."
+            )
+    else:
+        y = x
+
+    return y

@@ -1,0 +1,23 @@
+# Ignore these file types.
+*.log
+*.csv
+*.xlsx
+*.docx
+*.json
+.vscode/
+
+# Ignore Jupyter notebook checkpoints.
+.ipynb_checkpoints/
+
+# Ignore Mac system files.
+.DS_Store
+
+# Ignore Python bytecode.
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore these directories.
+archive/
+docs/
+
