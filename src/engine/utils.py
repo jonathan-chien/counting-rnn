@@ -122,7 +122,7 @@ class Logger:
 #     else:
 #         return masks.roll(-1, dims=1)
 
-def calculate_prop_correct(pred_labels, true_labels, masks):
+def compute_accuracy(pred_labels, true_labels, masks):
     """ 
     """
     matches = torch.eq(pred_labels, true_labels) | ~masks
@@ -134,7 +134,13 @@ def calculate_prop_correct(pred_labels, true_labels, masks):
     correct_ind = torch.where(seq_matches)[0]
     incorrect_ind = torch.where(~seq_matches)[0]
 
-    return num_correct/num_seq, num_correct, num_seq, correct_ind, incorrect_ind
+    return {
+        'value' : num_correct/num_seq, 
+        'num_correct' : num_correct, 
+        'num_seq' : num_seq, 
+        'correct_ind' : correct_ind, 
+        'incorrect_ind' : incorrect_ind
+    }
 
 def validate_h_0_config(h_0, allow_grad=False):
     """ 
