@@ -27,7 +27,7 @@ class Logger:
     
     def log_batch(self, *, epoch: int, batch: int, verbose=False, **kwargs):
         entry = {'epoch' : epoch, 'batch': batch}
-        kwargs = {key : tensor_utils.to_python_scalar(val) for key, val in kwargs}
+        kwargs = {key : tensor_utils.to_python_scalar(val) for key, val in kwargs.items()}
         entry.update(kwargs)
         self.batch_logs.append(entry)
         if verbose:
@@ -39,7 +39,7 @@ class Logger:
 
     def log_epoch(self, *, epoch: int, verbose=True, **kwargs):
         entry = {'epoch' : epoch}
-        kwargs = {key : tensor_utils.to_python_scalar(val) for key, val in kwargs}
+        kwargs = {key : tensor_utils.to_python_scalar(val) for key, val in kwargs.items()}
         entry.update(kwargs)
         self.epoch_logs.append(entry)
         if verbose:
