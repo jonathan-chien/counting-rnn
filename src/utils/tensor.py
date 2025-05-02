@@ -39,11 +39,12 @@ def make_sampler(distr, device=None):
     
     return sampler
 
-def move_to_device(data, device):
+def move_to_device(data, device, detach=False):
     """ 
     Utility for moving tensors, including tensors in arbitrarily nested lists/tuple/dicts.
     """
     if isinstance(data, torch.Tensor): 
+        data = data.detach() if detach else data
         return data.to(device, non_blocking=True)
     elif isinstance(data, (list, tuple)): 
         return type(data)(move_to_device(elem, device) for elem in data)
@@ -69,3 +70,4 @@ def to_python_scalar(x):
         y = x
 
     return y
+
