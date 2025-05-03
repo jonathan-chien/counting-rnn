@@ -1,3 +1,4 @@
+from itertools import chain
 from pathlib import Path
 import torch
 from typing import Callable
@@ -204,22 +205,22 @@ class MetricTracker:
             self.save(checkpoint, epoch_idx, is_best=is_best)
 
 
-def _process_batch_train(model, h_0, batch, labels, lengths, masks, deterministic):
-    """ 
-    """
-    logits, rnn_output, _ = model(
-        batch, h_0=h_0, lengths=lengths, output_type='many_to_many'
-    )
-    _, pred_labels = model.to_token(logits, deterministic=deterministic)
+# def _process_batch_train(model, h_0, batch, labels, lengths, masks, deterministic):
+#     """ 
+#     """
+#     logits, rnn_output, _ = model(
+#         batch, h_0=h_0, lengths=lengths, output_type='many_to_many'
+#     )
+#     _, pred_labels = model.to_token(logits, deterministic=deterministic)
 
-    # Masks and labels are shifted cyclically by one to align next token
-    # predictions with ground truth. This should be safe as response phase is
-    # always preceded in a sequence by other tokens.
-    accuracy = utils.compute_accuracy(
-        pred_labels, labels.roll(-1, dims=1), masks.roll(-1, dims=1)
-    )
+#     # Masks and labels are shifted cyclically by one to align next token
+#     # predictions with ground truth. This should be safe as response phase is
+#     # always preceded in a sequence by other tokens.
+#     accuracy = utils.compute_accuracy(
+#         pred_labels, labels.roll(-1, dims=1), masks.roll(-1, dims=1)
+#     )
 
-    return (logits, rnn_output), accuracy
+#     return (logits, rnn_output), accuracy
 
 def train(
     model, 
@@ -228,6 +229,7 @@ def train(
     evaluation,
     h_0=None,
     logger=None,
+    criteria={'accuracy' : utils.compute_accuracy},
     compute_mean_for=None,
     save_validation_logger=True,
     metric_tracker=None,
@@ -285,38 +287,51 @@ def train(
             else:
                 raise TypeError(f"Unsupported type {type(h_0)} for `h_0`.")
             
-            # TODO: move calculation of accuracy outside of
-            # _process_batch_train, handle with criteria dict as in
-            # evaluate_outputs, but could probably just do in this function
-            # since don't need much preprocessing.
-            batch_output, train_accuracy = _process_batch_train(
-                model, h_0_batch, batch, labels, lengths, masks, deterministic
+            # Forward pass.
+            logits, _, _ = model(
+                batch, h_0=h_0, lengths=lengths, output_type='many_to_many'
             )
+            _, pred_labels = model.to_token(logits, deterministic=deterministic)
 
+            # Compute losses.
             losses = {
-                name : loss_term.compute_loss(batch_output, labels, model)
+                name : loss_term.compute_loss(logits, labels, model)
                 for name, loss_term in loss_terms.items()
             }
             for loss_term in loss_terms.values(): loss_term.step()
-            # losses = {
-            #     loss_term.name : loss_term.step(batch_output, labels, model)
-            #     for loss_term in loss_terms
-            # }
-
-            if logger: 
-                batch_log = {
-                    'train_accuracy' : train_accuracy, 
-                    'batch_size' : batch.shape[0]
+            
+            # Compute performance metrics.
+            if criteria is not None:
+                performance = {
+                    criterion_name : criterion(
+                        pred_labels,
+                        labels.roll(-1, dims=1),
+                        masks.roll(-1, dims=1)
+                    )
+                    for criterion_name, criterion in criteria.items()
                 }
+
+            # Optionally log losses/performance metrics.
+            if logger: 
+                batch_log = {'batch_size' : batch.shape[0]}
                 batch_log.update(
                     {f'{name}_loss' : value for name, value in losses.items()}
                 )
+                if criteria is not None:
+                    batch_log.update(dict(
+                        chain.from_iterable(
+                            [
+                                (name, output['value']),
+                                (f'{name}_diagnostics', output)
+                            ]
+                            for name, output in performance.items()
+                        )     
+                    ))
                 logger.log_batch(epoch=i_epoch, batch=i_batch, **batch_log)
 
         # Take weighted average of loss/accuracy across batches to get training values.
         if logger:
             batch_sizes = logger.get_logged_values(key='batch_size', level='batch')
-
             train_mean_values = {
                 key : logger.compute_weighted_sum(
                     key=key,
@@ -328,17 +343,6 @@ def train(
                 and key in compute_mean_for
             }
             epoch_log.update(train_mean_values)
-
-            # epoch_log['train_cross_entropy_loss'] = logger.compute_weighted_sum(
-            #     key='cross_entropy_loss', 
-            #     level='batch', 
-            #     weights=batch_sizes/len(train_loader.dataset)
-            # )
-            # epoch_log['train_accuracy'] = logger.compute_weighted_sum(
-            #     key='train_accuracy', 
-            #     level='batch', 
-            #     weights=batch_sizes/len(train_loader.dataset)
-            # )
 
         # Validate model on validation set after each epoch.
         validation_logger, validation_mean_values = eval.evaluate(model, **evaluation)
@@ -376,6 +380,9 @@ def train(
                 if early_stopping.verbose: 
                     early_stopping.print_to_console()
                 return logger, metric_tracker, early_stopping
+        elif i_epoch == num_epochs - 1:
+            # Save final model.
+            pass
 
     return logger, metric_tracker, early_stopping, epoch_log
     
