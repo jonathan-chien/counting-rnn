@@ -55,19 +55,24 @@ def move_to_device(data, device, detach=False):
     
 def to_python_scalar(x):
     """ 
-    If input is a one element tensor, it is extracted as a python scalar and
-    move to CPU; otherwise it is returned unchanged.
+    Extracts any one-element tensors (including those arbitrarily nested in
+    dicts/lists/tuples) as Python floats and moves them to the CPU. Other
+    objects are returned unchanged.
     """
     if isinstance(x, torch.Tensor):
         if x.numel() == 1: 
-            y = x.cpu().item()
+            return x.cpu().item()
         else:
             raise ValueError(
                 "Valid log entries may have only 1 element but got " 
                 f"{x.numel()} elements with shape {x.shape}."
             )
+    elif isinstance(x, dict):
+        return {k : to_python_scalar(v) for k, v in x.items()}
+    elif isinstance(x, (list, tuple)):
+        return type(x)(to_python_scalar(v) for v in x)
     else:
-        y = x
+        return x
 
-    return y
+   
 
