@@ -1,4 +1,3 @@
-
 from pathlib import Path
 import torch
 from typing import Callable
@@ -13,6 +12,7 @@ class EarlyStopping:
     """
     def __init__(
         self, 
+        metric_name: str,
         patience: int,
         mode : str,
         min_epochs_before_stopping: int = 1,
@@ -29,6 +29,7 @@ class EarlyStopping:
             raise ValueError(
                 f"Unrecognized value {mode} for `mode`. Must be one of ['min', 'max']."
             )
+        self.metric_name = metric_name
         self.patience = patience
         self.mode = mode
         self.min_epochs_before_stopping = min_epochs_before_stopping
@@ -77,7 +78,7 @@ class EarlyStopping:
 class MetricTracker:
     """ 
     """
-    def __init__(self, checkpoint_dir, mode: str, frequency: str ='best'):
+    def __init__(self, metric_name, checkpoint_dir, mode: str, frequency: str ='best'):
         """ 
         mode : string
             ['min' | 'max']. 
@@ -95,6 +96,7 @@ class MetricTracker:
                 "either in ['best', 'always'], or a positive int."
             )
         
+        self.metric_name = metric_name
         self.checkpoint_dir = Path(checkpoint_dir)
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
         self.frequency = frequency
@@ -213,7 +215,7 @@ def _process_batch_train(model, h_0, batch, labels, lengths, masks, deterministi
     # Masks and labels are shifted cyclically by one to align next token
     # predictions with ground truth. This should be safe as response phase is
     # always preceded in a sequence by other tokens.
-    accuracy = utils.calculate_prop_correct(
+    accuracy = utils.compute_accuracy(
         pred_labels, labels.roll(-1, dims=1), masks.roll(-1, dims=1)
     )
 
@@ -226,6 +228,8 @@ def train(
     evaluation,
     h_0=None,
     logger=None,
+    compute_mean_for=None,
+    save_validation_logger=True,
     metric_tracker=None,
     early_stopping=None, 
     num_epochs=50, 
@@ -247,6 +251,16 @@ def train(
             f"on {model.tokens.device}."
         )
     h_0 = utils.validate_h_0_config(h_0)
+
+    if (
+        metric_tracker and early_stopping
+        and metric_tracker.metric_name != early_stopping.metric_name
+    ):
+        raise RuntimeError(
+            "If a MetricTracker object and an EarlyStopping object are both "
+            "passed in, their attributes `metric_name` must match, but got "
+            f"{metric_tracker.metric_name} and {early_stopping.metric_name}, respectively."
+        )
 
     model.to(device)
     model.train()
@@ -271,6 +285,10 @@ def train(
             else:
                 raise TypeError(f"Unsupported type {type(h_0)} for `h_0`.")
             
+            # TODO: move calculation of accuracy outside of
+            # _process_batch_train, handle with criteria dict as in
+            # evaluate_outputs, but could probably just do in this function
+            # since don't need much preprocessing.
             batch_output, train_accuracy = _process_batch_train(
                 model, h_0_batch, batch, labels, lengths, masks, deterministic
             )
@@ -279,7 +297,7 @@ def train(
                 name : loss_term.compute_loss(batch_output, labels, model)
                 for name, loss_term in loss_terms.items()
             }
-            for loss_term in loss_term.values(): loss_term.step()
+            for loss_term in loss_terms.values(): loss_term.step()
             # losses = {
             #     loss_term.name : loss_term.step(batch_output, labels, model)
             #     for loss_term in loss_terms
@@ -298,26 +316,43 @@ def train(
         # Take weighted average of loss/accuracy across batches to get training values.
         if logger:
             batch_sizes = logger.get_logged_values(key='batch_size', level='batch')
-            epoch_log['train_cross_entropy_loss'] = logger.compute_weighted_sum(
-                key='cross_entropy_loss', 
-                level='batch', 
-                weights=batch_sizes/len(train_loader.dataset)
-            )
-            epoch_log['train_accuracy'] = logger.compute_weighted_sum(
-                key='train_accuracy', 
-                level='batch', 
-                weights=batch_sizes/len(train_loader.dataset)
-            )
+
+            train_mean_values = {
+                key : logger.compute_weighted_sum(
+                    key=key,
+                    level='batch',
+                    weights=batch_sizes/len(train_loader.dataset)
+                )
+                for key in batch_log.keys()
+                if compute_mean_for is not None 
+                and key in compute_mean_for
+            }
+            epoch_log.update(train_mean_values)
+
+            # epoch_log['train_cross_entropy_loss'] = logger.compute_weighted_sum(
+            #     key='cross_entropy_loss', 
+            #     level='batch', 
+            #     weights=batch_sizes/len(train_loader.dataset)
+            # )
+            # epoch_log['train_accuracy'] = logger.compute_weighted_sum(
+            #     key='train_accuracy', 
+            #     level='batch', 
+            #     weights=batch_sizes/len(train_loader.dataset)
+            # )
 
         # Validate model on validation set after each epoch.
-        epoch_log['val_loss'], epoch_log['val_accuracy'] = eval.evaluate(model, **evaluation)
+        validation_logger, validation_mean_values = eval.evaluate(model, **evaluation)
+        if save_validation_logger: epoch_log['val_logger'] = validation_logger
+        epoch_log.update(
+            {f'val_{name}' : value for name, value in validation_mean_values.items()}
+        )
         
         if logger: logger.log_epoch(epoch=i_epoch, **epoch_log)
 
         # Optionally save model checkpoint.
         if metric_tracker:
             should_save, is_best = metric_tracker.should_save(
-                epoch_log['val_loss'], i_epoch
+                epoch_log[metric_tracker.metric_name], i_epoch
             )
             if should_save:
                 checkpoint = {
@@ -325,22 +360,24 @@ def train(
                     'model_state_dict' : model.state_dict(),
                     'optimizer_state_dicts' : {
                         loss_term.name : loss_term.optimizer.state_dict()
-                        for loss_term in loss_terms
+                        for loss_term in loss_terms.values()
                     },
                     'epoch_log' : epoch_log,
                     'best_epoch_so_far' : metric_tracker.best_epoch,
                     'best_value_so_far' : metric_tracker.best_value
                 }
+                # TODO: Add logic to recursively check checkpoints and detach,
+                # move to CPU, maybe move to numpy etc.
                 metric_tracker.save(checkpoint, i_epoch, is_best=is_best)
 
         if early_stopping:
-            early_stopping.update(epoch_log['val_loss'])
+            early_stopping.update(epoch_log[early_stopping.metric_name])
             if early_stopping.should_stop_early(i_epoch):
                 if early_stopping.verbose: 
                     early_stopping.print_to_console()
                 return logger, metric_tracker, early_stopping
 
-    return logger, metric_tracker, early_stopping
+    return logger, metric_tracker, early_stopping, epoch_log
     
 
 
@@ -481,7 +518,7 @@ def train(
 #     else:
 #         return masks.roll(-1, dims=1)
 
-# def calculate_prop_correct(pred_labels, true_labels, masks):
+# def compute_accuracy(pred_labels, true_labels, masks):
 #     """ 
 #     """
 #     matches = torch.eq(pred_labels, true_labels) | ~masks
@@ -621,7 +658,7 @@ def train(
 #                 logits, deterministic=deterministic
 #             )
 #             epoch['accuracy'].append(
-#                 calculate_prop_correct(
+#                 compute_accuracy(
 #                     pred_labels, 
 #                     labels.roll(-1, dims=1), 
 #                     shifted_masks
