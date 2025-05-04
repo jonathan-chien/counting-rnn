@@ -45,7 +45,7 @@ class EarlyStopping:
         """ 
         """
         self.recent_vals = self.recent_vals.roll(-1)
-        self.recent_vals[-1] = tensor_utils.to_python_scalar(x)
+        self.recent_vals[-1] = tensor_utils.to_cpu_python_scalar(x)
 
     def should_stop_early(self, epoch_idx):
         """ 
@@ -289,7 +289,7 @@ def train(
             
             # Forward pass.
             logits, _, _ = model(
-                batch, h_0=h_0, lengths=lengths, output_type='many_to_many'
+                batch, h_0=h_0_batch, lengths=lengths, output_type='many_to_many'
             )
             _, pred_labels = model.to_token(logits, deterministic=deterministic)
 
@@ -370,10 +370,13 @@ def train(
                     'best_epoch_so_far' : metric_tracker.best_epoch,
                     'best_value_so_far' : metric_tracker.best_value
                 }
-                # TODO: Add logic to recursively check checkpoints and detach,
-                # move to CPU, maybe move to numpy etc.
+                checkpoint = tensor_utils.recursive(
+                    checkpoint,
+                    tensor_utils.detach,
+                    tensor_utils.move_to_device('cpu'),
+                )
                 metric_tracker.save(checkpoint, i_epoch, is_best=is_best)
-
+       
         if early_stopping:
             early_stopping.update(epoch_log[early_stopping.metric_name])
             if early_stopping.should_stop_early(i_epoch):
