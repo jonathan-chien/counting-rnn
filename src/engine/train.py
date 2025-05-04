@@ -380,9 +380,6 @@ def train(
                 if early_stopping.verbose: 
                     early_stopping.print_to_console()
                 return logger, metric_tracker, early_stopping
-        elif i_epoch == num_epochs - 1:
-            # Save final model.
-            pass
 
     return logger, metric_tracker, early_stopping, epoch_log
     
