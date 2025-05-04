@@ -75,9 +75,7 @@ def process_batch_eval(
 
     if move_results_to_cpu or detach: 
         outputs = tensor_utils.recursive(
-            outputs, 
-            tensor_utils.move_to_device('cpu'), 
-            lambda x: x.detach() if detach else x
+            outputs, tensor_utils.move_to_device('cpu'), tensor_utils.detach
         )
 
     return outputs
@@ -140,14 +138,14 @@ def evaluate_outputs(
             tensor_utils.move_to_device(
                 'cpu' if move_results_to_cpu else generated['logits'].device
             ),
-            lambda x: x.detach() if detach else x
+            tensor_utils.detach
         )
         performance = tensor_utils.recursive(
             performance, 
             tensor_utils.move_to_device(
                 'cpu' if move_results_to_cpu else generated['labels'].device
             ),
-            lambda x: x.detach() if detach else x
+            tensor_utils.detach
         )
             # losses = tensor_utils.move_to_device(losses, 'cpu', detach=detach)
             # performance = tensor_utils.move_to_device(performance, 'cpu', detach=detach)
