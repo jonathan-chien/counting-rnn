@@ -106,8 +106,6 @@ class Logger:
     #         else:
     #             y[key] = value
 
-
-
 # def shift_masks(masks):
 #     """ 
 #     """
