@@ -1,6 +1,8 @@
+from dataclasses import dataclass
 import torch
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import Dataset
+from typing import Dict
 import warnings
 
 from . import utils
@@ -138,11 +140,11 @@ class Hypercube:
         pos_ind = self.check_if_included(truth_table)
 
         if pmfs is not None:
-            tensor_utils.validate_pmf(pmfs[0], torch.sum(pos_ind))
-            tensor_utils.validate_pmf(pmfs[1], torch.sum(~pos_ind))
+            utils.validate_pmf(pmfs[0], torch.sum(pos_ind))
+            utils.validate_pmf(pmfs[1], torch.sum(~pos_ind))
         else:
             pmfs = (
-                tensor_utils.uniform_pmf(torch.sum(pos_ind)), tensor_utils.uniform_pmf(torch.sum(~pos_ind))
+                utils.uniform_pmf(torch.sum(pos_ind)), tensor_utils.uniform_pmf(torch.sum(~pos_ind))
             )
         
         self.vertices = {
@@ -156,37 +158,62 @@ class Hypercube:
             }
         }
 
+
+@dataclass
 class SeqLengths:
     """ 
     Helper class for validating and storing in a format compatible with the
     Sequence class N distributions over the respective lengths of N sequences,
     for a natural number N.
-    """
-    def __init__(self, lengths):
-        """ 
-        Parameters
-        ----------
-        lengths : dict
-            dict where each key is the name of a kind of sequence (e.g. 'pos', 
-            'neg'), and each value is a dict with the following keys:
-                'support' : 1D tensor of non-negative ints.
-                'pmf' : 1D tensor of probability masses, same legnth as 'support'.
-                'dtype' : dict with the following keys:
-                    'support' : torch.dtype of support tensor
-                    'pmf' : torch.dtype of support tensor
 
-        Returns
-        -------
-        Sets attribute `lengths`, which is a dictionary with keys corresponding
-        to `names`; each value is a dict with keys 'support' and 'pmf', 
-        containing the supplied support and pmf.
-        """
-        self.lengths = dict()
-        for name, entry in lengths.items():
-            support, pmf = entry['support'], entry['pmf']
-            tensor_utils.validate_tensor(support)
-            tensor_utils.validate_pmf(pmf, len(support))
-            self.lengths[name] = {'support' : support, 'pmf' : pmf}
+    lengths : dict
+        dict where each key is the name of a kind of sequence (e.g. 'pos', 
+        'neg'), and each value is a dict with the following keys:
+            'support' : 1D tensor of non-negative ints.
+            'pmf' : 1D tensor of probability masses, same legnth as 'support'.
+    """
+    lengths: Dict[str, Dict[str, torch.Tensor]]
+
+    def __post_init__(self):
+        for name, entry in self.lengths.items():
+            try:
+                support, pmf = entry['support'], entry['pmf']
+                tensor_utils.validate_tensor(support, 1)
+                utils.validate_pmf(pmf, len(support))
+            except Exception as e:
+                raise ValueError(f"Validation failed for '{name}'.") from e
+
+# class SeqLengths:
+#     """ 
+#     Helper class for validating and storing in a format compatible with the
+#     Sequence class N distributions over the respective lengths of N sequences,
+#     for a natural number N.
+#     """
+#     def __init__(self, lengths):
+#         """ 
+#         Parameters
+#         ----------
+#         lengths : dict
+#             dict where each key is the name of a kind of sequence (e.g. 'pos', 
+#             'neg'), and each value is a dict with the following keys:
+#                 'support' : 1D tensor of non-negative ints.
+#                 'pmf' : 1D tensor of probability masses, same legnth as 'support'.
+#                 'dtype' : dict with the following keys:
+#                     'support' : torch.dtype of support tensor
+#                     'pmf' : torch.dtype of support tensor
+
+#         Returns
+#         -------
+#         Sets attribute `lengths`, which is a dictionary with keys corresponding
+#         to `names`; each value is a dict with keys 'support' and 'pmf', 
+#         containing the supplied support and pmf.
+#         """
+#         self.lengths = dict()
+#         for name, entry in lengths.items():
+#             support, pmf = entry['support'], entry['pmf']
+#             tensor_utils.validate_tensor(support)
+#             utils.validate_pmf(pmf, len(support))
+#             self.lengths[name] = {'support' : support, 'pmf' : pmf}
                 
 # class SeqLengths:
 #     """ 
