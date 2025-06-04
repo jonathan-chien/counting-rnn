@@ -11,7 +11,7 @@ class LossTerm:
         name: str, 
         loss_fn: Callable[..., torch.Tensor], 
         weight: float = 1., 
-        optimizer=torch.optim.Adam,
+        optimizer=torch.optim.AdamW,
         mode: str = 'train'
     ):
         self.name = name
