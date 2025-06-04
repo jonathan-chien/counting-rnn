@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from typing import Callable
+from typing import Callable, Optional
 import warnings
 
 class LossTerm:
@@ -11,7 +11,7 @@ class LossTerm:
         name: str, 
         loss_fn: Callable[..., torch.Tensor], 
         weight: float = 1., 
-        optimizer=torch.optim.AdamW,
+        optimizer: Optional[torch.optim.Optimizer] = None,
         mode: str = 'train'
     ):
         self.name = name
