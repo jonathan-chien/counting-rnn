@@ -570,7 +570,7 @@ class Sequences(Dataset):
         )
 
 
-class EmbedData:
+class Embedder:
     """ 
     Linear transformation of data with addition of noise from arbitrary 
     additive noise distribution.
