@@ -40,12 +40,12 @@ class EmbedderConfig:
 
 @dataclass
 class SequencesConfig:
+    seq_lengths: SeqLengths
+    elem_cls: type # E.g. Hypercube
+    elem_cfg: type # E.g. HypercubeConfig
+    embedder_cfg: EmbedderConfig
     num_seq: int
     seq_order: str = 'permute'
-    seq_lengths: SeqLengths
-    elem_cls: Hypercube
-    elem_config: HypercubeConfig
-    embedder_config: EmbedderConfig
 
 def build_hypercube_sequences(cfg: SequencesConfig) -> Sequences:
     hypercube = cfg.elem_cls(**asdict(cfg.elem_cfg))
@@ -120,9 +120,9 @@ class AutoRNNConfig:
     readout_network_cfg: FCNConfig
 
 def build_model(cfg: AutoRNNConfig, sequences, device) -> AutoRNN:
-    input_network = FCN(**asdict(cfg.input_network_config))
-    rnn = cfg.rnn_config.build()
-    readout_network = FCN(**asdict(cfg.readout_network_config))
+    input_network = FCN(**asdict(cfg.input_network_cfg))
+    rnn = cfg.rnn_cfg.build()
+    readout_network = FCN(**asdict(cfg.readout_network_cfg))
 
     tokens = sequences.transform(
         torch.cat(
@@ -141,9 +141,9 @@ def build_model(cfg: AutoRNNConfig, sequences, device) -> AutoRNN:
 class LossTermConfig:
     name: str
     loss_fn: Callable[..., torch.Tensor]
+    mode: str
     weight: float = 1.
     optimizer: Optional[torch.optim.Optimizer] = None
-    mode: str
 
 @dataclass
 class EarlyStoppingConfig:
@@ -158,9 +158,9 @@ class EarlyStoppingConfig:
 class MetricTrackerConfig:
     metric_name: str
     checkpoint_dir: str
-    frequency: str = 'best'
     mode: str
-
+    frequency: str = 'best'
+    
 @dataclass
 class LoggerConfig:
     log_dir: str
@@ -170,9 +170,9 @@ class LoggerConfig:
 
 @dataclass
 class DataLoaderConfig:
+    collate_fn: Optional[Callable[[List[Tuple]], Any]]
     batch_size: int = 128
     shuffle: bool = True
-    collage_fn: Optional[Callable[[List[Tuple]], Any]]
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -180,8 +180,11 @@ class DataLoaderConfig:
 # Build dataset.
 hypercube_cfg = HypercubeConfig(
     num_dims=2,
-    coords=torch.tensor([0]),
-    inclusion_set=torch.tensor([1]),
+    coords=torch.tensor([0, 1], dtype=torch.int64),
+    inclusion_set=torch.tensor(
+        [[1, 0], [1, 1]],
+        dtype=torch.int8
+    ),
     encoding=torch.tensor([0, 1], dtype=torch.int8)
 )
 
@@ -212,10 +215,10 @@ sequences_cfg = dict()
 
 sequences_cfg['train'] = SequencesConfig(
     num_seq=1024,
-    num_vars=5,
     seq_order='permute',
     seq_lengths=seq_lengths,
-    hypercube_cfg=hypercube_cfg,
+    elem_cls = Hypercube,
+    elem_cfg=hypercube_cfg,
     embedder_cfg=embedder_cfg,
 )
 
