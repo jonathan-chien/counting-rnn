@@ -2,7 +2,7 @@ from itertools import chain
 import torch
 
 from . import utils
-from ..utils import tensor as tensor_utils 
+from utils import tensor as tensor_utils 
 
 
 def process_batch_eval(

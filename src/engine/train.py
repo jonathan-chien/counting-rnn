@@ -5,7 +5,7 @@ from typing import Callable
 import warnings
 
 from . import eval, utils
-from ..utils import tensor as tensor_utils
+from utils import tensor as tensor_utils
 
 
 class EarlyStopping:

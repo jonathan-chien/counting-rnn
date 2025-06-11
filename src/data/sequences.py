@@ -6,7 +6,7 @@ from typing import Dict
 import warnings
 
 from . import utils
-from ..utils import tensor as tensor_utils
+from utils import tensor as tensor_utils
 
 
 class Hypercube:
