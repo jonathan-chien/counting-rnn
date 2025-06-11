@@ -17,6 +17,9 @@ __pycache__/
 *.pyc
 *.pyo
 
+# Ignore setuptools metadata.
+*.egg-info/
+
 # Ignore these directories.
 archive/
 docs/
