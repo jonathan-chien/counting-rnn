@@ -1,8 +1,8 @@
 from itertools import chain
 from pathlib import Path
-import torch
-from typing import Callable
 import warnings
+
+import torch
 
 from . import eval, utils
 from utils import tensor as tensor_utils

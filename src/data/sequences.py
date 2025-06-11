@@ -1,9 +1,10 @@
 from dataclasses import dataclass
+from typing import Dict
+import warnings
+
 import torch
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import Dataset
-from typing import Dict
-import warnings
 
 from . import utils
 from utils import tensor as tensor_utils

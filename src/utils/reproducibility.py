@@ -1,5 +1,6 @@
 import torch
 
+
 def set_seed(torch_seed, cuda_seed, use_deterministic_algos, cudnn_deterministic, cudnn_benchmark):
     torch.manual_seed(torch_seed)
     torch.cuda.manual_seed(cuda_seed)

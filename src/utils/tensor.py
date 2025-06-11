@@ -1,5 +1,6 @@
 import torch
 
+
 def validate_tensor(tensor, dim, dtype=None):
     """ 
     Ensure that input is a torch tensor of specified dimension.
