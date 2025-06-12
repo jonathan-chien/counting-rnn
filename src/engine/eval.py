@@ -173,6 +173,7 @@ def evaluate(
     """
     model.to(device)
     model.eval()
+    switch_label_on_device = switch_label.to(device)
 
     h_0 = utils.validate_h_0_config(h_0)
 
@@ -193,7 +194,7 @@ def evaluate(
                 labels, 
                 lengths, 
                 masks, 
-                switch_label, 
+                switch_label_on_device, 
                 deterministic,
                 move_results_to_cpu=False
             )
