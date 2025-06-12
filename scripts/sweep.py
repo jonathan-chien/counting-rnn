@@ -60,6 +60,7 @@ def build_hypercube_sequences(cfg: SequencesConfig) -> Sequences:
     
     return Sequences(
         num_seq=cfg.num_seq,
+        num_vars=hypercube.num_dims, # TODO: Eliminate this argument, see TODO in Sequences class
         len_distr=cfg.seq_lengths.lengths,
         elem_distr=hypercube.vertices,
         transform=embedder,
@@ -258,13 +259,12 @@ rnn_cfg = GRUConfig(
     bias=True,
     batch_first=True,
     bidirectional=False,
-    device=None
 )
 
 readout_network_cfg = FCNConfig(
     layer_sizes=[rnn_cfg.hidden_size, 80, 2],
-    nonlinearities=[torch.nn.GELU(), None],
-    dropouts=[torch.nn.Dropout(p=0.5), None]
+    nonlinearities=[torch.nn.GELU(), torch.nn.Identity()],
+    dropouts=[0.5, None]
 )
 
 model_cfg = AutoRNNConfig(
@@ -325,14 +325,14 @@ logger_train_cfg = LoggerConfig(
 loader_train_cfg = DataLoaderConfig(
     batch_size=128,
     shuffle=True,
-    collage_fn=sequences['train'].pad_collate_fn
+    collate_fn=sequences['train'].pad_collate_fn
 )
 
 loss_terms_train = [LossTerm(**asdict(loss_term_1_cfg)), LossTerm(**asdict(loss_term_2_cfg))]
 early_stopping = EarlyStopping(**asdict(early_stopping_cfg))
 metric_tracker = MetricTracker(**asdict(metric_tracker_cfg))
 logger_train = Logger(**asdict(logger_train_cfg))
-loader_train = DataLoader(**asdict(loader_train_cfg))
+loader_train = DataLoader(sequences['train'], **asdict(loader_train_cfg))
 
 
 
@@ -340,7 +340,7 @@ loader_train = DataLoader(**asdict(loader_train_cfg))
 loader_val_cfg = DataLoaderConfig(
     batch_size=128,
     shuffle=True,
-    collage_fn=sequences['train'].pad_collate_fn
+    collate_fn=sequences['train'].pad_collate_fn
 )
 loss_terms_val = copy.deepcopy(loss_terms_train)
 for loss_term in loss_terms_val: loss_term.mode = 'eval'
@@ -354,7 +354,7 @@ logger_val_cfg = LoggerConfig(
 
 
 logger_val = Logger(**asdict(logger_val_cfg))
-loader_val = DataLoader(**asdict(loader_val_cfg))
+loader_val = DataLoader(sequences['val'], **asdict(loader_val_cfg))
 
 
 
@@ -403,7 +403,7 @@ loader_test_cfg = DataLoaderConfig(
     collage_fn=sequences['train'].pad_collate_fn
 )
 
-loader_test = DataLoader(**asdict(loader_test_cfg))
+loader_test = DataLoader(sequences['test'], **asdict(loader_test_cfg))
 
 logger_test_cfg = LoggerConfig(
     log_dir='',
