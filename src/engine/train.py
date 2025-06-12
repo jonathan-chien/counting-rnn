@@ -295,8 +295,8 @@ def train(
 
             # Compute losses.
             losses = {
-                name : loss_term.compute_loss(logits, labels, model)
-                for name, loss_term in loss_terms.items()
+                loss_term.name : loss_term.compute_loss(logits, labels, model)
+                for loss_term in loss_terms
             }
             for loss_term in loss_terms.values(): loss_term.step()
             
