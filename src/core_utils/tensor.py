@@ -176,7 +176,7 @@ def to_cpu_python_scalar(x):
     Extracts a one-element tensor as a Python float. Other objects are returned
     unchanged.
     """
-    return x.cpu().item() if x.numel() == 1 else x
+    return x.cpu().item() if isinstance(x, torch.Tensor) and x.numel() == 1 else x
 
 def detach(x):
     """
