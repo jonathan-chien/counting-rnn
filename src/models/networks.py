@@ -436,7 +436,7 @@ class AutoRNN(nn.Module):
                 torch.nan
             ).to(input_device),
             'logits' : torch.full(
-                (batch_size, max_resp_len, self.readout_network.model[-1].out_features),
+                (batch_size, max_resp_len, self.readout_network.layer_sizes[-1]),
                 torch.nan
             ).to(input_device),
             'tokens' : torch.full(
