@@ -1,6 +1,6 @@
 import torch
 
-from utils import tensor as tensor_utils
+from core_utils import tensor as tensor_utils
 
   
 def validate_pmf(pmf, support_size, rtol=1e-5, atol=1e-8):
