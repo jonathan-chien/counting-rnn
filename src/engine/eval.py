@@ -104,12 +104,12 @@ def evaluate_outputs(
     )
     gen_resp_masks_reshaped = torch.reshape(generated['resp_masks'], (-1,))
     losses = {
-        name : loss_term.compute_loss(
+        loss_term.name : loss_term.compute_loss(
             output=gen_logits_reshaped[gen_resp_masks_reshaped, :],
             targets=labels[masks].to(torch.int64),
             model=model
         )
-        for name, loss_term in loss_terms.items()
+        for loss_term in loss_terms
     }
 
     # Need to get response portions of ground truth but left-aligned
@@ -208,17 +208,8 @@ def evaluate(
                 move_results_to_cpu=False,
             )
 
-            # Optionally log outputs.
-            if log_outputs:
-                batch_log = {
-                    'generated' : outputs['generated'],
-                    'on_input' : outputs['on_input'],
-                    'joined' : outputs['joined'],
-                    'seq_ind' : seq_ind, 
-                    'batch_size' : batch_full_seq.shape[0]
-                }
-            else:
-                batch_log = {}
+            # Log batch size.
+            batch_log = {'batch_size' : batch_full_seq.shape[0]}
 
             # Log the loss values.
             batch_log.update(
@@ -237,6 +228,15 @@ def evaluate(
                     for name, output in performance.items()
                 )     
             ))
+
+            # Optionally log outputs.
+            if log_outputs:
+                batch_log.update({
+                    'generated' : outputs['generated'],
+                    'on_input' : outputs['on_input'],
+                    'joined' : outputs['joined'],
+                    'seq_ind' : seq_ind
+                })
             
             if move_results_to_cpu:
                 batch_log = tensor_utils.recursive(
