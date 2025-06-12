@@ -24,15 +24,14 @@ class LossTerm:
             raise ValueError(
                 f"Unrecognized value {mode} for `mode`. Must be in ['train', 'eval']."
             )
-        else:
-            if self.optimizer is not None: 
-                warnings.warn(
-                    f"`optimizer` was passed in as {self.optimizer} but `mode` "
-                    "= 'eval'. Attempting to call self.step will results in a "
-                    "RuntimeError exception being raised. Set `optimizer` = "
-                    "None to avoid this warning."
-                )
-            self.mode = mode
+        elif mode == 'eval' and self.optimizer is not None: 
+            warnings.warn(
+                f"`optimizer` was passed in as {self.optimizer} but `mode` = "
+                "'eval'. Attempting to call self.step will results in a "
+                "RuntimeError exception being raised. Set `optimizer` = None "
+                "to avoid this warning."
+            )
+        self.mode = mode
         self.loss = None
 
     def compute_loss(self, output, targets, model):
