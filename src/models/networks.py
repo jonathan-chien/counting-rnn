@@ -530,13 +530,13 @@ class AutoRNN(nn.Module):
         if not batch_size:
             h_0_shape = (
                 (self.rnn.bidirectional+1)*self.rnn.num_layers, 
-                self.rnn_args['hidden_size']
+                self.rnn.hidden_size
             )
         else:
             h_0_shape = (
                 (self.rnn.bidirectional+1)*self.rnn.num_layers, 
                 batch_size, 
-                self.rnn_args['hidden_size']
+                self.rnn.hidden_size
             )
 
         return h_0_shape
