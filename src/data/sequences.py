@@ -145,7 +145,7 @@ class Hypercube:
             utils.validate_pmf(pmfs[1], torch.sum(~pos_ind))
         else:
             pmfs = (
-                utils.uniform_pmf(torch.sum(pos_ind)), tensor_utils.uniform_pmf(torch.sum(~pos_ind))
+                utils.uniform_pmf(torch.sum(pos_ind)), utils.uniform_pmf(torch.sum(~pos_ind))
             )
         
         self.vertices = {
