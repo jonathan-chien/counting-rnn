@@ -62,12 +62,29 @@ class FCN(nn.Module):
         num_layers = len(layer_sizes)
 
         # Validate nonlinearities.
-        if issubclass(nonlinearities, nn.Module):
-            nonlinearities = [nonlinearities() for _ in range(num_layers-1)]
-        elif not isinstance(nonlinearities, list):
-            raise TypeError(
-                "`nonlinearities` must either be a list or an object of nn.Module "
-                f"such as nn.ReLU(), but got type {type(nonlinearities)}."
+        # if issubclass(nonlinearities, nn.Module):
+        #     nonlinearities = [nonlinearities() for _ in range(num_layers-1)]
+        # elif not isinstance(nonlinearities, list):
+        #     raise TypeError(
+        #         "`nonlinearities` must either be a list or an subclass of nn.Module "
+        #         f"such as nn.ReLU, but got type {type(nonlinearities)}."
+        #     )
+        # elif len(nonlinearities) != num_layers - 1:
+        #     raise ValueError(
+        #         f"The length of `nonlinearities` ({len(nonlinearities)}) must be " 
+        #         f"one less than that of `layer_sizes` ({len(layer_sizes)})."
+        #     )
+        # elif not all(isinstance(item, nn.Module) for item in nonlinearities):
+        #     raise TypeError(
+        #         "If `nonlinearities` is a list, its elements must be objects "
+        #         "of the nn.Module class like nn.ReLU()."
+        #     )
+        if not isinstance(nonlinearities, list):
+            if isinstance(nonlinearities, type) and issubclass(nonlinearities, nn.Module):
+                nonlinearities = [nonlinearities() for _ in range(num_layers-1)]
+            else: raise TypeError(
+                "`nonlinearities` must either be a list or an subclass of nn.Module "
+                f"such as nn.ReLU, but got object of type {type(nonlinearities)}."
             )
         elif len(nonlinearities) != num_layers - 1:
             raise ValueError(
@@ -100,13 +117,16 @@ class FCN(nn.Module):
                 f"than that of 'layer_sizes' ({len(layer_sizes)})."
             )
         elif not all(
-            isinstance(prob, float) and 0.0 <= prob <= 1.0
+            (isinstance(prob, float) and 0.0 <= prob <= 1.0) or prob is None
             for prob in dropouts
         ):
             raise ValueError(
-                "If `dropouts` is a list, each element must be a float in [0.0, 1.0]."
+                "If `dropouts` is a list, each element must be a float in [0.0, 1.0] or None."
             )
-        dropouts = [nn.Dropout(p=prob, inplace=False) for prob in dropouts]
+        dropouts = [
+            nn.Dropout(p=prob, inplace=False) if prob is not None else nn.Identity() 
+            for prob in dropouts
+        ]
         
         # Construct network.
         layers = []
