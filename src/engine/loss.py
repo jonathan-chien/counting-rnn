@@ -136,7 +136,7 @@ def get_weight_hh(model):
             "single hidden layer networks are supported."
         )
     
-    weight_hh = candidates[0].detach().cpu()
+    weight_hh = candidates[0]
     return weight_hh
 
 def spectral_entropy(output, target, model):
