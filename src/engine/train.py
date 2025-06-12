@@ -369,7 +369,7 @@ def train(
                     'model_state_dict' : model.state_dict(),
                     'optimizer_state_dicts' : {
                         loss_term.name : loss_term.optimizer.state_dict()
-                        for loss_term in loss_terms.values()
+                        for loss_term in loss_terms
                     },
                     'epoch_log' : epoch_log,
                     'best_epoch_so_far' : metric_tracker.best_epoch,
