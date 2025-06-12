@@ -93,18 +93,18 @@ class LossTerm:
 #         self.optimizer.step()
 #         return loss.item()
 
-def invalid_input_message(item, item_name):
-    return (
-        "The calling function adheres to a consistent API for the self.loss_fn " 
-        "method in the LossTerm class, where all valid versions of the method " 
-        f"accept `output`, `target`, and `model` as arguments. However, "
-        f"`{item_name}` is not used for the present loss function and should " 
-        f"be passed in as None, but got type {type(item)}."
-    )
+# def invalid_input_message(item, item_name):
+#     return (
+#         "The calling function adheres to a consistent API for the self.loss_fn " 
+#         "method in the LossTerm class, where all valid versions of the method " 
+#         f"accept `output`, `target`, and `model` as arguments. However, "
+#         f"`{item_name}` is not used for the present loss function and should " 
+#         f"be passed in as None, but got type {type(item)}."
+#     )
 
 def wrapped_cross_entropy_loss(output, target, model=None):
-    if model is not None: 
-        raise ValueError(invalid_input_message(model, 'model'))
+    # if model is not None: 
+    #     raise ValueError(invalid_input_message(model, 'model'))
     return F.cross_entropy(output, target)
 
 def get_weight_hh(model):
@@ -143,10 +143,10 @@ def spectral_entropy(output, target, model):
     """ 
     """
     EPS = 1e-12
-    if output is not None:
-        raise ValueError(invalid_input_message(output, 'output'))
-    if target is not None:
-        raise ValueError(invalid_input_message(target, 'target'))
+    # if output is not None:
+    #     raise ValueError(invalid_input_message(output, 'output'))
+    # if target is not None:
+    #     raise ValueError(invalid_input_message(target, 'target'))
     
     weight_hh = get_weight_hh(model)
     _, s, _ = torch.linalg.svd(weight_hh)
@@ -155,10 +155,10 @@ def spectral_entropy(output, target, model):
     return h
 
 def nuclear_norm(output, target, model):
-    if output is not None:
-        raise ValueError(invalid_input_message(output, 'output'))
-    if target is not None:
-        raise ValueError(invalid_input_message(target, 'target'))
+    # if output is not None:
+    #     raise ValueError(invalid_input_message(output, 'output'))
+    # if target is not None:
+    #     raise ValueError(invalid_input_message(target, 'target'))
     
     weight_hh = get_weight_hh(model)
     _, s, _ = torch.linalg.svd(weight_hh)
