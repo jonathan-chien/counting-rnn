@@ -298,7 +298,7 @@ class Sequences(Dataset):
         self.num_seq = num_seq
         self.len_distr = len_distr
         self.elem_distr = elem_distr
-        self.num_vars = num_vars
+        self.num_vars = num_vars # TODO: Either eliminate num_vars (enforce that elem must have 2d tensor and use 2nd dim, or at least check against elem)
         self.seq_order = seq_order
         self.transform = transform
         self.dtype = dtype
