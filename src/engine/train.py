@@ -293,12 +293,17 @@ def train(
             )
             _, pred_labels = model.to_token(logits, deterministic=deterministic)
 
+            # Shift masks forward by one since prediction is of next token.
+            shifted_masks = torch.roll(masks, shifts=-1, dims=0)
+
             # Compute losses.
             losses = {
-                loss_term.name : loss_term.compute_loss(logits, labels, model)
+                loss_term.name : loss_term.compute_loss(
+                    logits[shifted_masks], labels[masks], model
+                )
                 for loss_term in loss_terms
             }
-            for loss_term in loss_terms.values(): loss_term.step()
+            for loss_term in loss_terms: loss_term.step()
             
             # Compute performance metrics.
             if criteria is not None:
