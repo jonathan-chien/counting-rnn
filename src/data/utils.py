@@ -5,7 +5,7 @@ from core_utils import tensor as tensor_utils
   
 def validate_pmf(pmf, support_size, rtol=1e-5, atol=1e-8):
     """
-    Check for valid PMF over vertices of hypercube.
+    Check for valid PMF.
     
     Parameters
     ----------
@@ -39,7 +39,7 @@ def get_lexicographic_ordering(num_vars, encoding):
     -------
     truth_table (2d tensor): 2^(num_vars) x num_vars tensor consisting of all 
         strings in {1,-1}^(num_vars) in lexicographic order (or equivalently 
-        all strings in {0,1}^num_vars, depending on the values of the input cyl_set).
+        all strings in {0,1}^num_vars.
     """
     tensor_utils.validate_tensor(encoding, 1)
     if len(encoding) != 2:
