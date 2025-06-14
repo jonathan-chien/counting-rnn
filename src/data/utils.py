@@ -27,12 +27,11 @@ def validate_pmf(pmf, support_size, rtol=1e-5, atol=1e-8):
     if not all((pmf >= 0) & (pmf <= 1)):
         raise ValueError("No value of `pmf` can be <=0 or >=1.")
         
-def uniform_pmf(n, dtype=None):
+def uniform_pmf(n, dtype=torch.float32):
     """
     Returns uniform distribution over n elements.
     """
-    if dtype is None: dtype = torch.float32
-    return torch.tile(torch.tensor([1/n], dtype=torch.float32), (n,))
+    return torch.tile(torch.tensor([1/n], dtype=dtype), (n,))
         
 def get_lexicographic_ordering(num_vars, encoding):
     """ 
