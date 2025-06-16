@@ -173,8 +173,8 @@ def move_to_device(device):
     
 def tensor_to_cpu_python_scalar(x):
     """ 
-    Extracts a one-element tensor as a Python scalar (float, int, etc.). Other 
-    objects are returned unchanged.
+    Extracts a one-element tensor as a Python scalar (float, int, etc.) on the 
+    CPU. Other objects are returned unchanged.
     """
     return x.cpu().item() if isinstance(x, torch.Tensor) and x.numel() == 1 else x
 
@@ -188,6 +188,8 @@ def tensor_to_numpy(x):
     """ 
     """
     return x.numpy() if isinstance(x, torch.Tensor) else x
+
+
 
 
 
