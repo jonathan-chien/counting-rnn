@@ -45,7 +45,7 @@ class EarlyStopping:
         """ 
         """
         self.recent_vals = self.recent_vals.roll(-1)
-        self.recent_vals[-1] = tensor_utils.to_cpu_python_scalar(x)
+        self.recent_vals[-1] = tensor_utils.tensor_to_cpu_python_scalar(x)
 
     def should_stop_early(self, epoch_idx):
         """ 
@@ -377,7 +377,7 @@ def train(
                 }
                 checkpoint = tensor_utils.recursive(
                     checkpoint,
-                    tensor_utils.detach,
+                    tensor_utils.detach_tensor,
                     tensor_utils.move_to_device('cpu'),
                 )
                 metric_tracker.save(checkpoint, i_epoch, is_best=is_best)

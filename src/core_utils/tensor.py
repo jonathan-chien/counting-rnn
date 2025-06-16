@@ -1,3 +1,5 @@
+from dataclasses import asdict, is_dataclass
+
 import torch
 
 
@@ -61,7 +63,7 @@ def make_sampler(distr, device=None):
 #         lambda x: (x.detach() if detach else x).to(device, non_blocking=True)
 #     )
     
-# def to_cpu_python_scalar(x):
+# def tensor_to_cpu_python_scalar(x):
 #     """ 
 #     Extracts any one-element tensors (including those arbitrarily nested in
 #     dicts/lists/tuples) as Python floats and moves them to the CPU. Other
@@ -114,7 +116,7 @@ def make_sampler(distr, device=None):
 #     else:
 #         return x
 
-# def to_cpu_python_scalar(x):
+# def tensor_to_cpu_python_scalar(x):
 #     """ 
 #     Extracts any one-element tensors (including those arbitrarily nested in
 #     dicts/lists/tuples) as Python floats and moves them to the CPU. Other
@@ -129,9 +131,9 @@ def make_sampler(distr, device=None):
 #                 f"{x.numel()} elements with shape {x.shape}."
 #             )
 #     elif isinstance(x, dict):
-#         return {k : to_cpu_python_scalar(v) for k, v in x.items()}
+#         return {k : tensor_to_cpu_python_scalar(v) for k, v in x.items()}
 #     elif isinstance(x, (list, tuple)):
-#         return type(x)(to_cpu_python_scalar(v) for v in x)
+#         return type(x)(tensor_to_cpu_python_scalar(v) for v in x)
 #     else:
 #         return x
 
@@ -169,21 +171,24 @@ def move_to_device(device):
     """
     return lambda x: x.to(device, non_blocking=True) if isinstance(x, torch.Tensor) else x
     
-def to_cpu_python_scalar(x):
+def tensor_to_cpu_python_scalar(x):
     """ 
-    Extracts a one-element tensor as a Python float. Other objects are returned
-    unchanged.
+    Extracts a one-element tensor as a Python scalar (float, int, etc.). Other 
+    objects are returned unchanged.
     """
     return x.cpu().item() if isinstance(x, torch.Tensor) and x.numel() == 1 else x
 
-def detach(x):
+def detach_tensor(x):
     """
     Detach tensor.
     """
     return x.detach() if isinstance(x, torch.Tensor) else x
     
-def to_numpy(x):
+def tensor_to_numpy(x):
     """ 
     """
     return x.numpy() if isinstance(x, torch.Tensor) else x
-    
+
+
+
+
