@@ -153,15 +153,13 @@ def recursive(x, *functions):
     """ 
     functions can be defined functions or lambda functions.
     """
-    if isinstance(x, torch.Tensor):
-        for func in functions: 
-            x = func(x)
-        return x
-    elif isinstance(x, dict):
+    if isinstance(x, dict):
         return {k : recursive(v, *functions) for k, v in x.items()}
     elif isinstance(x, (list, tuple)):
         return type(x)(recursive(v, *functions) for v in x)
     else:
+        for func in functions: 
+            x = func(x)
         return x
     
 def move_to_device(device):
@@ -169,7 +167,7 @@ def move_to_device(device):
     Utility for configuring lambda function for moving tensor to specified
     device. Intended to be used with `recursive`.
     """
-    return lambda x: x.to(device, non_blocking=True)
+    return lambda x: x.to(device, non_blocking=True) if isinstance(x, torch.Tensor) else x
     
 def to_cpu_python_scalar(x):
     """ 
