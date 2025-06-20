@@ -18,7 +18,7 @@ def make_dir(*path_parts: Union[str, Path], chdir=False):
 
 def save_to_json(x, filepath, indent=2):
     filepath = Path(filepath)
-    filepath.mkdir(parents=True, exist_ok=True)
+    filepath.parent.mkdir(parents=True, exist_ok=True)
 
     with open(filepath, 'w') as f:
         json.dump(x, f, indent=indent)
@@ -35,6 +35,14 @@ def get_constructor_params(x):
     """
     cls = x if isinstance(x, type) else x.__class__
     return list(inspect.signature(cls.__init__).parameters.keys())[1:] # First element is self
+
+def torch_save(x, filepath):
+    with open(filepath, 'wb') as f:
+        torch.save(x, f)
+
+def torch_load(filepath):
+    with open(filepath, 'rb') as f:
+        return torch.load(f)
 
 # ----------------------------- Pre-serialization --------------------------- #
 def get_path(x):
@@ -94,10 +102,29 @@ def tagged_dict_to_dataclass_instance(x):
     
 def tagged_dict_to_tensor(x):
     if is_tagged_dict(x, 'tensor'):
+        # Filter out tags.
         args = {
             key: val for key, val in x.items() 
             if key not in ('__path__', '__kind__')
         }
+
+        # Key 'dtype' points to a string, must convert to torch.dtype.
+        if 'dtype' not in args:
+            raise KeyError(
+                "Tagged tensor dict must contain a dtype key for accurate reconstruction."
+            )
+        try:
+            dtype = getattr(torch, args['dtype'].rsplit('.', 1)[-1])
+            if not isinstance(dtype, torch.dtype):
+                raise TypeError
+            args['dtype'] = dtype
+        except (AttributeError, TypeError):
+            raise ValueError(
+                f"args['dtype'] = {args['dtype']} yielded invalid dtype string "
+                f"{dtype}, must be string equivalent of valid torch.dtype, "
+                "e.g. 'torch.float32."
+            )
+        
         return torch.tensor(**args)
     else:
         return x
