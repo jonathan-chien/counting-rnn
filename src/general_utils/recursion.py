@@ -1,5 +1,5 @@
 from dataclasses import is_dataclass, fields
-from . import io_utils
+from . import serialization as ser_utils
 
 def recursive(x, branch_conditionals, leaf_fns, depth=None, max_depth=100):
     """ 
@@ -44,8 +44,8 @@ def handle_dict_with_transform(d, recurse):
     function's generality.
     """
     d = {k : recurse(v) for k, v in d.items()}
-    x = io_utils.tagged_dict_to_dataclass_instance(d)
-    x = io_utils.tagged_dict_to_tensor(x)
+    x = ser_utils.tagged_dict_to_dataclass_instance(d)
+    x = ser_utils.tagged_dict_to_tensor(x)
     return x
 
 dict_branch_with_transform = (is_dict, handle_dict_with_transform)
@@ -91,7 +91,7 @@ def handle_dataclass_with_transform(d, recurse):
     dataclass_as_dict = {f.name : recurse(getattr(d, f.name)) for f in fields(d)}
     return {
         **dataclass_as_dict,
-        '__path__' : io_utils.get_path(d),
+        '__path__' : ser_utils.get_path(d),
         '__kind__' : 'dataclass'
     }
 
