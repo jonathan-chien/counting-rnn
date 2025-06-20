@@ -7,7 +7,7 @@ from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import Dataset
 
 from . import utils
-from core_utils import tensor as tensor_utils
+from general_utils import tensor as tensor_utils
 
 
 class Hypercube:

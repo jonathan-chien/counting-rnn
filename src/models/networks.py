@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
-from core_utils import tensor as tensor_utils
+from general_utils import tensor as tensor_utils
 
 
 class FFN(nn.Module):

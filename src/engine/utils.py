@@ -3,7 +3,7 @@ from pathlib import Path
 
 import torch
 
-from core_utils import tensor as tensor_utils
+from general_utils import tensor as tensor_utils
 
 
 class Logger:
