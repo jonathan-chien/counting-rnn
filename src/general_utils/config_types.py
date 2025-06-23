@@ -1,8 +1,11 @@
 from dataclasses import asdict, dataclass, is_dataclass, fields
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, Any, List
 import warnings
+warnings.simplefilter("always")
 
-from . serialization import get_cls_path, load_from_path
+import torch
+
+from . serialization import get_cls_path, get_fn_path, load_from_path
 
 
 T = TypeVar('T')
@@ -10,18 +13,18 @@ T = TypeVar('T')
 
 @dataclass
 class ArgsConfig:
-    """Type 1"""
+    """Type I"""
     pass
 
 
 @dataclass 
 class ContainerConfig:
-    """Type 2"""
+    """Type II"""
     pass
 
 
 @dataclass
-class FactoryConfig(Generic[T]):
+class CallableConfig(Generic[T]):
     """ 
     Utility dataclass for storing a configuration of an object of an arbitrary
     class X within a dataclass config hierarchy. The class path for X is stored
@@ -30,70 +33,165 @@ class FactoryConfig(Generic[T]):
     json, and the object of class X can be instantiated following
     de-serialization. 
 
-    Type 3.
+    Type III
     """
-    cls_path : str
+    path : str
     args_cfg : ArgsConfig 
+    kind: str
     locked: bool = False
     warn_if_locked: bool = True
     raise_exception_if_locked: bool = False
 
     @classmethod
-    def from_class(
+    def from_callable(
         cls, 
-        cls_obj, 
-        args_cfg, 
-        locked=False, 
-        warn_if_locked=True, 
-        raise_exception_if_locked=False
+        callable_: Any, 
+        args_cfg: ArgsConfig, 
+        kind: str,
+        *,
+        locked: bool =False, 
+        warn_if_locked: bool =True, 
+        raise_exception_if_locked: bool =False
     ):
         """ 
-        Convenience method allowing easy instantiation of a FactoryConfig 
-        object by passing in a reference to class X and an ArgsConfig dataclass 
-        containing constructor args for X.
+        Central method allowing easy instantiation of a FactoryConfig object by
+        passing in a reference to callable (function or class) and an
+        ArgsConfig dataclass containing args for the callable.
         """
         return cls(
-            cls_path=get_cls_path(cls_obj),
+            path=cls.get_path(callable_, kind),
             args_cfg=args_cfg,
+            kind=kind, # Register kind
             locked=locked,
             warn_if_locked=warn_if_locked,
             raise_exception_if_locked=raise_exception_if_locked
         )
-
-    def instantiate(self, **kwargs) -> T:
-        """ 
-        Instantiate object of class X using previously supplied constructor args.
-        """
-        if self.locked:
-            if self.warn_if_locked and not self.raise_exception_if_locked:
-                warnings.warn(
-                    "The instantiate method was called on this object, but self.locked=True."
-                )
-            elif self.raise_exception_if_locked:
-                raise RuntimeError(
-                    "The instantiate method was called on this object, but self.locked=True."
-                )
-            return self # y = x.instantiate() results in y == x
-         
-        if not is_dataclass(self.args_cfg):
-            raise TypeError(
-                "Expected a dataclass for self.args_cfg but got type " 
-                f"{type(self.args_cfg)}."
+    
+    @staticmethod
+    def get_path(callable_, kind):
+        if kind == 'class':
+            return get_cls_path(callable_)
+        if kind == 'function': 
+            return get_fn_path(callable_)
+        else:
+            raise ValueError(
+                f"Unrecognized value {kind} for `kind`. Must be 'class' or 'function'."
             )
         
-        cls = self.get_class()
-
-        print(f"[DEBUG] Instantiating class from: {self.cls_path}")
-        print(f"[DEBUG] args_cfg type: {type(self.args_cfg)}")
-        for field in fields(self.args_cfg):
-            val = getattr(self.args_cfg, field.name)
-            print(f"  - {field.name}: type={type(val)} repr={repr(val)}")
-
-        return cls(**asdict(self.args_cfg), **kwargs)
+    def call(self, **kwargs) -> T:
+        """ 
+        Call callable using previously supplied args.
+        """
+        if self.locked:
+            message = (
+                "The `call` method was called on this object with self.path=" 
+                f"{self.path}, but self.locked=True."
+            )
+            if self.warn_if_locked and not self.raise_exception_if_locked:
+                warnings.warn(message)
+            elif self.raise_exception_if_locked:
+                raise RuntimeError(message)
+            return self # y = x.call() results in y == x
+         
+        if not isinstance(self.args_cfg, ArgsConfig):
+            raise TypeError(
+                "Expected an ArgsConfig dataclass for self.args_cfg but got " 
+                f"type {type(self.args_cfg)}."
+            )
+        
+        callable_ = self.get_callable()
+        return callable_(**asdict(self.args_cfg), **kwargs)
     
-    def get_class(self):
+    def get_callable(self):
         """ 
         Convenience method to retrieve reference to class X from the stored 
         class path.
         """
-        return load_from_path(self.cls_path)
+        return load_from_path(self.path)
+    
+   
+    
+
+# @dataclass
+# class FunctionConfig:
+#     fn_path: str
+#     args_cfg: ArgsConfig
+#     locked: bool = False
+#     warn_if_locked: bool = True
+#     raise_exception_if_locked = False
+
+#     @classmethod
+#     def from_fn(
+#         cls, 
+#         fn, 
+#         args_cfg, 
+#         locked=False, 
+#         warn_if_locked=True, 
+#         raise_exception_if_locked=False
+#     ):
+#         return cls(
+#             fn_path=get_fn_path(fn),
+#             args_cfg=args_cfg,
+#             locked=locked,
+#             warn_if_locked=warn_if_locked,
+#             raise_exception_if_locked=raise_exception_if_locked
+#         )
+    
+#     def execute(self, **kwargs):
+#         """ 
+#         """
+#         if self.locked:
+#             if self.warn_if_locked and not self.raise_exception_if_locked:
+#                 warnings.warn(
+#                     "The instantiate method was called on this object, but self.locked=True."
+#                 )
+#             elif self.raise_exception_if_locked:
+#                 raise RuntimeError(
+#                     "The instantiate method was called on this object, but self.locked=True."
+#                 )
+#             return self # y = x.instantiate() results in y == x
+         
+#         if not isinstance(self.args_cfg, ArgsConfig):
+#             raise TypeError(
+#                 "Expected an ArgsConfig dataclass for self.args_cfg but got " 
+#                 f"type {type(self.args_cfg)}."
+#             )
+        
+#         fn = self.get_fn()
+#         return fn(**asdict(self.args_cfg), **kwargs)
+    
+#     def get_fn(self):
+#         """ 
+#         """
+#         return load_from_path(self.fn_path)
+    
+
+# @dataclass
+# class TensorArgs(ArgsConfig):
+#     """ 
+#     """
+#     data: List
+#     dtype: str
+#     requires_grad: bool
+
+
+# @dataclass
+# class TensorConfig(FunctionConfig):
+#     """ 
+#     """
+#     @classmethod
+#     def from_tensor(
+#         cls, 
+#         t,
+#         locked=False,
+#         warn_if_locked=True,
+#         raise_exception_if_locked=False
+#         ):
+#         return cls.from_fn(
+#             fn=torch.tensor,
+#             args_cfg=ArgsConfig(
+#                 data=t.tolist(),
+#                 dtype=str(t.dtype),
+#                 requires_grad=t.requires_grad
+#             )
+#         )

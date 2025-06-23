@@ -99,19 +99,19 @@ def handle_dataclass_with_transform(d, recurse):
 
 dataclass_branch_with_transform = (is_dataclass, handle_dataclass_with_transform)
 
-def handle_dataclass_with_instantiation(d, recurse):
+def handle_dataclass_with_call(d, recurse):
     """ 
     """
     # Global import on 06/21/25 causes circular import error.
-    from .config_types import FactoryConfig
+    from .config_types import CallableConfig
 
     # Descend recursively into dataclass first.
     dataclass = type(d)(**{f.name : recurse(getattr(d, f.name)) for f in fields(d)})
 
-    if isinstance(dataclass, FactoryConfig):
-        dataclass = dataclass.instantiate()
+    if isinstance(dataclass, CallableConfig):
+        return dataclass.call()
+    else:
+        return dataclass
 
-    return dataclass
-
-dataclass_branch_with_instantiation = (is_dataclass, handle_dataclass_with_instantiation)
+dataclass_branch_with_instantiation = (is_dataclass, handle_dataclass_with_call)
 

@@ -19,7 +19,7 @@ def get_constructor_params(x):
     cls = x if isinstance(x, type) else x.__class__
     return list(inspect.signature(cls.__init__).parameters.keys())[1:] # First element is self
 
-def serialize_and_deserialize(cfg, filepath):
+def serialize(cfg, filepath):
     """ 
     """
     # Convert for serialization. TODO: implement recursive check for dicts, return Boolean, could allow file deletion if dicts don't match
@@ -39,7 +39,9 @@ def serialize_and_deserialize(cfg, filepath):
 
     # Serialize/save.
     io_utils.save_to_json(serializable_cfg_dict, filepath, indent=2)
+    return serializable_cfg_dict
 
+def deserialize(filepath):
     # Deserialize and reconstruct.
     deserialized_cfg_dict = io_utils.load_from_json(filepath)
     reconstructed_cfg = r_utils.recursive(
@@ -53,8 +55,44 @@ def serialize_and_deserialize(cfg, filepath):
             lambda x: x,
         )
     )
-
     return reconstructed_cfg
+
+# def serialize_and_deserialize(cfg, filepath):
+#     """ 
+#     """
+#     # Convert for serialization. TODO: implement recursive check for dicts, return Boolean, could allow file deletion if dicts don't match
+#     serializable_cfg_dict = r_utils.recursive(
+#         cfg,
+#         branch_conditionals=(
+#             r_utils.dict_branch, 
+#             r_utils.tuple_branch, 
+#             r_utils.list_branch, 
+#             r_utils.dataclass_branch_with_transform
+#         ),
+#         leaf_fns=(
+#             tensor_to_tagged_dict,
+#             function_to_tagged_dict
+#         )
+#     )
+
+#     # Serialize/save.
+#     io_utils.save_to_json(serializable_cfg_dict, filepath, indent=2)
+
+#     # Deserialize and reconstruct.
+#     deserialized_cfg_dict = io_utils.load_from_json(filepath)
+#     reconstructed_cfg = r_utils.recursive(
+#         deserialized_cfg_dict,
+#         branch_conditionals=(
+#             r_utils.dict_branch_with_transform,
+#             r_utils.tuple_branch, 
+#             r_utils.list_branch, 
+#         ),
+#         leaf_fns=(
+#             lambda x: x,
+#         )
+#     )
+
+#     return reconstructed_cfg
 
 # ----------------------------- Pre-serialization --------------------------- #
 def get_cls_path(x):
@@ -185,7 +223,8 @@ def tagged_dict_to_function(x):
 def recursive_instantiation(x):
     """ 
     Utility to recursively walk through nested object and replace any 
-    FactoryConfig objects with the instantiated object of the associated class.
+    CallableConfig object with the result of calling the `call` method on that 
+    object.
     """
     return r_utils.recursive(
         x,
