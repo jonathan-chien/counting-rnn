@@ -5,10 +5,10 @@ import torch
 
 from data.sequences import Hypercube, SeqLengths, Sequences, Embedder
 from data import utils as data_utils
-from general_utils.config_types import ArgsConfig, ContainerConfig, FactoryConfig
+from general_utils.config_types import ArgsConfig, ContainerConfig, CallableConfig
 from general_utils import fileio as io_utils
 from general_utils import reproducibility 
-from general_utils.serialization import serialize_and_deserialize
+from general_utils.serialization import serialize, deserialize
 
 
 @dataclass
@@ -46,7 +46,7 @@ class EmbedderConfig(ArgsConfig):
     offset_1: Optional[torch.Tensor] = None
     offset_2: Optional[torch.Tensor] = None
     method: Union[str, torch.Tensor] = 'random_rotation'
-    noise_distr: Optional[FactoryConfig] = None
+    noise_distr: Optional[CallableConfig] = None
 
 
 @dataclass
@@ -54,7 +54,7 @@ class SequencesConfig(ContainerConfig):
     seq_lengths: SeqLengths
     # elem_cls: type # E.g. Hypercube
     # elem_cfg: Any # E.g. HypercubeConfig
-    elem: FactoryConfig
+    elem: CallableConfig
     embedder_cfg: EmbedderConfig
     num_seq: int
     seq_order: str = 'permute'
@@ -67,7 +67,7 @@ class NormalDistrConfig(ArgsConfig):
 
 
 @dataclass
-class BuildConfig(ContainerConfig):
+class DataConfig(ContainerConfig):
     sequences_cfg: Dict[str, SequencesConfig]
     reproducibility_cfg: ReproducibilityConfig
     
@@ -79,8 +79,8 @@ def apply_reproducibility_cfg(seed_cfg: SeedConfig, torch_determinism_cfg: Torch
 def build_hypercube_sequences(cfg: SequencesConfig) -> Sequences:
     # The following three lines could be replaced by FactoryConfig + recursive 
     # instantiation, but manual instantiation here is more readable/lightweight.
-    hypercube = cfg.elem.instantiate()
-    cfg.embedder_cfg.noise_distr = cfg.embedder_cfg.noise_distr.instantiate() 
+    hypercube = cfg.elem.call()
+    cfg.embedder_cfg.noise_distr = cfg.embedder_cfg.noise_distr.call() 
     embedder = Embedder(**asdict(cfg.embedder_cfg))
 
     # Check that number of variables is large enough.
@@ -100,166 +100,171 @@ def build_hypercube_sequences(cfg: SequencesConfig) -> Sequences:
     )
 
 
-# ------------------------------ Set directory ------------------------------ #
-output_dir, filename = io_utils.make_file_dir_and_id(
-    base_dir='configs/datasets',
-    sub_dir_1='000',
-    sub_dir_2='000',
-    file_ind = ('000', '000', '000')
-)
 
-# ------------------------ Reproducibility settings ------------------------- #
-# 3 children for train, val, and test. num_words_per_child = number of desired
-# seed repeats.
-NUM_SEEDS = 50
-seed_lists, entropy, _, _ = reproducibility.generate_numpy_seed_sequence(
-    num_children=3, num_words_per_child=NUM_SEEDS, dtype='uint32', return_as='int'
-)
 
-reproducibility_cfg = ReproducibilityConfig(
-    entropy=entropy,
-    seed_cfg_dict={
-        split : [
-            SeedConfig(torch_seed=s, cuda_seed=s) 
-            for s in seeds
-        ]
-        for (split, seeds) in zip(('train', 'val', 'test'), seed_lists)
-    },
-    torch_determinisim_cfg_dict={
-        'train' : TorchDeterminismConfig(
-            use_deterministic_algos=False,
-            cudnn_deterministic=False,
-            cudnn_benchmark=True
-        ),
-        'val' : TorchDeterminismConfig(
-            use_deterministic_algos=False,
-            cudnn_deterministic=False,
-            cudnn_benchmark=True
-        ),
-        'test' : TorchDeterminismConfig(
-            use_deterministic_algos=False,
-            cudnn_deterministic=False,
-            cudnn_benchmark=True
-        )
-    }
-)
-
-# ------------------------- Build auxiliary objects ------------------------- #
-hypercube_cfg = HypercubeConfig(
-    num_dims=2,
-    coords=torch.tensor([0, 1], dtype=torch.int64),
-    inclusion_set=torch.tensor(
-        [[1, 0], [1, 1]],
-        dtype=torch.int8
-    ),
-    encoding=torch.tensor([0, 1], dtype=torch.int8)
-)
-
-seq_lengths = SeqLengths(
-    lengths={
-        'pos' : {
-            'support' : torch.arange(0, 10),
-            'pmf' : data_utils.uniform_pmf(10)
-        },
-        'neg' : {
-            'support' : torch.arange(0, 5),
-            'pmf' : data_utils.uniform_pmf(5)
-        }
-    }
-)
-
-embedder_cfg = EmbedderConfig(
-    ambient_dim=5,
-    mean_center=False,
-    offset_1=-torch.tile(torch.tensor([0.5]), (hypercube_cfg.num_dims + 3,)), # Plus 3 for the dimensions corresponding to special tokens
-    offset_2=None,
-    method='random_rotation',
-    # noise_distr=torch.distributions.Normal(0, 0.05)
-    noise_distr=FactoryConfig.from_class(
-        torch.distributions.Normal, 
-        NormalDistrConfig(loc=0, scale=0.05)
+if __name__ == '__main__':
+    # ------------------------------ Set directory ------------------------------ #
+    output_dir, filename = io_utils.make_file_dir_and_id(
+        base_dir='configs/datasets',
+        sub_dir_1='000',
+        sub_dir_2='000',
+        file_ind = ('000', '000', '000')
     )
-)
 
-# ----------------------------- Sequences config ---------------------------- #
-sequences_cfg = SequencesConfig(
-    num_seq=1024,
-    seq_order='permute',
-    seq_lengths=seq_lengths,
-    elem=FactoryConfig.from_class(Hypercube, hypercube_cfg),
-    embedder_cfg=embedder_cfg,
-)
+    # ------------------------ Reproducibility settings ------------------------- #
+    # 3 children for train, val, and test. num_words_per_child = number of desired
+    # seed repeats.
+    NUM_SEEDS = 50
+    seed_lists, entropy, _, _ = reproducibility.generate_numpy_seed_sequence(
+        num_children=3, num_words_per_child=NUM_SEEDS, dtype='uint32', return_as='int'
+    )
 
-# ------------------------------- Serialize --------------------------------- #
-# Attempt to serialize and reconstruct full cfg tree, and use reconstructed
-# version to build, to ensure future reproducibility.
-build_cfg = BuildConfig(
-    sequences_cfg=sequences_cfg,
-    reproducibility_cfg=reproducibility_cfg
-)
-# serializable_cfg_dict = r_utils.recursive(
-#     build_cfg,
-#     branch_conditionals=(
-#         r_utils.dict_branch, 
-#         r_utils.tuple_branch, 
-#         r_utils.list_branch, 
-#         r_utils.dataclass_branch_with_transform
-#     ),
-#     leaf_fns=(
-#         tensor_to_tagged_dict,
-#     )
-# )
-# cfg_filepath = output_dir / (filename + '.json')
-# io_utils.save_to_json(serializable_cfg_dict, cfg_filepath, indent=2)
+    reproducibility_cfg = ReproducibilityConfig(
+        entropy=entropy,
+        seed_cfg_dict={
+            split : [
+                SeedConfig(torch_seed=s, cuda_seed=s) 
+                for s in seeds
+            ]
+            for (split, seeds) in zip(('train', 'val', 'test'), seed_lists)
+        },
+        torch_determinisim_cfg_dict={
+            'train' : TorchDeterminismConfig(
+                use_deterministic_algos=False,
+                cudnn_deterministic=False,
+                cudnn_benchmark=True
+            ),
+            'val' : TorchDeterminismConfig(
+                use_deterministic_algos=False,
+                cudnn_deterministic=False,
+                cudnn_benchmark=True
+            ),
+            'test' : TorchDeterminismConfig(
+                use_deterministic_algos=False,
+                cudnn_deterministic=False,
+                cudnn_benchmark=True
+            )
+        }
+    )
 
-# # ------------------------------- Reconstruct ------------------------------- #
-# deserialized_build_cfg_dict = io_utils.load_from_json(cfg_filepath)
-# reconstructed_build_cfg = r_utils.recursive(
-#     deserialized_build_cfg_dict,
-#     branch_conditionals=(
-#         r_utils.dict_branch_with_transform,
-#         r_utils.tuple_branch, 
-#         r_utils.list_branch, 
-#     ),
-#     leaf_fns=(
-#         lambda x: x,
-#     )
-# )
-cfg_filepath = output_dir / (filename + '.json')
-reconstructed_build_cfg = serialize_and_deserialize(build_cfg, cfg_filepath)
+    # ------------------------- Build auxiliary objects ------------------------- #
+    hypercube_cfg = HypercubeConfig(
+        num_dims=2,
+        coords=torch.tensor([0, 1], dtype=torch.int64),
+        inclusion_set=torch.tensor(
+            [[1, 0], [1, 1]],
+            dtype=torch.int8
+        ),
+        encoding=torch.tensor([0, 1], dtype=torch.int8)
+    )
 
-# ----------------------------- Build sequences ----------------------------- #
-# See if sequences build without error. Arbitrarily using the train split's 
-# first seed and determinism settings here.
-apply_reproducibility_cfg(
-    seed_cfg=reconstructed_build_cfg.reproducibility_cfg.seed_cfg_dict['train'][0],
-    torch_determinism_cfg=reconstructed_build_cfg.reproducibility_cfg.torch_determinisim_cfg_dict['train']
-)
-sequences = build_hypercube_sequences(reconstructed_build_cfg.sequences_cfg) 
+    seq_lengths = SeqLengths(
+        lengths={
+            'pos' : {
+                'support' : torch.arange(0, 10),
+                'pmf' : data_utils.uniform_pmf(10)
+            },
+            'neg' : {
+                'support' : torch.arange(0, 5),
+                'pmf' : data_utils.uniform_pmf(5)
+            }
+        }
+    )
 
-PRINT_TO_CONSOLE = True
-if PRINT_TO_CONSOLE:
-    # Retrieve sample from current split.
-    seq_idx = 7
-    seq, labels, _, _, _ = sequences[seq_idx]
+    embedder_cfg = EmbedderConfig(
+        ambient_dim=5,
+        mean_center=False,
+        offset_1=-torch.tile(torch.tensor([0.5]), (hypercube_cfg.num_dims + 3,)), # Plus 3 for the dimensions corresponding to special tokens
+        offset_2=None,
+        method='random_rotation',
+        # noise_distr=torch.distributions.Normal(0, 0.05)
+        noise_distr=CallableConfig.from_callable(
+            torch.distributions.Normal, 
+            NormalDistrConfig(loc=0, scale=0.05),
+            kind='class'
+        )
+    )
 
-    # Get version where all labels in positive vs negative class are the same.
-    labels_uniform_class = labels.clone()
-    labels_uniform_class[labels >= 4] = 4
-    labels_uniform_class[labels < 0] = -1
+    # ----------------------------- Sequences config ---------------------------- #
+    sequences_cfg = SequencesConfig(
+        num_seq=1024,
+        seq_order='permute',
+        seq_lengths=seq_lengths,
+        elem=CallableConfig.from_callable(Hypercube, hypercube_cfg, kind='class'),
+        embedder_cfg=embedder_cfg,
+    )
 
-    print(f"Shape of single sequence: {seq.shape}.")
-    print(f"Shape of corresponding labels: {labels.shape}.")
-    print(f"Sequence: \n {seq}.") 
-    print(f"Labels by class: \n {labels_uniform_class}.") 
-    print(f"Labels by stimulus: \n {labels}.") 
-    print("\n")
+    # ------------------------------- Serialize --------------------------------- #
+    # Attempt to serialize and reconstruct full cfg tree, and use reconstructed
+    # version to build, to ensure future reproducibility.
+    data_cfg = DataConfig(
+        sequences_cfg=sequences_cfg,
+        reproducibility_cfg=reproducibility_cfg
+    )
+    # serializable_cfg_dict = r_utils.recursive(
+    #     data_cfg,
+    #     branch_conditionals=(
+    #         r_utils.dict_branch, 
+    #         r_utils.tuple_branch, 
+    #         r_utils.list_branch, 
+    #         r_utils.dataclass_branch_with_transform
+    #     ),
+    #     leaf_fns=(
+    #         tensor_to_tagged_dict,
+    #     )
+    # )
+    # cfg_filepath = output_dir / (filename + '.json')
+    # io_utils.save_to_json(serializable_cfg_dict, cfg_filepath, indent=2)
 
-# Optionally save sequences.
-SAVE_DATASET = False
-if SAVE_DATASET:
-    dataset_filepath = output_dir / (filename + '.pt')
-    io_utils.torch_save(sequences, dataset_filepath)
+    # # ------------------------------- Reconstruct ------------------------------- #
+    # deserialized_data_cfg_dict = io_utils.load_from_json(cfg_filepath)
+    # reconstructed_data_cfg = r_utils.recursive(
+    #     deserialized_data_cfg_dict,
+    #     branch_conditionals=(
+    #         r_utils.dict_branch_with_transform,
+    #         r_utils.tuple_branch, 
+    #         r_utils.list_branch, 
+    #     ),
+    #     leaf_fns=(
+    #         lambda x: x,
+    #     )
+    # )
+    cfg_filepath = output_dir / (filename + '.json')
+    _ = serialize(data_cfg, cfg_filepath)
+    reconstructed_data_cfg = deserialize(cfg_filepath)
+
+    # ----------------------------- Build sequences ----------------------------- #
+    # See if sequences build without error. Arbitrarily using the train split's 
+    # first seed and determinism settings here.
+    apply_reproducibility_cfg(
+        seed_cfg=reconstructed_data_cfg.reproducibility_cfg.seed_cfg_dict['train'][0],
+        torch_determinism_cfg=reconstructed_data_cfg.reproducibility_cfg.torch_determinisim_cfg_dict['train']
+    )
+    sequences = build_hypercube_sequences(reconstructed_data_cfg.sequences_cfg) 
+
+    PRINT_TO_CONSOLE = True
+    if PRINT_TO_CONSOLE:
+        # Retrieve sample from current split.
+        seq_idx = 7
+        seq, labels, _, _, _ = sequences[seq_idx]
+
+        # Get version where all labels in positive vs negative class are the same.
+        labels_uniform_class = labels.clone()
+        labels_uniform_class[labels >= 4] = 4
+        labels_uniform_class[labels < 0] = -1
+
+        print(f"Shape of single sequence: {seq.shape}.")
+        print(f"Shape of corresponding labels: {labels.shape}.")
+        print(f"Sequence: \n {seq}.") 
+        print(f"Labels by class: \n {labels_uniform_class}.") 
+        print(f"Labels by stimulus: \n {labels}.") 
+        print("\n")
+
+    # Optionally save sequences.
+    SAVE_DATASET = False
+    if SAVE_DATASET:
+        dataset_filepath = output_dir / (filename + '.pt')
+        io_utils.torch_save(sequences, dataset_filepath)
 
 
 
