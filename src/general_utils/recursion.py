@@ -1,6 +1,7 @@
 from dataclasses import is_dataclass, fields
 from . import serialization as ser_utils
 
+
 def recursive(x, branch_conditionals, leaf_fns, depth=None, max_depth=100):
     """ 
     """
@@ -11,7 +12,7 @@ def recursive(x, branch_conditionals, leaf_fns, depth=None, max_depth=100):
             f"User-specified max recursion depth of {max_depth} exceeded."
         )
 
-    # Recursive descent.
+    # Recursive descent. Transformations in consequent possible here as well.
     for antecedent, consequent in branch_conditionals:
         if antecedent(x):
             return consequent(
@@ -34,7 +35,7 @@ dict_branch = (is_dict, handle_dict)
 
 def handle_dict_with_transform(d, recurse):
     """ 
-    This function breaks the rule of separating branch conditions from leaf
+    This function breaks the pattern of separating branch conditions from
     transformations, as a transformation is applied here after branching.
     However, since we wish both to descend recursively into tagged dicts and to
     transform them into dataclasses, it seems there is no way to keep these
@@ -46,6 +47,7 @@ def handle_dict_with_transform(d, recurse):
     d = {k : recurse(v) for k, v in d.items()}
     x = ser_utils.tagged_dict_to_dataclass_instance(d)
     x = ser_utils.tagged_dict_to_tensor(x)
+    x = ser_utils.tagged_dict_to_function(x)
     return x
 
 dict_branch_with_transform = (is_dict, handle_dict_with_transform)
@@ -62,7 +64,7 @@ def is_tuple(x):
     return isinstance(x, tuple)
 
 def handle_tuple(t, recurse):
-    return (recurse(v) for v in t)
+    return tuple(recurse(v) for v in t)
 
 tuple_branch = (is_tuple, handle_tuple)
 
@@ -91,9 +93,25 @@ def handle_dataclass_with_transform(d, recurse):
     dataclass_as_dict = {f.name : recurse(getattr(d, f.name)) for f in fields(d)}
     return {
         **dataclass_as_dict,
-        '__path__' : ser_utils.get_path(d),
+        '__path__' : ser_utils.get_cls_path(d),
         '__kind__' : 'dataclass'
     }
 
 dataclass_branch_with_transform = (is_dataclass, handle_dataclass_with_transform)
+
+def handle_dataclass_with_instantiation(d, recurse):
+    """ 
+    """
+    # Global import on 06/21/25 causes circular import error.
+    from .config_types import FactoryConfig
+
+    # Descend recursively into dataclass first.
+    dataclass = type(d)(**{f.name : recurse(getattr(d, f.name)) for f in fields(d)})
+
+    if isinstance(dataclass, FactoryConfig):
+        dataclass = dataclass.instantiate()
+
+    return dataclass
+
+dataclass_branch_with_instantiation = (is_dataclass, handle_dataclass_with_instantiation)
 

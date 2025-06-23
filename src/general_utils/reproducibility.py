@@ -33,7 +33,3 @@ def generate_numpy_seed_sequence(num_children=1, num_words_per_child=1, dtype=np
         )
     
     return seeds, entropy, root_seed_seq, children
-
-
-
-# Could also set seed for random module and numpy if needed.
