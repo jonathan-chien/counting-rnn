@@ -33,7 +33,7 @@ def handle_dict(d, recurse):
 
 dict_branch = (is_dict, handle_dict)
 
-def handle_dict_with_transform(d, recurse):
+def handle_dict_with_transform_to_dataclass(d, recurse):
     """ 
     This function breaks the pattern of separating branch conditions from
     transformations, as a transformation is applied here after branching.
@@ -46,11 +46,11 @@ def handle_dict_with_transform(d, recurse):
     """
     d = {k : recurse(v) for k, v in d.items()}
     x = ser_utils.tagged_dict_to_dataclass_instance(d)
-    x = ser_utils.tagged_dict_to_tensor(x)
-    x = ser_utils.tagged_dict_to_function(x)
+    # x = ser_utils.tagged_dict_to_tensor(x)
+    # x = ser_utils.tagged_dict_to_function(x)
     return x
 
-dict_branch_with_transform = (is_dict, handle_dict_with_transform)
+dict_branch_with_transform_to_dataclass = (is_dict, handle_dict_with_transform_to_dataclass)
 
 def is_list(x):
     return isinstance(x, list)
@@ -75,7 +75,7 @@ def handle_dataclass(d, recurse):
 
 dataclass_branch = (is_dataclass, handle_dataclass)
 
-def handle_dataclass_with_transform(d, recurse):
+def handle_dataclass_with_transform_to_dict(d, recurse):
     """ 
     This function breaks the rule of separating branch conditions from leaf
     transformations, as a transformation is applied here after branching.
@@ -97,21 +97,21 @@ def handle_dataclass_with_transform(d, recurse):
         '__kind__' : 'dataclass'
     }
 
-dataclass_branch_with_transform = (is_dataclass, handle_dataclass_with_transform)
+dataclass_branch_with_transform_to_dict = (is_dataclass, handle_dataclass_with_transform_to_dict)
 
-def handle_dataclass_with_call(d, recurse):
+def handle_dataclass_with_factory(d, recurse):
     """ 
     """
     # Global import on 06/21/25 causes circular import error.
-    from .config_types import CallableConfig
+    from .config_types import CallableConfig, TensorConfig
 
     # Descend recursively into dataclass first.
     dataclass = type(d)(**{f.name : recurse(getattr(d, f.name)) for f in fields(d)})
 
-    if isinstance(dataclass, CallableConfig):
+    if isinstance(dataclass, CallableConfig) and not isinstance(dataclass, TensorConfig):
         return dataclass.call()
     else:
         return dataclass
 
-dataclass_branch_with_instantiation = (is_dataclass, handle_dataclass_with_call)
+dataclass_branch_with_factory = (is_dataclass, handle_dataclass_with_factory)
 

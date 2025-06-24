@@ -29,11 +29,10 @@ def serialize(cfg, filepath):
             r_utils.dict_branch, 
             r_utils.tuple_branch, 
             r_utils.list_branch, 
-            r_utils.dataclass_branch_with_transform
+            r_utils.dataclass_branch_with_transform_to_dict
         ),
         leaf_fns=(
-            tensor_to_tagged_dict,
-            function_to_tagged_dict
+            lambda x: x,
         )
     )
 
@@ -47,7 +46,7 @@ def deserialize(filepath):
     reconstructed_cfg = r_utils.recursive(
         deserialized_cfg_dict,
         branch_conditionals=(
-            r_utils.dict_branch_with_transform,
+            r_utils.dict_branch_with_transform_to_dataclass,
             r_utils.tuple_branch, 
             r_utils.list_branch, 
         ),
@@ -67,7 +66,7 @@ def deserialize(filepath):
 #             r_utils.dict_branch, 
 #             r_utils.tuple_branch, 
 #             r_utils.list_branch, 
-#             r_utils.dataclass_branch_with_transform
+#             r_utils.dataclass_branch_with_transform_to_dict
 #         ),
 #         leaf_fns=(
 #             tensor_to_tagged_dict,
@@ -83,7 +82,7 @@ def deserialize(filepath):
 #     reconstructed_cfg = r_utils.recursive(
 #         deserialized_cfg_dict,
 #         branch_conditionals=(
-#             r_utils.dict_branch_with_transform,
+#             r_utils.dict_branch_with_transform_to_dataclass,
 #             r_utils.tuple_branch, 
 #             r_utils.list_branch, 
 #         ),
@@ -105,13 +104,15 @@ def get_cls_path(x):
 def get_fn_path(x):
     """ 
     """
-    if not isinstance(x, types.FunctionType):
+    if not isinstance(x, (types.FunctionType, types.BuiltinFunctionType)):
         raise TypeError(f"Expected a function, but got type {type(x)}.")
     return get_import_path(x)
 
 def get_import_path(x):
     """ 
     """
+    if x is torch.tensor: # Special case, else would get 'torch._VariableFunctionsClass.tensor'.
+        return 'torch.tensor'
     return x.__module__ + '.' + x.__qualname__
 
 def dataclass_instance_to_tagged_dict(x):
@@ -126,31 +127,31 @@ def dataclass_instance_to_tagged_dict(x):
     else:
         return x
 
-def tensor_to_tagged_dict(x): 
-    """ 
-    Converts input to a tagged dict if a tensor, otherwise returns input 
-    unchanged (this is necessary for this function to be used as a leaf_fn
-    with the recursive function from the recursion module).
-    """
-    if isinstance(x, torch.Tensor):
-        return {
-            '__path__' : 'torch.Tensor',
-            '__kind__' : 'tensor',
-            'data' : x.tolist(),
-            'dtype' : str(x.dtype),
-            'requires_grad' : x.requires_grad
-        }
-    else:
-        return x
+# def tensor_to_tagged_dict(x): 
+#     """ 
+#     Converts input to a tagged dict if a tensor, otherwise returns input 
+#     unchanged (this is necessary for this function to be used as a leaf_fn
+#     with the recursive function from the recursion module).
+#     """
+#     if isinstance(x, torch.Tensor):
+#         return {
+#             '__path__' : 'torch.Tensor',
+#             '__kind__' : 'tensor',
+#             'data' : x.tolist(),
+#             'dtype' : str(x.dtype),
+#             'requires_grad' : x.requires_grad
+#         }
+#     else:
+#         return x
     
-def function_to_tagged_dict(f):
-    if isinstance(f, types.FunctionType):
-        return {
-            '__path__' : get_fn_path(f),
-            '__kind__' : 'function',
-        }
-    else:
-        return f
+# def function_to_tagged_dict(f):
+#     if isinstance(f, types.FunctionType):
+#         return {
+#             '__path__' : get_fn_path(f),
+#             '__kind__' : 'function',
+#         }
+#     else:
+#         return f
 
 
 # --------------------------- Post-de-serialization ------------------------- #    
@@ -181,44 +182,44 @@ def tagged_dict_to_dataclass_instance(x):
     else:
         return x
     
-def tagged_dict_to_tensor(x):
-    """ 
-    """
-    if is_tagged_dict(x, 'tensor'):
-        # Filter out tags.
-        args = {
-            key: val for key, val in x.items() 
-            if key not in ('__path__', '__kind__')
-        }
+# def tagged_dict_to_tensor(x):
+#     """ 
+#     """
+#     if is_tagged_dict(x, 'tensor'):
+#         # Filter out tags.
+#         args = {
+#             key: val for key, val in x.items() 
+#             if key not in ('__path__', '__kind__')
+#         }
 
-        # Key 'dtype' points to a string, must convert to torch.dtype.
-        if 'dtype' not in args:
-            raise KeyError(
-                "Tagged tensor dict must contain a dtype key for accurate reconstruction."
-            )
-        try:
-            dtype = getattr(torch, args['dtype'].rsplit('.', 1)[-1])
-            if not isinstance(dtype, torch.dtype):
-                raise TypeError
-            args['dtype'] = dtype
-        except (AttributeError, TypeError):
-            raise ValueError(
-                f"args['dtype'] = {args['dtype']} yielded invalid dtype string "
-                f"{dtype}, must be string equivalent of valid torch.dtype, "
-                "e.g. 'torch.float32."
-            )
+#         # Key 'dtype' points to a string, must convert to torch.dtype.
+#         if 'dtype' not in args:
+#             raise KeyError(
+#                 "Tagged tensor dict must contain a dtype key for accurate reconstruction."
+#             )
+#         try:
+#             dtype = getattr(torch, args['dtype'].rsplit('.', 1)[-1])
+#             if not isinstance(dtype, torch.dtype):
+#                 raise TypeError
+#             args['dtype'] = dtype
+#         except (AttributeError, TypeError):
+#             raise ValueError(
+#                 f"args['dtype'] = {args['dtype']} yielded invalid dtype string "
+#                 f"{dtype}, must be string equivalent of valid torch.dtype, "
+#                 "e.g. 'torch.float32."
+#             )
         
-        return torch.tensor(**args)
-    else:
-        return x
+#         return torch.tensor(**args)
+#     else:
+#         return x
     
-def tagged_dict_to_function(x):
-    """ 
-    """
-    if is_tagged_dict(x, 'function'):
-        return load_from_path(x['__path__'])
-    else:
-        return x
+# def tagged_dict_to_function(x):
+#     """ 
+#     """
+#     if is_tagged_dict(x, 'function'):
+#         return load_from_path(x['__path__'])
+#     else:
+#         return x
     
 def recursive_instantiation(x):
     """ 
@@ -232,7 +233,7 @@ def recursive_instantiation(x):
             r_utils.dict_branch,
             r_utils.list_branch,
             r_utils.tuple_branch,
-            r_utils.dataclass_branch_with_instantiation
+            r_utils.dataclass_branch_with_factory
         ),
         leaf_fns=(
             lambda x: x,
