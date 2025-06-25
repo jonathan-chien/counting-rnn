@@ -223,9 +223,8 @@ def tagged_dict_to_dataclass_instance(x):
     
 def recursive_instantiation(x):
     """ 
-    Utility to recursively walk through nested object and replace any 
-    CallableConfig object with the result of calling the `call` method on that 
-    object.
+    Utility to recursively walk through nested object and replace any FactoryConfig
+    objects with the result of calling the `recover` method on that object.
     """
     return r_utils.recursive(
         x,

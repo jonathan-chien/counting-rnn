@@ -1,5 +1,5 @@
 from dataclasses import asdict, dataclass, replace
-from typing import Generic, TypeVar, Any, List, Literal, Optional
+from typing import Generic, TypeVar, Any, Dict, List, Literal, Optional
 import warnings
 warnings.simplefilter("always")
 
@@ -8,6 +8,7 @@ import torch
 from . serialization import get_cls_path, get_fn_path, load_from_path
 
 
+# ------------------------------ Config types ------------------------------- #
 T = TypeVar('T')
 
 
@@ -398,3 +399,23 @@ class TensorConfig(CallableConfig):
 #                 requires_grad=t.requires_grad
 #             )
 #         )
+
+# ---------------------------- Reproducibility ------------------------------ #
+@dataclass
+class SeedConfig(ArgsConfig):
+    torch_seed: int
+    cuda_seed: int
+
+
+@dataclass
+class TorchDeterminismConfig(ArgsConfig):
+    use_deterministic_algos: bool = False
+    cudnn_deterministic: bool = False
+    cudnn_benchmark: bool = True
+
+
+@dataclass
+class ReproducibilityConfig(ContainerConfig):
+    entropy: int
+    seed_cfg_dict: Dict[str, SeedConfig]
+    torch_determinisim_cfg_dict : Dict[str, TorchDeterminismConfig]
