@@ -99,19 +99,62 @@ def handle_dataclass_with_transform_to_dict(d, recurse):
 
 dataclass_branch_with_transform_to_dict = (is_dataclass, handle_dataclass_with_transform_to_dict)
 
-def handle_dataclass_with_factory(d, recurse):
-    """ 
-    """
+def handle_dataclass_with_factory_config(d, recurse):
     # Global import on 06/21/25 causes circular import error.
-    from .config_types import CallableConfig, TensorConfig
+    from .config_types import FactoryConfig
 
     # Descend recursively into dataclass first.
-    dataclass = type(d)(**{f.name : recurse(getattr(d, f.name)) for f in fields(d)})
+    d_transformed = handle_dataclass(d, recurse)
 
-    if isinstance(dataclass, CallableConfig) and not isinstance(dataclass, TensorConfig):
-        return dataclass.call()
+    # Better to check this inside of here, that way this condition is always
+    # checked for any dataclass. Otherwise, if separate branch conditionals
+    # are used in the recursive function, and dataclass_branch comes first, 
+    # the conditional check loop will short circuit, and deeper items may not
+    # be reached.
+    if isinstance(d_transformed, FactoryConfig):
+        return d_transformed.recover()
     else:
-        return dataclass
+        return d_transformed
 
-dataclass_branch_with_factory = (is_dataclass, handle_dataclass_with_factory)
+dataclass_branch_with_factory_config = (is_dataclass, handle_dataclass_with_factory_config)
 
+
+# def is_callable_config_dataclass(x):
+#     from .config_types import CallableConfig, TensorConfig
+#     return isinstance(x, CallableConfig) and not isinstance(x, TensorConfig)
+
+# def handle_callable_config_dataclass(d, recurse):
+#     """ 
+#     """
+#     # Global import on 06/21/25 causes circular import error.
+#     from .config_types import CallableConfig, TensorConfig
+
+#     # Descend recursively into dataclass first.
+#     dataclass = handle_dataclass(d, recurse)
+
+#     if isinstance(dataclass, CallableConfig) and not isinstance(dataclass, TensorConfig):
+#         return dataclass.recover()
+#     else:
+#         return dataclass
+
+# callable_config_dataclass_branch = (is_callable_config_dataclass, handle_callable_config_dataclass)
+
+# def is_tensor_config_dataclass(x):
+#     from .config_types import TensorConfig
+#     return isinstance(x, TensorConfig)
+
+# def handle_tensor_config_dataclass(d, recurse):
+#     """ 
+#     """
+#     # Global import on 06/21/25 causes circular import error.
+#     from .config_types import TensorConfig
+
+#     # Descend recursively into dataclass first.
+#     dataclass = handle_dataclass(d, recurse)
+
+#     if isinstance(dataclass, TensorConfig):
+#         return dataclass.to_tensor()
+#     else:
+#         return dataclass
+
+# tensor_config_dataclass_branch = (is_tensor_config_dataclass, handle_tensor_config_dataclass)

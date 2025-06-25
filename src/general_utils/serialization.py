@@ -233,7 +233,7 @@ def recursive_instantiation(x):
             r_utils.dict_branch,
             r_utils.list_branch,
             r_utils.tuple_branch,
-            r_utils.dataclass_branch_with_factory
+            r_utils.dataclass_branch_with_factory_config
         ),
         leaf_fns=(
             lambda x: x,

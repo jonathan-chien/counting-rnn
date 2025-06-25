@@ -1,5 +1,5 @@
 from dataclasses import asdict, dataclass, replace
-from typing import Generic, TypeVar, Any, List, Optional
+from typing import Generic, TypeVar, Any, List, Literal, Optional
 import warnings
 warnings.simplefilter("always")
 
@@ -22,23 +22,30 @@ class ContainerConfig:
     """Type II"""
     pass
 
+@dataclass
+class FactoryConfig(Generic[T]):
+    """
+    Since TensorConfig subclasses CallableConfig, all instances of the former
+    are technically instances of the latter. However, this may lead to
+    confusion if, e.g., a function like is_callable_config is called. This
+    should return True for TensorConfig objects, but this may not be the most
+    intuitive interpretation of that name. For improved readability,
+    CallableConfig and thus all of its child classes subclass the FactoryConfig
+    base class, which can be reference in isinstance checks. These collectively
+    constitute the Type III dataclasses.
+    """
+    pass
 
 @dataclass
-class CallableConfig(Generic[T]):
+class CallableConfig(FactoryConfig[T]):
     """ 
-    Utility dataclass for storing a configuration of an object of an arbitrary
-    class X within a dataclass config hierarchy. The class path for X is stored
-    as a string and constructor args are stored in a dataclass; thus, this
-    dataclass can easily be converted to a tagged dict and serialized with
-    json, and the object of class X can be instantiated following
-    de-serialization. 
-
-    Type III
+    Utility dataclass for storing 
     """
     path : str
     args_cfg : Optional[ArgsConfig]
-    call_locked: bool = False
-    retrieve_locked: bool = False
+    kind: Literal['class', 'function']
+    recovery_mode: Literal['call', 'get_callable']
+    locked: bool = False
     warn_if_locked: bool = True
     raise_exception_if_locked: bool = False
 
@@ -48,28 +55,28 @@ class CallableConfig(Generic[T]):
         callable_: Any, 
         args_cfg: Optional[ArgsConfig], 
         kind: str,
+        recovery_mode: str,
         *,
-        call_locked: bool = False, 
-        retrieve_locked: bool = False,
+        locked: bool = False, 
         warn_if_locked: bool =True, 
         raise_exception_if_locked: bool =False
     ):
         """ 
-        Central method allowing easy instantiation of a CallableConfig object 
-        by passing in a reference to callable (function or class) and an
-        ArgsConfig dataclass containing args for the callable.
         """
         return cls(
             path=cls._get_path(callable_, kind),
             args_cfg=args_cfg,
-            call_locked=call_locked,
-            retrieve_locked=retrieve_locked,
+            kind=kind,
+            recovery_mode=recovery_mode,
+            locked=locked,
             warn_if_locked=warn_if_locked,
             raise_exception_if_locked=raise_exception_if_locked
         )
     
     @staticmethod
     def _get_path(callable_, kind):
+        """ 
+        """
         if kind == 'class':
             return get_cls_path(callable_)
         elif kind == 'function':
@@ -79,7 +86,7 @@ class CallableConfig(Generic[T]):
                 f"Unrecognized value {kind} for kind. Must be 'class' or 'function'"
             )
         
-    def call(self, **kwargs) -> T:
+    def _call(self, **kwargs) -> T:
         """ 
         Call callable using previously supplied args.
         """
@@ -95,54 +102,66 @@ class CallableConfig(Generic[T]):
                     f"got type {type(self.args_cfg)}."
                 )
         
-        if self.call_locked:
-            self._output_if_locked('call')
-            return self
-        
-        callable_ = self.get_callable()
+        callable_ = self._get_callable()
         return callable_(**asdict(self.args_cfg), **kwargs)
     
-    def manually_call(self, **kwargs):
-        self.call_locked = False
-        return self.call(**kwargs)
+    # def manually_call(self, **kwargs):
+    #     self.call_locked = False
+    #     return self.call(**kwargs)
     
-    def get_callable(self):
+    def _get_callable(self):
         """ 
         Convenience method to retrieve reference to class X from the stored 
         class path.
         """
-        if self.retrieve_locked:
-            self._output_if_locked('retrieve')
-            return self
         return load_from_path(self.path)
     
-    def manually_get_callable(self):
-        self.retrieve_locked = False
-        return self.get_callable()
+    # def manually_get_callable(self):
+    #     self.retrieve_locked = False
+    #     return self.get_callable()
     
-    def _output_if_locked(self, lock_kind):
-        if lock_kind == 'call':
-            message = (
-                "The `call` method was called on this object with self.path=" 
-                f"{self.path}, but self.call_locked=True."
-            )
-        elif lock_kind == 'retrieve':
-            message = (
-                "The `get_callable` method was called on this object with " 
-                f"self.path={self.path}, but self.retrieve_locked=True."
-            )
-        else:
-            raise ValueError(
-                f"Unrecognized value for lock_kind: {lock_kind}. Must be "
-                "'call' or 'retrieve'."
-            )
-
+    def _output_if_locked(self):
+        """ 
+        """
+        message = (
+            "The `recover` method was called on this object with self.path=" 
+            f"{self.path}, but self.locked=True."
+        )
         if self.warn_if_locked and not self.raise_exception_if_locked:
             warnings.warn(message)
         elif self.raise_exception_if_locked:
             raise RuntimeError(message)
 
-
+    def recover(self, **kwargs):
+        """ 
+        """
+        if self.locked:
+            self._output_if_locked()
+            return self
+        elif self.recovery_mode == 'call':
+            print(self.path) # Development/debugging
+            return self._call(**kwargs)
+        elif self.recovery_mode == 'get_callable':
+            if len(kwargs) != 0:
+                raise RuntimeError(
+                    "It seems kwargs were passed to the `recover` method. Since " 
+                    "self.recovery_mode='get_callable', `recover` is a wrapper " 
+                    "to `_get_callable`, which takes no arguments."
+                )
+            print(self.path) # Development/debugging
+            return self._get_callable()
+        else:
+            raise RuntimeError(
+                "Unexpected condition reached during retrieval process, " 
+                "liked due to unrecognized value for self.recovery_mode: "
+                f"'{self.recovery_mode}'. Must be 'call' or 'get_callable'."
+            )
+        
+    def manually_recover(self, **kwargs):
+        """ 
+        """
+        self.locked = False
+        return self.recover(**kwargs)
 
 
 
@@ -258,12 +277,13 @@ class TensorConfig(CallableConfig):
                 requires_grad=t.requires_grad
             ),
             kind='function',
-            call_locked=locked,
+            recovery_mode='call',
+            locked=locked,
             warn_if_locked=warn_if_locked,
             raise_exception_if_locked=raise_exception_if_locked
         )
     
-    def to_tensor(self):
+    def recover(self):
         # Key 'dtype' points to a string, must convert to torch.dtype.
         if 'dtype' not in asdict(self.args_cfg):
             raise KeyError(
@@ -281,15 +301,16 @@ class TensorConfig(CallableConfig):
             )
         
         updated_args_cfg = replace(self.args_cfg, dtype=dtype)
-
-        return self.from_callable(
+        temporary_tensor_config = type(self).from_callable(
             callable_=torch.tensor,
             args_cfg=updated_args_cfg,
-            call_locked=self.call_locked,
-            retrieve_locked=self.retrieve_locked,
+            kind=self.kind,
+            recovery_mode=self.recovery_mode,
+            locked=self.locked,
             warn_if_locked=self.warn_if_locked,
             raise_exception_if_locked=self.raise_exception_if_locked
-        ).call()
+        )
+        return super(TensorConfig, temporary_tensor_config).recover()
     
     
     
