@@ -3,108 +3,110 @@ from typing import List, Optional
 
 import torch
 
-from models.networks import FCN, AutoRNN
-from general_utils.config_types import ArgsConfig, ContainerConfig, CallableConfig
+from models import builder as model_builder
+from models.config import AutoRNNConfig, ElmanConfig, GRUConfig, FCNConfig, GELUConfig, IdentityConfig, ReLUConfig
+from models.networks import FCN
+from general_utils.config import CallableConfig
 from general_utils.serialization import serialize, deserialize, recursive_instantiation
 from general_utils import fileio as io_utils
 
-@dataclass
-class ReLUConfig(ArgsConfig):
-    inplace: bool = False
+# @dataclass
+# class ReLUConfig(ArgsConfig):
+#     inplace: bool = False
 
 
-@dataclass
-class GELUConfig(ArgsConfig):
-    approximate: str = 'none'
+# @dataclass
+# class GELUConfig(ArgsConfig):
+#     approximate: str = 'none'
 
 
-@dataclass
-class IdentityConfig(ArgsConfig):
-    pass
+# @dataclass
+# class IdentityConfig(ArgsConfig):
+#     pass
 
 
-@dataclass
-class FCNConfig(ArgsConfig):
-    layer_sizes: Optional[List[int]]
-    nonlinearities: List[Optional[CallableConfig]]
-    dropouts: List[Optional[CallableConfig]]
+# @dataclass
+# class FCNConfig(ArgsConfig):
+#     layer_sizes: Optional[List[int]]
+#     nonlinearities: List[Optional[CallableConfig]]
+#     dropouts: List[Optional[CallableConfig]]
 
-@dataclass
-class BaseRNNConfig(ArgsConfig):
-    input_size: int
-    hidden_size: int
-    num_layers: int = 1
-    bias: bool = True
-    batch_first: bool = True
-    dropout: float = 0
-    bidirectional: bool = False
+# @dataclass
+# class BaseRNNConfig(ArgsConfig):
+#     input_size: int
+#     hidden_size: int
+#     num_layers: int = 1
+#     bias: bool = True
+#     batch_first: bool = True
+#     dropout: float = 0
+#     bidirectional: bool = False
     
 
-@dataclass
-class ElmanConfig(BaseRNNConfig):
-    nonlinearity: str = 'tanh'
+# @dataclass
+# class ElmanConfig(BaseRNNConfig):
+#     nonlinearity: str = 'tanh'
     
 
-@dataclass
-class GRUConfig(BaseRNNConfig):
-    pass
+# @dataclass
+# class GRUConfig(BaseRNNConfig):
+#     pass
 
 
-@dataclass
-class AutoRNNConfig(ArgsConfig):
-    input_network: CallableConfig
-    rnn: CallableConfig
-    readout_network: CallableConfig
+# @dataclass
+# class AutoRNNConfig(ArgsConfig):
+#     input_network: CallableConfig
+#     rnn: CallableConfig
+#     readout_network: CallableConfig
 
 
-def build_model(cfg: AutoRNNConfig, tokens) -> AutoRNN:
-    # input_network = cfg.input_network.call()
-    # rnn = cfg.rnn.call()
-    # readout_network = cfg.readout_network.call()
-    # return AutoRNN(input_network, rnn, readout_network, tokens)
-    components = {
-        name : network.call() for name, network in asdict(cfg).items()
-    }
-    return AutoRNN(**components, tokens=tokens)
+# def build_model(cfg: AutoRNNConfig, tokens) -> AutoRNN:
+#     # input_network = cfg.input_network.call()
+#     # rnn = cfg.rnn.call()
+#     # readout_network = cfg.readout_network.call()
+#     # return AutoRNN(input_network, rnn, readout_network, tokens)
+#     components = {
+#         name : network.call() for name, network in asdict(cfg).items()
+#     }
+#     return AutoRNN(**components, tokens=tokens)
 
-def get_tokens(sequences, device):
-    return sequences.transform(
-        torch.cat(
-            (
-                sequences.special_tokens['count']['token'].unsqueeze(0), 
-                sequences.special_tokens['eos']['token'].unsqueeze(0)
-            ), 
-            dim=0
-        )
-    ).to(device)
+# def get_tokens(sequences, device):
+#     return sequences.transform(
+#         torch.cat(
+#             (
+#                 sequences.special_tokens['count']['token'].unsqueeze(0), 
+#                 sequences.special_tokens['eos']['token'].unsqueeze(0)
+#             ), 
+#             dim=0
+#         )
+#     ).to(device)
 
-def insert_embedding_dim(embedding_dim, model_cfg):
-    if model_cfg.input_network.args_cfg.layer_sizes is None:
-        model_cfg.rnn.args_cfg.input_size = embedding_dim
-    else:
-        model_cfg.input_network.args_cfg.layer_sizes[0] = embedding_dim
-    return model_cfg
+# def insert_embedding_dim(embedding_dim, model_cfg):
+#     if model_cfg.input_network.args_cfg.layer_sizes is None:
+#         model_cfg.rnn.args_cfg.input_size = embedding_dim
+#     else:
+#         model_cfg.input_network.args_cfg.layer_sizes[0] = embedding_dim
+#     return model_cfg
 
-def test_model(embedding_dim, model_cfg, tokens, input_, device):
-    """ 
-    """
-    model_cfg = insert_embedding_dim(embedding_dim, model_cfg)
-    model_cfg = recursive_instantiation(model_cfg)
+# def test_model(embedding_dim, model_cfg, tokens, input_, device):
+#     """ 
+#     """
+#     model_cfg = insert_embedding_dim(embedding_dim, model_cfg)
+#     model_cfg = recursive_instantiation(model_cfg)
 
-    # Test instantiation of model.
-    model = AutoRNN(
-        input_network=model_cfg.input_network,
-        rnn=model_cfg.rnn,
-        readout_network=model_cfg.readout_network,
-        tokens=tokens
-    ).to(device)
-    print("Model successfully instantiated.")
+#     # Test instantiation of model.
+#     model = AutoRNN(
+#         input_network=model_cfg.input_network,
+#         rnn=model_cfg.rnn,
+#         readout_network=model_cfg.readout_network,
+#         tokens=tokens
+#     ).to(device)
+#     print("Model successfully instantiated.")
 
-    # Try forward pass and generation on mock data.
-    forward_out = model(input_)
-    print(f"Output of forward pass on mock data: \n {forward_out}.")
-    generate_out = model.generate(input_)
-    print(f"Output of generation on mock data: \n {generate_out}.")
+#     # Try forward pass and generation on mock data.
+#     forward_out = model(input_)
+#     print(f"Output of forward pass on mock data: \n {forward_out}.")
+#     generate_out = model.generate(input_)
+#     print(f"Output of generation on mock data: \n {generate_out}.")
 
 
 if __name__ == '__main__':
@@ -121,10 +123,11 @@ if __name__ == '__main__':
         FCN, 
         FCNConfig(
             layer_sizes=['embedding_dim', 50],
-            nonlinearities=[CallableConfig.from_callable(torch.nn.ReLU, ReLUConfig(), kind='class')],
+            nonlinearities=[CallableConfig.from_callable(torch.nn.ReLU, ReLUConfig(), kind='class', recovery_mode='call')],
             dropouts=[None]
         ),
-        kind='class'
+        kind='class',
+        recovery_mode='call'
     )
 
     rnn_input_size = (
@@ -145,7 +148,8 @@ if __name__ == '__main__':
                 batch_first=True,
                 bidirectional=False,
             ),
-            kind='class'
+            kind='class',
+            recovery_mode='call'
         )
     elif rnn_type == 'rnn':
         rnn = CallableConfig(
@@ -159,7 +163,8 @@ if __name__ == '__main__':
                 batch_first=True,
                 bidirectional=False,
             ),
-            kind='class'
+            kind='class',
+            recovery_mode='call'
         )
     else:
         ValueError(f"Unrecognized value {rnn_type} for `rnn_type`.")
@@ -169,12 +174,13 @@ if __name__ == '__main__':
         FCNConfig(
             layer_sizes=[rnn.args_cfg.hidden_size, 80, 2],
             nonlinearities=[
-                CallableConfig.from_callable(torch.nn.GELU, GELUConfig(), kind='class'), 
-                CallableConfig.from_callable(torch.nn.Identity, IdentityConfig(), kind='class')
+                CallableConfig.from_callable(torch.nn.GELU, GELUConfig(), kind='class', recovery_mode='call'), 
+                CallableConfig.from_callable(torch.nn.Identity, IdentityConfig(), kind='class', recovery_mode='call')
             ],
             dropouts=[0.5, None]
         ),
-        kind='class'
+        kind='class',
+        recovery_mode='call'
     )
 
     model_cfg = AutoRNNConfig(
@@ -200,7 +206,7 @@ if __name__ == '__main__':
     )
     mock_tokens = torch.randn((2, mock_embedding_dim)).to(device)
     mock_input = mock_input = torch.randn((10, mock_embedding_dim)).to(device)
-    model = test_model(
+    model = model_builder.test_model(
         embedding_dim=mock_embedding_dim, 
         model_cfg=reconstructed_model_cfg,
         tokens=mock_tokens,
@@ -223,7 +229,7 @@ if __name__ == '__main__':
     # #         r_utils.dict_branch, 
     # #         r_utils.tuple_branch, 
     # #         r_utils.list_branch, 
-    # #         r_utils.dataclass_branch_with_instantiation
+    # #         r_utils.callable_config_dataclass_branch
     # #     ),
     # #     leaf_fns=(
     # #         lambda x: x,
