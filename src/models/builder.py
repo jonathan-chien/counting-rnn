@@ -1,5 +1,3 @@
-from dataclasses import asdict
-
 from .config import AutoRNNConfig
 from .networks import AutoRNN
 from general_utils import serialization
@@ -9,7 +7,7 @@ def build_model(cfg: AutoRNNConfig, tokens) -> AutoRNN:
     """ 
     """
     components = {
-        name : network.call() for name, network in asdict(cfg).items()
+        name : network.call() for name, network in serialization.shallow_asdict(cfg).items()
     }
     return AutoRNN(**components, tokens=tokens)
 
@@ -24,7 +22,7 @@ def test_model(embedding_dim, model_cfg, tokens, input_, device):
     """ 
     """
     model_cfg = insert_embedding_dim(embedding_dim, model_cfg)
-    model_cfg = serialization.recursive_instantiation(model_cfg)
+    model_cfg = serialization.recursive_recover(model_cfg)
 
     # Test instantiation of model.
     model = AutoRNN(
@@ -40,3 +38,5 @@ def test_model(embedding_dim, model_cfg, tokens, input_, device):
     print(f"Output of forward pass on mock data: \n {forward_out}.")
     generate_out = model.generate(input_)
     print(f"Output of generation on mock data: \n {generate_out}.")
+
+    return model

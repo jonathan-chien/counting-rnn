@@ -1,10 +1,12 @@
 from itertools import chain
 from pathlib import Path
 import warnings
+from typing import Literal
 
 import torch
 
 from . import eval, utils
+from .config import RequiresGradConfig
 from general_utils import tensor as tensor_utils
 
 
@@ -222,9 +224,49 @@ class MetricTracker:
 
 #     return (logits, rnn_output), accuracy
 
+def set_requires_grad(
+    model: torch.nn.Module, 
+    cfg: RequiresGradConfig,
+    mode: Literal['inclusion', 'exclusion'],
+    requires_grad: bool,
+    verbose=True
+):
+    def set_value(named_params, networks, value):
+        for network, patterns in networks.items():
+            for pat in patterns:
+                for param_name, param in named_params:
+                    if param_name.startswith(network + '.') and pat in param_name:
+                        param.requires_grad=value
+
+    # Validate that all network names show up in model attributes.
+    for network in cfg.networks.keys():
+        if network not in model._modules:
+            raise ValueError(
+                f"cfg.networks key '{network}' is not a registered submodule of `model`."
+            )
+
+    named_params = list(model.named_parameters())
+
+    if mode == 'inclusion':
+        set_value(named_params, cfg.networks, requires_grad)
+    elif mode == 'exclusion':
+        for _, param in named_params:
+            param.requires_grad = requires_grad
+        set_value(named_params, cfg.networks, not(requires_grad))
+    else:
+        raise ValueError(
+            f"Got unrecognized value {mode} for `mode`. Must be 'inclusion' or 'exclusion'."
+        )
+    if verbose:
+        for param_name, param in named_params:
+            if param.requires_grad:
+                print(f"{param_name} is active.")
+            else:
+                print(f"{param_name} is frozen.")
+
 def train(
     model, 
-    train_loader, 
+    dataloader, 
     loss_terms,
     evaluation,
     h_0=None,
@@ -270,7 +312,7 @@ def train(
     for i_epoch in range(num_epochs):
         if logger: epoch_log = {}
 
-        for i_batch, (batch, labels, lengths, masks, seq_ind) in enumerate(train_loader):
+        for i_batch, (batch, labels, lengths, masks, seq_ind) in enumerate(dataloader):
             batch, labels, masks = batch.to(device), labels.to(device), masks.to(device)
 
             if h_0 is None:
@@ -341,7 +383,7 @@ def train(
                 key : logger.compute_weighted_sum(
                     key=key,
                     level='batch',
-                    weights=batch_sizes/len(train_loader.dataset)
+                    weights=batch_sizes/len(dataloader.dataset)
                 )
                 for key in batch_log.keys()
                 if compute_mean_for is not None 

@@ -3,7 +3,8 @@ from itertools import chain
 import torch
 
 from . import utils
-from general_utils import tensor as tensor_utils 
+from general_utils import recursion as recursion_utils
+from general_utils import tensor as tensorecursion_utils 
 
 
 def process_batch_eval(
@@ -75,9 +76,21 @@ def process_batch_eval(
     }
 
     if move_results_to_cpu or detach: 
-        outputs = tensor_utils.recursive(
-            outputs, tensor_utils.move_to_device('cpu'), tensor_utils.detach_tensor
+        outputs = recursion_utils.recursive(
+            outputs, 
+            branch_conditionals=(
+                recursion_utils.dict_branch,
+                recursion_utils.list_branch,
+                recursion_utils.tuple_branch
+            ),
+            leaf_fns=(
+                tensorecursion_utils.move_to_device('cpu'), 
+                tensorecursion_utils.detach_tensor
+            )
         )
+        # outputs = tensorecursion_utils.recursive(
+        #     outputs, tensorecursion_utils.move_to_device('cpu'), tensorecursion_utils.detach_tensor
+        # )
 
     return outputs
 
@@ -134,22 +147,50 @@ def evaluate_outputs(
     }
    
     if move_results_to_cpu or detach:
-        losses = tensor_utils.recursive(
-            losses, 
-            tensor_utils.move_to_device(
-                'cpu' if move_results_to_cpu else generated['logits'].device
+        losses = recursion_utils.recursive(
+            losses,
+            branch_conditionals=(
+                recursion_utils.dict_branch,
+                recursion_utils.list_branch,
+                recursion_utils.tuple_branch
             ),
-            tensor_utils.detach_tensor
+            leaf_fns=(
+                tensorecursion_utils.move_to_device(
+                    'cpu' if move_results_to_cpu else generated['logits'].device
+                ),
+                tensorecursion_utils.detach_tensor
+            ) 
         )
-        performance = tensor_utils.recursive(
+        performance = recursion_utils.recursive(
             performance, 
-            tensor_utils.move_to_device(
-                'cpu' if move_results_to_cpu else generated['labels'].device
+            branch_conditionals=(
+                recursion_utils.dict_branch,
+                recursion_utils.list_branch,
+                recursion_utils.tuple_branch
             ),
-            tensor_utils.detach_tensor
+            leaf_fns=(
+                tensorecursion_utils.move_to_device(
+                    'cpu' if move_results_to_cpu else generated['labels'].device
+                ),
+                tensorecursion_utils.detach_tensor
+            )
         )
-            # losses = tensor_utils.move_to_device(losses, 'cpu', detach=detach)
-            # performance = tensor_utils.move_to_device(performance, 'cpu', detach=detach)
+        # losses = tensorecursion_utils.recursive(
+        #     losses, 
+        #     tensorecursion_utils.move_to_device(
+        #         'cpu' if move_results_to_cpu else generated['logits'].device
+        #     ),
+        #     tensorecursion_utils.detach_tensor
+        # )
+        # performance = tensorecursion_utils.recursive(
+        #     performance, 
+        #     tensorecursion_utils.move_to_device(
+        #         'cpu' if move_results_to_cpu else generated['labels'].device
+        #     ),
+        #     tensorecursion_utils.detach_tensor
+        # )
+            # losses = tensorecursion_utils.move_to_device(losses, 'cpu', detach=detach)
+            # performance = tensorecursion_utils.move_to_device(performance, 'cpu', detach=detach)
 
     return losses, performance
 
@@ -239,10 +280,21 @@ def evaluate(
                 })
             
             if move_results_to_cpu:
-                batch_log = tensor_utils.recursive(
+                batch_log = recursion_utils.recursive(
                     batch_log, 
-                    tensor_utils.move_to_device('cpu')
+                    branch_conditionals=(
+                        recursion_utils.dict_branch,
+                        recursion_utils.list_branch,
+                        recursion_utils.tuple_branch
+                    ),
+                    leaf_fns=(
+                        tensorecursion_utils.move_to_device('cpu'),
+                    )
                 )
+                # batch_log = tensorecursion_utils.recursive(
+                #     batch_log, 
+                #     tensorecursion_utils.move_to_device('cpu')
+                # )
 
             logger.log_batch(epoch=0, batch=i_batch, **batch_log, verbose=False)
 

@@ -1,4 +1,4 @@
-from dataclasses import dataclass, is_dataclass, asdict
+from dataclasses import fields, is_dataclass
 import importlib
 import inspect
 import types
@@ -18,6 +18,13 @@ def get_constructor_params(x):
     """
     cls = x if isinstance(x, type) else x.__class__
     return list(inspect.signature(cls.__init__).parameters.keys())[1:] # First element is self
+
+def shallow_asdict(d): 
+    """ 
+    """
+    if not is_dataclass(d):
+        raise TypeError("`shallow_asdict` should be called on dataclass instances.")
+    return {f.name : getattr(d, f.name) for f in fields(d)}
 
 def serialize(cfg, filepath):
     """ 
@@ -120,7 +127,7 @@ def dataclass_instance_to_tagged_dict(x):
     Utility for converting dataclass instances to a tagged dict.
     """
     if is_dataclass(x):
-        d = asdict(x)
+        d = shallow_asdict(x)
         d['__path__'] = get_cls_path(x)
         d['__kind__'] = 'dataclass'
         return d
@@ -221,7 +228,7 @@ def tagged_dict_to_dataclass_instance(x):
 #     else:
 #         return x
     
-def recursive_instantiation(x):
+def recursive_recover(x):
     """ 
     Utility to recursively walk through nested object and replace any FactoryConfig
     objects with the result of calling the `recover` method on that object.

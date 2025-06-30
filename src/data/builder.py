@@ -1,7 +1,9 @@
+import copy
 import torch
 
 from .sequences import Sequences
 from .config import SequencesConfig
+from general_utils.reproducibility import apply_reproducibility_settings
 
 
 def build_hypercube_sequences(cfg: SequencesConfig) -> Sequences:
@@ -37,3 +39,26 @@ def get_tokens(sequences, device):
             dim=0
         )
     ).to(device)
+
+def build_split_sequences(sequences_cfg_base, reproducibility_cfg, split_names, split_sizes, seed_ind):
+
+    lengths = [len(item) for item in [split_names, split_sizes, seed_ind]]
+    if len(set(lengths)) != 1:
+        raise ValueError(
+            "All input arguments must be of the same length but got: "
+            f"len(split_sizes)={len(split_sizes)}, "
+            f"len(split_names)={len(split_names)}, "
+            f"len(seed_ind)={len(seed_ind)}."
+        )
+    
+    sequences_cfgs = [copy.deepcopy(sequences_cfg_base) for _ in range(lengths[0])]
+    
+    splits = zip(sequences_cfgs, split_sizes, split_names, seed_ind)
+    sequences = {}
+    for (s_cfg, size, name, seed_idx) in splits:
+        s_cfg.num_seq = size
+        apply_reproducibility_settings(reproducibility_cfg, name, seed_idx)
+        sequences[name] = build_hypercube_sequences(s_cfg)
+    
+    return sequences
+

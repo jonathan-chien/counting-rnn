@@ -1,17 +1,14 @@
-from dataclasses import asdict, dataclass, replace
-from typing import Generic, TypeVar, Any, Dict, List, Literal, Optional
+from dataclasses import dataclass, replace
+from typing import Any, Dict, List, Literal, Optional
 import warnings
 warnings.simplefilter("always")
 
 import torch
 
-from . serialization import get_cls_path, get_fn_path, load_from_path
+from . serialization import get_cls_path, get_fn_path, load_from_path, shallow_asdict
 
 
 # ------------------------------ Config types ------------------------------- #
-T = TypeVar('T')
-
-
 @dataclass
 class ArgsConfig:
     """Type I"""
@@ -24,7 +21,7 @@ class ContainerConfig:
     pass
 
 @dataclass
-class FactoryConfig(Generic[T]):
+class FactoryConfig:
     """
     Since TensorConfig subclasses CallableConfig, all instances of the former
     are technically instances of the latter. However, this may lead to
@@ -37,8 +34,9 @@ class FactoryConfig(Generic[T]):
     """
     pass
 
+
 @dataclass
-class CallableConfig(FactoryConfig[T]):
+class CallableConfig(FactoryConfig):
     """ 
     Utility dataclass for storing 
     """
@@ -84,17 +82,17 @@ class CallableConfig(FactoryConfig[T]):
             return get_fn_path(callable_)
         else:
             raise ValueError(
-                f"Unrecognized value {kind} for kind. Must be 'class' or 'function'"
+                f"Unrecognized value {kind} for kind. Must be 'class' or 'function'."
             )
         
-    def _call(self, **kwargs) -> T:
+    def _call(self, **kwargs):
         """ 
         Call callable using previously supplied args.
         """
         if not isinstance(self.args_cfg, ArgsConfig):
             if self.args_cfg is None:
                 raise RuntimeError(
-                    "The `call' method was called on this object, but args_cfg "
+                    "The `_call' method was called on this object, but args_cfg "
                     "passed in as None."
                 )
             else:
@@ -104,11 +102,7 @@ class CallableConfig(FactoryConfig[T]):
                 )
         
         callable_ = self._get_callable()
-        return callable_(**asdict(self.args_cfg), **kwargs)
-    
-    # def manually_call(self, **kwargs):
-    #     self.call_locked = False
-    #     return self.call(**kwargs)
+        return callable_(**shallow_asdict(self.args_cfg), **kwargs)
     
     def _get_callable(self):
         """ 
@@ -116,10 +110,6 @@ class CallableConfig(FactoryConfig[T]):
         class path.
         """
         return load_from_path(self.path)
-    
-    # def manually_get_callable(self):
-    #     self.retrieve_locked = False
-    #     return self.get_callable()
     
     def _output_if_locked(self):
         """ 
@@ -165,86 +155,6 @@ class CallableConfig(FactoryConfig[T]):
         return self.recover(**kwargs)
 
 
-
-# @dataclass
-# class ClassConfig(CallableConfig):
-    
-#     @classmethod
-#     def from_class(
-#         cls, 
-#         cls_obj: type, 
-#         args_cfg: ArgsConfig, 
-#         *,
-#         locked: bool = False, 
-#         warn_if_locked: bool =True, 
-#         raise_exception_if_locked: bool =False
-#     ):
-#         """ 
-#         Alias cls._from_callable.
-#         """
-#         return cls._from_callable(
-#             cls, 
-#             callable_=cls_obj,
-#             args_cfg=args_cfg,
-#             locked=locked,
-#             warn_if_locked=warn_if_locked,
-#             raise_exception_if_locked=raise_exception_if_locked
-#         )
-    
-#     @staticmethod
-#     def _get_path(cls_obj):
-#         return get_cls_path(cls_obj)
-    
-#     def instantiate(self, **kwargs):
-#         """ 
-#         Alias self._call. Can set self.locked=True to prevent automatic
-#         instantiation in a recursive walk (requires deferred manual
-#         instantiation, see `manually_instantiate`).
-#         """
-#         if not self.locked:
-#             return self._call(**kwargs)
-#         else:
-#             return self
-    
-#     def manually_instantiate(self, **kwargs):
-#         self.lock = False
-#         return self.instantiate(**kwargs)
-
-
-# @dataclass
-# class FunctionConfig(CallableConfig):
-
-#     @classmethod
-#     def from_fn(
-#         cls, 
-#         fn,
-#         args_cfg: ArgsConfig, 
-#         *,
-#         locked: bool = False, 
-#         warn_if_locked: bool =True, 
-#         raise_exception_if_locked: bool =False
-#     ):
-#         return cls._from_callable(
-#             callable_=fn,
-#             args_cfg=args_cfg,
-#             locked=locked,
-#             warn_if_locked=warn_if_locked,
-#             raise_exception_if_locked=raise_exception_if_locked
-#         )
-
-#     @staticmethod
-#     def get_path(x):
-#         return get_fn_path(x)
-    
-#     def
-    
-#     def execute(self, **kwargs):
-#         return self._call(**kwargs)
-    
-#     def get_fn(self):
-#         return self._get_callable()
-
-
 @dataclass
 class TensorArgsConfig(ArgsConfig):
     """ 
@@ -254,6 +164,11 @@ class TensorArgsConfig(ArgsConfig):
     data: List
     dtype: str
     requires_grad: bool
+
+
+@dataclass
+class TorchDeviceConfig(ArgsConfig):
+    device: str = 'cpu'
 
 
 @dataclass
@@ -268,7 +183,7 @@ class TensorConfig(CallableConfig):
         raise_exception_if_locked=False
         ):
         """ 
-        Convenience method to instantiate a CallableConfig object from a tensor.
+        Convenience method to instantiate a TensorConfig object from a tensor.
         """
         return cls.from_callable(
             callable_=torch.tensor,
@@ -286,7 +201,7 @@ class TensorConfig(CallableConfig):
     
     def recover(self):
         # Key 'dtype' points to a string, must convert to torch.dtype.
-        if 'dtype' not in asdict(self.args_cfg):
+        if 'dtype' not in shallow_asdict(self.args_cfg):
             raise KeyError(
                 "TensorConfig object must contain a dtype attribute for " 
                 "accurate reconstruction."
@@ -313,92 +228,6 @@ class TensorConfig(CallableConfig):
         )
         return super(TensorConfig, temporary_tensor_config).recover()
     
-    
-    
-
-# @dataclass
-# class FunctionConfig:
-#     fn_path: str
-#     args_cfg: ArgsConfig
-#     locked: bool = False
-#     warn_if_locked: bool = True
-#     raise_exception_if_locked = False
-
-#     @classmethod
-#     def from_fn(
-#         cls, 
-#         fn, 
-#         args_cfg, 
-#         locked=False, 
-#         warn_if_locked=True, 
-#         raise_exception_if_locked=False
-#     ):
-#         return cls(
-#             fn_path=get_fn_path(fn),
-#             args_cfg=args_cfg,
-#             locked=locked,
-#             warn_if_locked=warn_if_locked,
-#             raise_exception_if_locked=raise_exception_if_locked
-#         )
-    
-#     def execute(self, **kwargs):
-#         """ 
-#         """
-#         if self.locked:
-#             if self.warn_if_locked and not self.raise_exception_if_locked:
-#                 warnings.warn(
-#                     "The instantiate method was called on this object, but self.locked=True."
-#                 )
-#             elif self.raise_exception_if_locked:
-#                 raise RuntimeError(
-#                     "The instantiate method was called on this object, but self.locked=True."
-#                 )
-#             return self # y = x.instantiate() results in y == x
-         
-#         if not isinstance(self.args_cfg, ArgsConfig):
-#             raise TypeError(
-#                 "Expected an ArgsConfig dataclass for self.args_cfg but got " 
-#                 f"type {type(self.args_cfg)}."
-#             )
-        
-#         fn = self.get_fn()
-#         return fn(**asdict(self.args_cfg), **kwargs)
-    
-#     def get_fn(self):
-#         """ 
-#         """
-#         return load_from_path(self.fn_path)
-    
-
-# @dataclass
-# class TensorArgs(ArgsConfig):
-#     """ 
-#     """
-#     data: List
-#     dtype: str
-#     requires_grad: bool
-
-
-# @dataclass
-# class TensorConfig(FunctionConfig):
-#     """ 
-#     """
-#     @classmethod
-#     def from_tensor(
-#         cls, 
-#         t,
-#         locked=False,
-#         warn_if_locked=True,
-#         raise_exception_if_locked=False
-#         ):
-#         return cls.from_fn(
-#             fn=torch.tensor,
-#             args_cfg=ArgsConfig(
-#                 data=t.tolist(),
-#                 dtype=str(t.dtype),
-#                 requires_grad=t.requires_grad
-#             )
-#         )
 
 # ---------------------------- Reproducibility ------------------------------ #
 @dataclass
@@ -418,4 +247,4 @@ class TorchDeterminismConfig(ArgsConfig):
 class ReproducibilityConfig(ContainerConfig):
     entropy: int
     seed_cfg_dict: Dict[str, SeedConfig]
-    torch_determinisim_cfg_dict : Dict[str, TorchDeterminismConfig]
+    torch_determinism_cfg_dict : Dict[str, TorchDeterminismConfig]

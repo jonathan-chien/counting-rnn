@@ -30,13 +30,13 @@ class FCN(nn.Module):
         layer_sizes : list or None
             Of length N. k_th element is int size of k_th layer including input 
             layer. If None, the network is set as a single nn.Identity layer.
-        nonlinearities : list or nn.Module subclass, optional
+        nonlinearities : list, nn.Module subclass
             For list input, of length N - 1, where k_th element corresponds to
             k_th non-input layer and is an activation function object of
             nn.Module subclass like nn.ReLU(). Can also pass a single nn.Module
             subclass like nn.ReLU, which will be broadcast to all
             layers and instantiated. Default=nn.ReLU.
-        dropouts : list, float, optional
+        dropouts : list, float
             For list input, of length N-1, where k_th element is float-valued
             probability of dropping for k_th non-input layer. If a float,
             should be in [0.0, 1.0] and will be broadcast as probability of
@@ -61,24 +61,6 @@ class FCN(nn.Module):
             )
         num_layers = len(layer_sizes)
 
-        # Validate nonlinearities.
-        # if issubclass(nonlinearities, nn.Module):
-        #     nonlinearities = [nonlinearities() for _ in range(num_layers-1)]
-        # elif not isinstance(nonlinearities, list):
-        #     raise TypeError(
-        #         "`nonlinearities` must either be a list or an subclass of nn.Module "
-        #         f"such as nn.ReLU, but got type {type(nonlinearities)}."
-        #     )
-        # elif len(nonlinearities) != num_layers - 1:
-        #     raise ValueError(
-        #         f"The length of `nonlinearities` ({len(nonlinearities)}) must be " 
-        #         f"one less than that of `layer_sizes` ({len(layer_sizes)})."
-        #     )
-        # elif not all(isinstance(item, nn.Module) for item in nonlinearities):
-        #     raise TypeError(
-        #         "If `nonlinearities` is a list, its elements must be objects "
-        #         "of the nn.Module class like nn.ReLU()."
-        #     )
         if not isinstance(nonlinearities, list):
             if isinstance(nonlinearities, type) and issubclass(nonlinearities, nn.Module):
                 nonlinearities = [nonlinearities() for _ in range(num_layers-1)]

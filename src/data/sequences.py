@@ -160,29 +160,29 @@ class Hypercube:
         }
 
 
-@dataclass
-class SeqLengths:
-    """ 
-    Helper class for validating and storing in a format compatible with the
-    Sequence class N distributions over the respective lengths of N sequences,
-    for a natural number N.
+# @dataclass
+# class SeqLengths:
+#     """ 
+#     Helper class for validating and storing in a format compatible with the
+#     Sequence class N distributions over the respective lengths of N sequences,
+#     for a natural number N.
 
-    lengths : dict
-        dict where each key is the name of a kind of sequence (e.g. 'pos', 
-        'neg'), and each value is a dict with the following keys:
-            'support' : 1D tensor of non-negative ints.
-            'pmf' : 1D tensor of probability masses, same legnth as 'support'.
-    """
-    lengths: Dict[str, Dict[str, torch.Tensor]]
+#     lengths : dict
+#         dict where each key is the name of a kind of sequence (e.g. 'pos', 
+#         'neg'), and each value is a dict with the following keys:
+#             'support' : 1D tensor of non-negative ints.
+#             'pmf' : 1D tensor of probability masses, same legnth as 'support'.
+#     """
+#     lengths: Dict[str, Dict[str, torch.Tensor]]
 
-    def __post_init__(self):
-        for name, entry in self.lengths.items():
-            try:
-                support, pmf = entry['support'], entry['pmf']
-                tensor_utils.validate_tensor(support, 1)
-                utils.validate_pmf(pmf, len(support))
-            except Exception as e:
-                raise ValueError(f"Validation failed for '{name}'.") from e
+#     def __post_init__(self):
+#         for name, entry in self.lengths.items():
+#             try:
+#                 support, pmf = entry['support'], entry['pmf']
+#                 tensor_utils.validate_tensor(support, 1)
+#                 utils.validate_pmf(pmf, len(support))
+#             except Exception as e:
+#                 raise ValueError(f"Validation failed for '{name}'.") from e
 
 # class SeqLengths:
 #     """ 
@@ -317,7 +317,7 @@ class Sequences(Dataset):
         """ 
         """
         for class_ in ['pos', 'neg']:
-            # Samplers for sequence lenghths. Change syntax to update?
+            # Samplers for sequence lenghths.
             self.len_distr[class_]['sampler'] = torch.distributions.Categorical(
                 probs=self.len_distr[class_]['pmf']
             )
@@ -592,7 +592,7 @@ class Embedder:
         self.method = method 
         self.noise_distr = noise_distr
         self.noise_sampler = (
-            tensor_utils.make_sampler(self.noise_distr) 
+            tensor_utils.make_sampler(self.noise_distr) # TODO: Replace with callable Sampler class so Embedder (and thus Sequences) object is picke-able
             if self.noise_distr is not None else None
         )
             

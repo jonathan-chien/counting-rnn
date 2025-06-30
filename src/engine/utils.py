@@ -3,6 +3,7 @@ from pathlib import Path
 
 import torch
 
+from .config import RequiresGradConfig
 from general_utils import tensor as tensor_utils
 
 

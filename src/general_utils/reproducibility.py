@@ -1,6 +1,9 @@
 import numpy as np
 import torch
 
+from .serialization import shallow_asdict
+from .config import ReproducibilityConfig
+
 
 def set_seed(torch_seed, cuda_seed):
     torch.manual_seed(torch_seed)
@@ -33,3 +36,13 @@ def generate_numpy_seed_sequence(num_children=1, num_words_per_child=1, dtype=np
         )
     
     return seeds, entropy, root_seed_seq, children
+
+def apply_reproducibility_settings(cfg: ReproducibilityConfig, split: str, seed_idx: int):
+    """ 
+    """
+    set_seed(
+        **shallow_asdict(cfg.seed_cfg_dict[split][seed_idx])
+    )
+    set_torch_determinism(
+        **shallow_asdict(cfg.torch_determinism_cfg_dict[split])
+    )
