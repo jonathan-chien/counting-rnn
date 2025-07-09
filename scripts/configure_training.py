@@ -8,8 +8,8 @@ from engine.utils import Logger, compute_accuracy
 from engine.train import EarlyStopping, MetricTracker, train
 from engine.loss import LossTerm, spectral_entropy, wrapped_cross_entropy_loss
 from engine.config import (
-    AdamWConfig, DataLoaderConfig, LossTermConfig, EarlyStoppingConfig, 
-    MetricTrackerConfig, LoggerConfig, TrainFnConfig, RequiresGradConfig, TrainValConfig
+    AdamWConfig, DataLoaderConfig, EarlyStoppingConfig, LoggerConfig, LossTermConfig,
+    MetricTrackerConfig, RequiresGradConfig, SplitConfig, TrainFnConfig, TrainValConfig
 )
 from models.builder import test_model
 from general_utils.config import CallableConfig, TorchDeviceConfig
@@ -321,9 +321,20 @@ train_fn_cfg = TrainFnConfig(
     deterministic=False
 )
 
+
+
+
 train_val_cfg = TrainValConfig(
-    train_split_size=5000,
-    val_split_size=2500,
+    train_split_cfg=SplitConfig(
+        split_name='train',
+        split_size=1000,
+        seed_idx=0
+    ),
+    val_split_cfg=SplitConfig(
+        split_name='val',
+        split_size=500,
+        seed_idx=0
+    ),
     requires_grad_cfg=REQUIRES_GRAD_REGISTRY['none'],
     train_fn_cfg=train_fn_cfg
 )
@@ -358,9 +369,7 @@ seed_idx = 0
 sequences = build_split_sequences(
     data_cfg.sequences_cfg,
     data_cfg.reproducibility_cfg,
-    split_names=['train', 'val'],
-    split_sizes=[train_val_cfg.train_split_size, train_val_cfg.val_split_size],
-    seed_ind=[0, 0]
+    split_cfgs=[train_val_cfg.train_split_cfg, train_val_cfg.val_split_cfg],
 )
 
 # Get embedding dimension and a sequence from sequences_cfg.
@@ -378,6 +387,7 @@ model = test_model(
     tokens=tokens,
     input_=seq,
     device=train_val_cfg.train_fn_cfg.device
+    
 )
 
 # Add model parameters to optimizers.

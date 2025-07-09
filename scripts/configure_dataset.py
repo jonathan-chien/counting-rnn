@@ -5,24 +5,28 @@ from data.config import DataConfig, HypercubeConfig, EmbedderConfig, SequencesCo
 from data.sequences import Hypercube, Embedder
 from data import utils as data_utils
 from general_utils.config import ReproducibilityConfig, SeedConfig, TorchDeterminismConfig, CallableConfig, TensorConfig
-from general_utils import fileio 
-from general_utils import reproducibility 
-from general_utils import serialization 
+from general_utils import fileio as fileio_utils
+from general_utils import reproducibility as reproducibility_utils
+from general_utils import serialization as serialization_utils
 
 
 # ------------------------------ Set directory ------------------------------ #
-output_dir, filename = fileio.make_file_dir_and_id(
-    base_dir='configs/datasets',
-    sub_dir_1='000',
-    sub_dir_2='000',
-    file_ind = ('000', '000', '000')
-)
+# output_dir, filename = fileio.make_file_dir_and_id(
+#     base_dir='configs/datasets',
+#     sub_dir_1='000',
+#     sub_dir_2='000',
+#     file_ind = ('000', '000', '000')
+# )
+base_dir = 'configs/datasets'
+sub_dir = '000'
+output_dir = fileio_utils.make_dir(base_dir, sub_dir)
+filename = fileio_utils.make_filename('000')
 
 # ------------------------ Reproducibility settings ------------------------- #
 # 3 children for train, val, and test. num_words_per_child = number of desired
 # seed repeats.
 NUM_SEEDS = 50
-seed_lists, entropy, _, _ = reproducibility.generate_numpy_seed_sequence(
+seed_lists, entropy, _, _ = reproducibility_utils.generate_numpy_seed_sequence(
     num_children=3, num_words_per_child=NUM_SEEDS, dtype='uint32', return_as='int'
 )
 
@@ -90,7 +94,6 @@ embedder_cfg = EmbedderConfig(
     offset_1=TensorConfig.from_tensor(-torch.tile(torch.tensor([0.5]), (hypercube_args_cfg.num_dims + 3,))), # Plus 3 for the dimensions corresponding to special tokens
     offset_2=None,
     method='random_rotation',
-    # noise_distr=torch.distributions.Normal(0, 0.05)
     noise_distr=CallableConfig.from_callable(
         torch.distributions.Normal, 
         NormalDistrConfig(loc=0, scale=0.05),
@@ -127,20 +130,27 @@ data_cfg = DataConfig(
 )
 
 cfg_filepath = output_dir / (filename + '.json')
-_ = serialization.serialize(data_cfg, cfg_filepath)
-reconstructed_data_cfg = serialization.deserialize(cfg_filepath)
+_ = serialization_utils.serialize(data_cfg, cfg_filepath)
+
+
+
+
+
+
+
+reconstructed_data_cfg = serialization_utils.deserialize(cfg_filepath)
 
 # Recursive instantiation.
-reconstructed_data_cfg = serialization.recursive_recover(reconstructed_data_cfg)
+reconstructed_data_cfg = serialization_utils.recursive_recover(reconstructed_data_cfg)
 
 # ----------------------------- Build sequences ----------------------------- #
 # See if sequences build without error. Arbitrarily using the train split's 
 # first seed and determinism settings here.
-reproducibility.set_seed(
-    **serialization.shallow_asdict(reconstructed_data_cfg.reproducibility_cfg.seed_cfg_dict['train'][0])
+reproducibility_utils.set_seed(
+    **serialization_utils.shallow_asdict(reconstructed_data_cfg.reproducibility_cfg.seed_cfg_dict['train'][0])
 )
-reproducibility.set_torch_determinism(
-    **serialization.shallow_asdict(reconstructed_data_cfg.reproducibility_cfg.torch_determinism_cfg_dict['train'])
+reproducibility_utils.set_torch_determinism(
+    **serialization_utils.shallow_asdict(reconstructed_data_cfg.reproducibility_cfg.torch_determinism_cfg_dict['train'])
 )
 
 # Choose arbitrary split size.
@@ -170,7 +180,7 @@ if PRINT_TO_CONSOLE:
 SAVE_DATASET = False
 if SAVE_DATASET:
     dataset_filepath = output_dir / (filename + '.pt')
-    fileio.torch_save(sequences, dataset_filepath)
+    fileio_utils.torch_save(sequences, dataset_filepath)
 
 
 

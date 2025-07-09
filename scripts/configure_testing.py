@@ -11,6 +11,7 @@ from engine.utils import Logger, compute_accuracy
 from general_utils.config import CallableConfig, TorchDeviceConfig
 from general_utils import serialization as serialization_utils
 
+
 loss_term_1 = CallableConfig.from_callable(
     LossTerm,
     LossTermConfig(
@@ -112,7 +113,7 @@ eval_fn_cfg = EvalFnConfig(
 
 
 test_cfg = TestConfig(
-    test_split_size=2500,
+    test_split_size=500,
     eval_fn_cfg=eval_fn_cfg,
 )
 
