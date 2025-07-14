@@ -591,8 +591,12 @@ class Embedder:
         self.offset_2 = offset_2
         self.method = method 
         self.noise_distr = noise_distr
+        # self.noise_sampler = (
+        #     tensor_utils.make_sampler(self.noise_distr) # TODO: Replace with callable Sampler class so Embedder (and thus Sequences) object is picke-able
+        #     if self.noise_distr is not None else None
+        # )
         self.noise_sampler = (
-            tensor_utils.make_sampler(self.noise_distr) # TODO: Replace with callable Sampler class so Embedder (and thus Sequences) object is picke-able
+            tensor_utils.DistributionSampler(self.noise_distr) # TODO: Replace with callable Sampler class so Embedder (and thus Sequences) object is picke-able
             if self.noise_distr is not None else None
         )
             
@@ -626,12 +630,13 @@ class Embedder:
             x + self.noise_sampler(x.shape) 
             if self.noise_sampler is not None else x
         )
-
-    def __call__(self, data):
+    
+    def apply_deterministic_transform(self, data):
         """ 
-        Parameters:
-        -----------
-        data (2d tensor): Of shape (num_datapoints, num_vars+3).
+        Deterministic portion of the transformation. Can be accessed and 
+        applied manually e.g. when extracting transformed tokens to store in 
+        model for autoregressive generation (otherwise, each time the tokens 
+        are extracted, e.g. when generating different split)
         """
         data = data.clone()
         num_datapoints, num_dims = data.shape
@@ -656,10 +661,45 @@ class Embedder:
             data_padded @ self.lin_transform 
             if self.lin_transform is not None else data_padded
         )
+
+        if self.offset_2 is not None: transformed += self.offset_2
+
+        return transformed
+
+    def __call__(self, data):
+        """ 
+        Parameters:
+        -----------
+        data (2d tensor): Of shape (num_datapoints, num_vars+3).
+        """
+        
+        transformed = self.apply_deterministic_transform(data)
+        # num_datapoints, num_dims = data.shape
+    
+        # # E.g. this could be to center hypercube at 0 before rotation.
+        # if self.offset_1 is not None: data += self.offset_1
+
+        # if num_dims > self.ambient_dim:
+        #     raise ValueError(
+        #         f"Dimensionality of data is {num_dims}, but cannot be greater "
+        #         f"than value of attribute `ambient_dim`({self.ambient_dim})."
+        #     )
+        # else:
+        #     extra_dims = self.ambient_dim - num_dims
+
+        # # Pad with zeros to introduce any extra dimensions. 
+        # data_padded = torch.cat(
+        #     (data, torch.zeros((num_datapoints, extra_dims))), dim=1
+        # )
+
+        # transformed = (
+        #     data_padded @ self.lin_transform 
+        #     if self.lin_transform is not None else data_padded
+        # )
             
         transformed = self._noise(transformed)
 
-        if self.offset_2 is not None: transformed += self.offset_2
+        # if self.offset_2 is not None: transformed += self.offset_2
         
         return transformed
     

@@ -6,8 +6,8 @@ from typing import Any
 
 import torch
 
-from . import recursion as r_utils
-from . import fileio as io_utils
+from . import recursion as recursion_utils
+from . import fileio as fileio_utils
 
 
 def get_constructor_params(x):
@@ -30,13 +30,13 @@ def serialize(cfg, filepath):
     """ 
     """
     # Convert for serialization. TODO: implement recursive check for dicts, return Boolean, could allow file deletion if dicts don't match
-    serializable_cfg_dict = r_utils.recursive(
+    serializable_cfg_dict = recursion_utils.recursive(
         cfg,
         branch_conditionals=(
-            r_utils.dict_branch, 
-            r_utils.tuple_branch, 
-            r_utils.list_branch, 
-            r_utils.dataclass_branch_with_transform_to_dict
+            recursion_utils.dict_branch, 
+            recursion_utils.tuple_branch, 
+            recursion_utils.list_branch, 
+            recursion_utils.dataclass_branch_with_transform_to_dict
         ),
         leaf_fns=(
             lambda x: x,
@@ -44,18 +44,18 @@ def serialize(cfg, filepath):
     )
 
     # Serialize/save.
-    io_utils.save_to_json(serializable_cfg_dict, filepath, indent=2)
+    fileio_utils.save_to_json(serializable_cfg_dict, filepath, indent=2)
     return serializable_cfg_dict
 
 def deserialize(filepath):
     # Deserialize and reconstruct.
-    deserialized_cfg_dict = io_utils.load_from_json(filepath)
-    reconstructed_cfg = r_utils.recursive(
+    deserialized_cfg_dict = fileio_utils.load_from_json(filepath)
+    reconstructed_cfg = recursion_utils.recursive(
         deserialized_cfg_dict,
         branch_conditionals=(
-            r_utils.dict_branch_with_transform_to_dataclass,
-            r_utils.tuple_branch, 
-            r_utils.list_branch, 
+            recursion_utils.dict_branch_with_transform_to_dataclass,
+            recursion_utils.tuple_branch, 
+            recursion_utils.list_branch, 
         ),
         leaf_fns=(
             lambda x: x,
@@ -63,42 +63,6 @@ def deserialize(filepath):
     )
     return reconstructed_cfg
 
-# def serialize_and_deserialize(cfg, filepath):
-#     """ 
-#     """
-#     # Convert for serialization. TODO: implement recursive check for dicts, return Boolean, could allow file deletion if dicts don't match
-#     serializable_cfg_dict = r_utils.recursive(
-#         cfg,
-#         branch_conditionals=(
-#             r_utils.dict_branch, 
-#             r_utils.tuple_branch, 
-#             r_utils.list_branch, 
-#             r_utils.dataclass_branch_with_transform_to_dict
-#         ),
-#         leaf_fns=(
-#             tensor_to_tagged_dict,
-#             function_to_tagged_dict
-#         )
-#     )
-
-#     # Serialize/save.
-#     io_utils.save_to_json(serializable_cfg_dict, filepath, indent=2)
-
-#     # Deserialize and reconstruct.
-#     deserialized_cfg_dict = io_utils.load_from_json(filepath)
-#     reconstructed_cfg = r_utils.recursive(
-#         deserialized_cfg_dict,
-#         branch_conditionals=(
-#             r_utils.dict_branch_with_transform_to_dataclass,
-#             r_utils.tuple_branch, 
-#             r_utils.list_branch, 
-#         ),
-#         leaf_fns=(
-#             lambda x: x,
-#         )
-#     )
-
-#     return reconstructed_cfg
 
 # ----------------------------- Pre-serialization --------------------------- #
 def get_cls_path(x):
@@ -134,32 +98,6 @@ def dataclass_instance_to_tagged_dict(x):
     else:
         return x
 
-# def tensor_to_tagged_dict(x): 
-#     """ 
-#     Converts input to a tagged dict if a tensor, otherwise returns input 
-#     unchanged (this is necessary for this function to be used as a leaf_fn
-#     with the recursive function from the recursion module).
-#     """
-#     if isinstance(x, torch.Tensor):
-#         return {
-#             '__path__' : 'torch.Tensor',
-#             '__kind__' : 'tensor',
-#             'data' : x.tolist(),
-#             'dtype' : str(x.dtype),
-#             'requires_grad' : x.requires_grad
-#         }
-#     else:
-#         return x
-    
-# def function_to_tagged_dict(f):
-#     if isinstance(f, types.FunctionType):
-#         return {
-#             '__path__' : get_fn_path(f),
-#             '__kind__' : 'function',
-#         }
-#     else:
-#         return f
-
 
 # --------------------------- Post-de-serialization ------------------------- #    
 def is_tagged_dict(x, kind):
@@ -171,75 +109,60 @@ def is_tagged_dict(x, kind):
     if x['__kind__'] != kind: return False
     return True
 
-def load_from_path(path: str):
+# def load_from_path(path: str):
+#     """ 
+#     """
+#     module_path, cls_name = path.rsplit('.', 1)
+#     module = importlib.import_module(module_path)
+#     return getattr(module, cls_name)
+
+def load_from_path(path: str, module_depth: int = 1):
     """ 
     """
-    module_path, cls_name = path.rsplit('.', 1)
+    path_parts = path.rsplit('.')
+
+    # Validate.
+    if module_depth >= len(path_parts):
+        raise ValueError(
+            "`module_depth` must be strictly less than the number of path " 
+            f"parts ({len(path_parts)}), but got {module_depth}."
+        )
+    
+    # Reconstruct the two parts: path to module and remainder of path.
+    module_path = '.'.join(path_parts[:-module_depth])
     module = importlib.import_module(module_path)
-    return getattr(module, cls_name)
+    attr_path = path_parts[-module_depth:]
+    
+    # Traverse to target attribute.
+    obj = module
+    for attr in attr_path:
+        obj = getattr(obj, attr)
+
+    return obj
 
 def tagged_dict_to_dataclass_instance(x):
     """ 
     """
     if is_tagged_dict(x, 'dataclass'):
-        cls = load_from_path(x['__path__'])
+        cls = load_from_path(x['__path__'], module_depth=1)
         param_names = get_constructor_params(cls)
         args = {key: val for key, val in x.items() if key in param_names}
         return cls(**args)
     else:
         return x
     
-# def tagged_dict_to_tensor(x):
-#     """ 
-#     """
-#     if is_tagged_dict(x, 'tensor'):
-#         # Filter out tags.
-#         args = {
-#             key: val for key, val in x.items() 
-#             if key not in ('__path__', '__kind__')
-#         }
-
-#         # Key 'dtype' points to a string, must convert to torch.dtype.
-#         if 'dtype' not in args:
-#             raise KeyError(
-#                 "Tagged tensor dict must contain a dtype key for accurate reconstruction."
-#             )
-#         try:
-#             dtype = getattr(torch, args['dtype'].rsplit('.', 1)[-1])
-#             if not isinstance(dtype, torch.dtype):
-#                 raise TypeError
-#             args['dtype'] = dtype
-#         except (AttributeError, TypeError):
-#             raise ValueError(
-#                 f"args['dtype'] = {args['dtype']} yielded invalid dtype string "
-#                 f"{dtype}, must be string equivalent of valid torch.dtype, "
-#                 "e.g. 'torch.float32."
-#             )
-        
-#         return torch.tensor(**args)
-#     else:
-#         return x
-    
-# def tagged_dict_to_function(x):
-#     """ 
-#     """
-#     if is_tagged_dict(x, 'function'):
-#         return load_from_path(x['__path__'])
-#     else:
-#         return x
-    
 def recursive_recover(x):
     """ 
     Utility to recursively walk through nested object and replace any FactoryConfig
     objects with the result of calling the `recover` method on that object.
     """
-    return r_utils.recursive(
+    return recursion_utils.recursive(
         x,
         branch_conditionals=(
-            r_utils.dict_branch,
-            r_utils.list_branch,
-            r_utils.tuple_branch,
-            r_utils.dataclass_branch_with_factory_config
+            recursion_utils.dict_branch,
+            recursion_utils.list_branch,
+            recursion_utils.tuple_branch,
+            recursion_utils.dataclass_branch_with_factory_config
         ),
         leaf_fns=(
             lambda x: x,

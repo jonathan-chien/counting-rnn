@@ -1,6 +1,20 @@
 import torch
 
 
+class DistributionSampler:
+
+    def __init__(self, distr, device=None):
+        self.distr = distr
+        self.device = device
+
+    def __call__(self, sample_shape):
+        if hasattr(self.distr, 'rsample'):
+            sample = self.distr.rsample(sample_shape=sample_shape)
+        else:
+            sample = self.distr.sample(sample_shape=sample_shape)
+        return sample.to(self.device) if self.device is not None else sample
+
+
 def validate_tensor(tensor, dim, dtype=None):
     """ 
     Ensure that input is a torch tensor of specified dimension.
@@ -14,9 +28,10 @@ def validate_tensor(tensor, dim, dtype=None):
     
 def make_sampler(distr, device=None):
     """ 
-    Given a torch.distributions.Distribution subclass object, configures and 
-    returns a function capable of acceptin a sample size argument and returning 
-    samples from this distribution.
+    Given a torch.distributions.Distribution subclass object, configures and
+    returns a function capable of acceptin a sample size argument and returning
+    samples from this distribution. Note that the returned sampler function is
+    not pickleable. For a pickable solution, use the DistributionSampler class.
 
     Parameters
     ----------
@@ -40,18 +55,18 @@ def make_sampler(distr, device=None):
     
     return sampler
 
-def recursive(x, *functions):
-    """ 
-    functions can be defined functions or lambda functions.
-    """
-    if isinstance(x, dict):
-        return {k : recursive(v, *functions) for k, v in x.items()}
-    elif isinstance(x, (list, tuple)):
-        return type(x)(recursive(v, *functions) for v in x)
-    else:
-        for func in functions: 
-            x = func(x)
-        return x
+# def recursive(x, *functions):
+#     """ 
+#     functions can be defined functions or lambda functions.
+#     """
+#     if isinstance(x, dict):
+#         return {k : recursive(v, *functions) for k, v in x.items()}
+#     elif isinstance(x, (list, tuple)):
+#         return type(x)(recursive(v, *functions) for v in x)
+#     else:
+#         for func in functions: 
+#             x = func(x)
+#         return x
     
 def move_to_device(device):
     """ 

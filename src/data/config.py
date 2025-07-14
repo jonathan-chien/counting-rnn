@@ -68,7 +68,19 @@ class NormalDistrConfig(config_utils.ArgsConfig):
     scale : float 
 
 
+
+@dataclass
+class SplitConfig(config_utils.ContainerConfig):
+    train: int
+    val: int
+    test: int
+
+
 @dataclass
 class DataConfig(config_utils.ContainerConfig):
     sequences_cfg: Dict[str, SequencesConfig]
+    split_cfg: SplitConfig
     reproducibility_cfg: config_utils.ReproducibilityConfig
+    
+
+

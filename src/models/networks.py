@@ -167,7 +167,7 @@ class AutoRNN(nn.Module):
         self.input_network = input_network
         self.rnn = rnn
         self.readout_network = readout_network
-        self.tokens = tokens
+        self.register_buffer('tokens', tokens)
 
         # Can be used to generate tokens probabilistically.
         self.softmax = nn.Softmax(dim=-1)

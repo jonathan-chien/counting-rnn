@@ -4,8 +4,7 @@ import torch
 
 from . import utils
 from general_utils import recursion as recursion_utils
-from general_utils import tensor as tensorecursion_utils 
-
+from general_utils import tensor as tensor_utils
 
 def process_batch_eval(
     model, 
@@ -19,7 +18,7 @@ def process_batch_eval(
     move_results_to_cpu=False,
     detach=False
 ):
-    # XXX: The below code is from the original implementation (note that
+    # NB: The below code is from the original implementation (note that
     # everything ran in a big flat `train` function.). switch_ind is derived
     # from labels and used to build both the lengths and batch_demo_phase.
     # Therefore, if labels were passed in on the GPU, this would cause an error
@@ -84,13 +83,10 @@ def process_batch_eval(
                 recursion_utils.tuple_branch
             ),
             leaf_fns=(
-                tensorecursion_utils.move_to_device('cpu'), 
-                tensorecursion_utils.detach_tensor
+                tensor_utils.move_to_device('cpu'), 
+                tensor_utils.detach_tensor
             )
         )
-        # outputs = tensorecursion_utils.recursive(
-        #     outputs, tensorecursion_utils.move_to_device('cpu'), tensorecursion_utils.detach_tensor
-        # )
 
     return outputs
 
@@ -155,10 +151,10 @@ def evaluate_outputs(
                 recursion_utils.tuple_branch
             ),
             leaf_fns=(
-                tensorecursion_utils.move_to_device(
+                tensor_utils.move_to_device(
                     'cpu' if move_results_to_cpu else generated['logits'].device
                 ),
-                tensorecursion_utils.detach_tensor
+                tensor_utils.detach_tensor
             ) 
         )
         performance = recursion_utils.recursive(
@@ -169,28 +165,12 @@ def evaluate_outputs(
                 recursion_utils.tuple_branch
             ),
             leaf_fns=(
-                tensorecursion_utils.move_to_device(
+                tensor_utils.move_to_device(
                     'cpu' if move_results_to_cpu else generated['labels'].device
                 ),
-                tensorecursion_utils.detach_tensor
+                tensor_utils.detach_tensor
             )
         )
-        # losses = tensorecursion_utils.recursive(
-        #     losses, 
-        #     tensorecursion_utils.move_to_device(
-        #         'cpu' if move_results_to_cpu else generated['logits'].device
-        #     ),
-        #     tensorecursion_utils.detach_tensor
-        # )
-        # performance = tensorecursion_utils.recursive(
-        #     performance, 
-        #     tensorecursion_utils.move_to_device(
-        #         'cpu' if move_results_to_cpu else generated['labels'].device
-        #     ),
-        #     tensorecursion_utils.detach_tensor
-        # )
-            # losses = tensorecursion_utils.move_to_device(losses, 'cpu', detach=detach)
-            # performance = tensorecursion_utils.move_to_device(performance, 'cpu', detach=detach)
 
     return losses, performance
 
@@ -288,13 +268,9 @@ def evaluate(
                         recursion_utils.tuple_branch
                     ),
                     leaf_fns=(
-                        tensorecursion_utils.move_to_device('cpu'),
+                        tensor_utils.move_to_device('cpu'),
                     )
                 )
-                # batch_log = tensorecursion_utils.recursive(
-                #     batch_log, 
-                #     tensorecursion_utils.move_to_device('cpu')
-                # )
 
             logger.log_batch(epoch=0, batch=i_batch, **batch_log, verbose=False)
 

@@ -1,0 +1,92 @@
+from collections.abc import Iterable
+from typing import Any
+
+def error_message(expected: str, actual: Any):
+    return f"Expected {expected}, but got type {type(actual).__name__}."
+
+def is_int(x):
+    return isinstance(x, int) 
+
+def is_pos_int(x):
+    return (is_int(x) and x > 0) 
+
+def is_nonneg_int(x):
+    return (is_int(x) and x >= 0)
+
+def is_iterable(x):
+    return (isinstance(x, Iterable) and not isinstance(x, (str, bytes)))
+
+def validate_int(x):
+    if not is_int(x):
+        raise TypeError(error_message("an int", x))
+    
+def validate_pos_int(x):
+    if not is_pos_int(x):
+        raise ValueError(error_message("a positive int", x))
+    
+def validate_nonneg_int(x):
+    if not is_nonneg_int(x):
+        raise ValueError(error_message("a non-negative int", x))
+
+def validate_iterable(x):
+    """ 
+    """
+    if not is_iterable(x):
+        raise TypeError(error_message("an iterable", x))
+    
+def validate_iterable_contents(x, predicate, expected: str):
+    validate_iterable(x)
+    for i_elem, elem in enumerate(x):
+        if not predicate(elem):
+            raise ValueError(
+                f"Element at index {i_elem} failed validation: expected "
+                f"{expected}, but got {elem}."
+            )
+
+
+
+
+# def validate_iterable_of_ints(x):
+#     """ 
+#     """
+#     validate_iterable(x)
+#     for i_elem, elem in enumerate(x):
+#         if not isinstance(x, int)
+
+#     if not all(isinstance(k, int) for k in x):
+#         raise TypeError(
+#             f"Expected all elements of iterable to be of type int, but got {x}."
+#         )
+
+# def validate_iterable_of_ints(x):
+#     """ 
+#     """
+#     validate_iterable(x)
+#     try:
+#         for elem in x: 
+#             validate_int(elem)
+#     except TypeError:
+#         raise TypeError(
+#             f"Expected all elements of iterable to be of type int, but got {x}."
+#         )
+    
+# def validate_iterable_of_pos_ints(x):
+#     """ 
+#     """
+#     validate_iterable(x)
+#     if not all(isinstance(k, int) for k in x):
+#         raise TypeError(
+#             f"Expected all elements of iterable to be of type int, but got {x}."
+#         )
+
+# def validate_iterable_of_pos_ints(x):
+#     """ 
+#     """
+#     validate_iterable(x)
+#     try:
+#         for elem in x:
+#             validate_pos_int(elem)
+#     except (TypeError, ValueError):
+#         raise TypeError(
+#             f"Expected all elements of iterable to be positive ints, but got {x}."
+#         )

@@ -111,18 +111,36 @@ class TrainFnConfig(ArgsConfig):
     deterministic: bool
 
 
+# @dataclass
+# class SplitConfig(ArgsConfig):
+#     split_name: str
+#     split_size: int
+#     seed_idx: int
+
+
 @dataclass
 class TrainValConfig(ContainerConfig):
-    train_split_size: int
-    val_split_size: int
-    requires_grad_cfg: RequiresGradConfig
     train_fn_cfg: TrainFnConfig
-
+    train_split_seed_idx: 0
+    val_split_seed_idx: 0
+    requires_grad_cfg: RequiresGradConfig
+    
 
 @dataclass
-class TestConfig:
-    test_split_size: int
+class TestConfig(ContainerConfig):
     eval_fn_cfg: EvalFnConfig
+    test_split_seed_idx: 0
+    
+
+@dataclass
+class ExperimentConfig(ContainerConfig):
+    """
+    """
+    data_training_cfg: Optional[Union[ArgsConfig, ContainerConfig]] = None 
+    training_cfg: Optional[Union[ArgsConfig, ContainerConfig]] = None 
+    model_cfg: Optional[Union[ArgsConfig, ContainerConfig]] = None 
+    data_testing_cfg: Optional[Union[ArgsConfig, ContainerConfig]] = None 
+    testing_cfg: Optional[Union[ArgsConfig, ContainerConfig]] = None 
 
 # @dataclass
 # class TrainConfig(ArgsConfig):

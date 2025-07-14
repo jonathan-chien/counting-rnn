@@ -1,5 +1,5 @@
 from dataclasses import dataclass, replace
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional, Union
 import warnings
 warnings.simplefilter("always")
 
@@ -11,26 +11,36 @@ from . serialization import get_cls_path, get_fn_path, load_from_path, shallow_a
 # ------------------------------ Config types ------------------------------- #
 @dataclass
 class ArgsConfig:
-    """Type I"""
+    """
+    Type I
+    
+    Attribute names should exactly match parameter names for function or method.
+    """
     pass
 
 
 @dataclass 
 class ContainerConfig:
-    """Type II"""
+    """
+    Type II
+
+    Attributes are heterogeneous, can contain other config dataclasses.
+    """
     pass
 
 @dataclass
 class FactoryConfig:
     """
+    Type III
+
     Since TensorConfig subclasses CallableConfig, all instances of the former
-    are technically instances of the latter. However, this may lead to
-    confusion if, e.g., a function like is_callable_config is called. This
-    should return True for TensorConfig objects, but this may not be the most
-    intuitive interpretation of that name. For improved readability,
-    CallableConfig and thus all of its child classes subclass the FactoryConfig
-    base class, which can be reference in isinstance checks. These collectively
-    constitute the Type III dataclasses.
+    are instances of the latter. However, this may lead to confusion if, e.g.,
+    a function like is_callable_config is called. This should return True for
+    TensorConfig objects, but this may not necessarily be intuitive, as
+    CallableConfig and TensorConfig objects are often used side by side. For
+    improved readability, CallableConfig and thus all of its child classes
+    subclass the FactoryConfig base class, which can be referenced in
+    isinstance checks. These collectively constitute the Type III dataclasses.
     """
     pass
 
@@ -78,7 +88,7 @@ class CallableConfig(FactoryConfig):
         """
         if kind == 'class':
             return get_cls_path(callable_)
-        elif kind == 'function':
+        elif kind in ('function', 'static_method'):
             return get_fn_path(callable_)
         else:
             raise ValueError(
@@ -102,14 +112,18 @@ class CallableConfig(FactoryConfig):
                 )
         
         callable_ = self._get_callable()
-        return callable_(**shallow_asdict(self.args_cfg), **kwargs)
+        return callable_(**{**shallow_asdict(self.args_cfg), **kwargs})
     
     def _get_callable(self):
         """ 
-        Convenience method to retrieve reference to class X from the stored 
-        class path.
+        Retrieve reference to callable from the stored class path.
         """
-        return load_from_path(self.path)
+        module_depth = (
+            1 if self.kind in ('function', 'class') 
+            else 2 if self.kind == 'static_method' 
+            else None
+        )
+        return load_from_path(self.path, module_depth=module_depth)
     
     def _output_if_locked(self):
         """ 
@@ -142,9 +156,8 @@ class CallableConfig(FactoryConfig):
             print(self.path) # Development/debugging
             return self._get_callable()
         else:
-            raise RuntimeError(
-                "Unexpected condition reached during retrieval process, " 
-                "liked due to unrecognized value for self.recovery_mode: "
+            raise ValueError(
+                "Unrecognized value for self.recovery_mode: "
                 f"'{self.recovery_mode}'. Must be 'call' or 'get_callable'."
             )
         
@@ -246,5 +259,5 @@ class TorchDeterminismConfig(ArgsConfig):
 @dataclass
 class ReproducibilityConfig(ContainerConfig):
     entropy: int
-    seed_cfg_dict: Dict[str, SeedConfig]
+    seed_cfg_list: List[Dict[str, SeedConfig]]
     torch_determinism_cfg_dict : Dict[str, TorchDeterminismConfig]
