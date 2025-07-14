@@ -2,20 +2,18 @@ import copy
 
 import torch
 
-from data.builder import build_split_sequences, get_tokens
 from data.sequences import Sequences
+from engine.driver import run_training_from_filepath
 from engine.utils import Logger, compute_accuracy
-from engine.train import EarlyStopping, MetricTracker, train
+from engine.train import EarlyStopping, MetricTracker
 from engine.loss import LossTerm, spectral_entropy, wrapped_cross_entropy_loss
 from engine.config import (
     AdamWConfig, DataLoaderConfig, EarlyStoppingConfig, LoggerConfig, LossTermConfig,
-    MetricTrackerConfig, RequiresGradConfig, SplitConfig, TrainFnConfig, TrainValConfig
+    MetricTrackerConfig, RequiresGradConfig, TrainFnConfig, TrainValConfig
 )
-from models.builder import test_model
 from general_utils.config import CallableConfig, TorchDeviceConfig
-from general_utils import fileio as io_utils
+from general_utils import fileio as fileio_utils
 from general_utils import serialization as serialization_utils
-from general_utils import reproducibility as reproducibility_utils
 
 # @dataclass
 # class LossTermConfig(ArgsConfig):
@@ -165,7 +163,7 @@ loss_term_2 = CallableConfig.from_callable(
             recovery_mode='call',
             locked=True,
             warn_if_locked=True,
-            raise_exception_if_locked=False
+            raise_exception_if_locked=False # TODO: Change to a single parameter (e.g. if_locked=['warn', 'raise_exception', 'silent'])
         ),
         mode='train'
     ),
@@ -191,12 +189,15 @@ metric_tracker = CallableConfig.from_callable(
     MetricTracker,
     MetricTrackerConfig(
         metric_name='val_cross_entropy_loss',
-        checkpoint_dir='',
+        checkpoint_dir='dir_name__',
         mode='min',
         frequency='best'
     ),
+    locked=True,
     kind='class',
-    recovery_mode='call'
+    recovery_mode='call',
+    warn_if_locked=True,
+    raise_exception_if_locked=False
 )
 
 logger_train = CallableConfig.from_callable(
@@ -216,7 +217,12 @@ dataloader_train = CallableConfig.from_callable(
     DataLoaderConfig(
         batch_size=128,
         shuffle=True,
-        collate_fn=Sequences.pad_collate_fn
+        collate_fn=CallableConfig.from_callable(
+            Sequences.pad_collate_fn,
+            args_cfg=None,
+            kind='static_method',
+            recovery_mode='get_callable'
+        )
     ),
     kind='class',
     recovery_mode='call',
@@ -243,7 +249,12 @@ dataloader_val = CallableConfig.from_callable(
     DataLoaderConfig(
         batch_size=128,
         shuffle=True,
-        collate_fn=Sequences.pad_collate_fn
+        collate_fn=CallableConfig.from_callable(
+            Sequences.pad_collate_fn,
+            args_cfg=None,
+            kind='static_method',
+            recovery_mode='get_callable'
+        )
     ),
     kind='class',
     recovery_mode='call',
@@ -316,7 +327,7 @@ train_fn_cfg = TrainFnConfig(
     compute_mean_for=['cross_entropy_loss', 'accuracy'],
     metric_tracker=metric_tracker,
     early_stopping=early_stopping,
-    num_epochs=50,
+    num_epochs=3,
     device=device,
     deterministic=False
 )
@@ -324,135 +335,43 @@ train_fn_cfg = TrainFnConfig(
 
 
 
+# train_val_cfg = TrainValConfig(
+#     train_split_cfg=SplitConfig(
+#         split_name='train',
+#         split_size=1000,
+#         seed_idx=0
+#     ),
+#     val_split_cfg=SplitConfig(
+#         split_name='val',
+#         split_size=500,
+#         seed_idx=0
+#     ),
+#     requires_grad_cfg=REQUIRES_GRAD_REGISTRY['none'],
+#     train_fn_cfg=train_fn_cfg
+# )
 train_val_cfg = TrainValConfig(
-    train_split_cfg=SplitConfig(
-        split_name='train',
-        split_size=1000,
-        seed_idx=0
-    ),
-    val_split_cfg=SplitConfig(
-        split_name='val',
-        split_size=500,
-        seed_idx=0
-    ),
-    requires_grad_cfg=REQUIRES_GRAD_REGISTRY['none'],
-    train_fn_cfg=train_fn_cfg
+    train_fn_cfg=train_fn_cfg,
+    train_split_seed_idx=0,
+    val_split_seed_idx=0,
+    requires_grad_cfg=REQUIRES_GRAD_REGISTRY['none']
 )
 
-# Recursive instantation.
-train_val_cfg = serialization_utils.recursive_recover(train_val_cfg)
+base_dir = 'configs/training'
+sub_dir = '__00'
+output_dir = fileio_utils.make_dir(base_dir, sub_dir)
+filename = fileio_utils.make_filename('0000')
 
-# configs/datasets/000/000/000_000_000.json should point to dummy dataset.
-data_cfg = serialization_utils.deserialize('configs/datasets/000/000/000_000_000.json')
-data_cfg = serialization_utils.recursive_recover(data_cfg)
-seed_idx = 0
+train_val_cfg_filepath = output_dir / (filename + '.json')
+_ = serialization_utils.serialize(train_val_cfg, train_val_cfg_filepath)
 
-# sequences = {}
-
-# reproducibility_utils.apply_reproducibility_settings(
-#     cfg=data_cfg.reproducibility_cfg,
-#     split='train',
-#     seed_idx=0
-# )
-# sequences_cfg_copy_train = copy.deepcopy(data_cfg.sequences_cfg)
-# sequences_cfg_copy_train.num_seq = train_val_cfg.train_split_size
-# sequences['train'] = build_hypercube_sequences(sequences_cfg_copy_train)
-
-# reproducibility_utils.apply_reproducibility_settings(
-#     cfg=data_cfg.reproducibility_cfg,
-#     split='val',
-#     seed_idx=0
-# )
-# sequences_cfg_copy_val = copy.deepcopy(data_cfg.sequences_cfg)
-# sequences_cfg_copy_val.num_seq = train_val_cfg.val_split_size
-# sequences['val'] = build_hypercube_sequences(sequences_cfg_copy_val)
-sequences = build_split_sequences(
-    data_cfg.sequences_cfg,
-    data_cfg.reproducibility_cfg,
-    split_cfgs=[train_val_cfg.train_split_cfg, train_val_cfg.val_split_cfg],
+(
+    training, checkpoint_dir, train_val_cfg_dict, model_cfg_dict, data_cfg_dict
+) = run_training_from_filepath(
+    data_cfg_filepath='configs/datasets/__00/0000.json',
+    model_cfg_filepath='configs/models/__01/0000.json',
+    train_val_cfg_filepath=train_val_cfg_filepath,
+    run_dir='experiments/__00/0000/',
+    seed_idx=0,
+    test_mode=True,
 )
 
-# Get embedding dimension and a sequence from sequences_cfg.
-embedding_dim = data_cfg.sequences_cfg.embedder.ambient_dim
-tokens = get_tokens(sequences['train'], train_val_cfg.train_fn_cfg.device)
-seq, labels, _, _, _ = sequences['train'][0]
-seq = seq.to(train_val_cfg.train_fn_cfg.device)
-
-# configs/models/000/000/000_000_000.json should point to a dummy model.
-model_cfg = serialization_utils.deserialize('configs/models/000/000/000_000_000.json')
-# model_cfg = serialization_utils.recursive_recover(model_cfg)
-model = test_model(
-    embedding_dim=embedding_dim, 
-    model_cfg=model_cfg,
-    tokens=tokens,
-    input_=seq,
-    device=train_val_cfg.train_fn_cfg.device
-    
-)
-
-# Add model parameters to optimizers.
-# train_val_cfg.train_fn_cfg.loss_terms = [
-#     term.optimizer.manually_recover(params=model.parameters())
-#     for term in train_val_cfg.train_fn_cfg.loss_terms
-# ]
-for term in train_val_cfg.train_fn_cfg.loss_terms:
-    term.optimizer = term.optimizer.manually_recover(params=model.parameters())
-
-# Add dataset to dataloaders.
-train_val_cfg.train_fn_cfg.dataloader = train_val_cfg.train_fn_cfg.dataloader.manually_recover(dataset = sequences['train'])
-train_val_cfg.train_fn_cfg.evaluation['dataloader'] = train_val_cfg.train_fn_cfg.evaluation['dataloader'].manually_recover(dataset = sequences['train'])
-
-
-
-# For testing, just run a few epochs.
-train_fn_cfg_copy = copy.deepcopy(train_val_cfg.train_fn_cfg)
-
-train_fn_cfg_copy.num_epochs = 2
-
-# Replace placeholder.
-train_fn_cfg_copy.evaluation['switch_label'] = sequences['train'].special_tokens['switch']['label'].to(train_val_cfg.train_fn_cfg.device)
-training = train(model, **serialization_utils.shallow_asdict(train_fn_cfg_copy))
-
-
-
-
-
-
-
-# # Prepare arguments to evaluate function.
-# evaluation_val = {
-#     'dataloader' : val_cfg.dataloader,
-#     'switch_label' : sequences['val'].special_tokens['switch']['label'].to(device),
-#     'loss_terms' : val_cfg.loss_terms,
-#     'logger': val_cfg.logger,
-#     'compute_mean_for' : ['cross_entropy_loss', 'accuracy'],
-#     'log_outputs' : False,
-#     'criteria' : {'accuracy' : compute_accuracy},
-#     'h_0' : None,
-#     'deterministic' : True,
-#     'device' : device,
-#     'move_results_to_cpu' : True,
-#     'verbose' : True
-# }
-
-# # Save config.
-
-    
-
-
-# training = train(
-#     model,
-#     dataloader_train,
-#     loss_terms=loss_terms_train,
-#     evaluation=evaluation_val,
-#     h_0=None,
-#     logger=logger_train,
-#     criteria={'accuracy' : compute_accuracy},
-#     compute_mean_for=['cross_entropy_loss', 'accuracy'],
-#     save_validation_logger=True,
-#     metric_tracker=metric_tracker,
-#     early_stopping=early_stopping,
-#     num_epochs=3,
-#     device=device,
-#     deterministic=True
-# )
