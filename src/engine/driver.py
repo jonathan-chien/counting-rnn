@@ -87,6 +87,8 @@ def run_training_from_filepath(data_cfg_filepath, model_cfg_filepath, train_val_
         **serialization_utils.shallow_asdict(train_fn_cfg)
     )
 
+    # TODO: Save logger.
+
     return training, checkpoint_dir, train_val_cfg_dict, model_cfg_dict, data_cfg_dict
 
 
@@ -145,6 +147,8 @@ def run_testing_from_filepath(data_cfg_filepath, model_cfg_filepath, test_cfg_fi
         model, 
         **serialization_utils.shallow_asdict(test_cfg_dict['recovered'].eval_fn_cfg)
     )
+
+    # TODO: Save logger.
 
     return testing, data_cfg_dict, model_cfg_dict
 
