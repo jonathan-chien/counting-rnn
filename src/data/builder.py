@@ -5,10 +5,9 @@ from typing import Iterable
 
 from .sequences import Sequences
 from .config import DataConfig, SequencesConfig
-from general_utils import cli as cli_utils
 from general_utils import reproducibility as reproducibility_utils
 from general_utils import serialization as serialization_utils
-from general_utils import fileio as fileio_utils
+
 
 def build_hypercube_sequences(cfg: SequencesConfig) -> Sequences:
     hypercube = cfg.elem
@@ -183,7 +182,7 @@ def build_sequences_from_filepath(
             print("\n")
 
     if save_path is not None:
-        fileio_utils.torch_save(sequences, save_path)
+        torch.save(sequences, save_path)
         serialization_utils.serialize(data_cfg_dict['recovered'], save_path)
 
     return sequences, data_cfg_dict

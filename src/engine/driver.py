@@ -3,7 +3,7 @@ import copy
 import torch
 
 from data import builder as data_builder
-from .train import train
+from .training import train
 from .eval import evaluate
 from models import builder as model_builder
 from general_utils import fileio as fileio_utils
