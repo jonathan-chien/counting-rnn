@@ -1,4 +1,5 @@
 import copy
+from typing import List
 
 import torch
 
@@ -146,7 +147,7 @@ def run_testing_from_filepath(data_cfg_filepath, model_cfg_filepath, test_cfg_fi
             dataset = sequences['test']
         )
     
-    # Build and add logger save directory for train and val loggers..
+    # Build and add logger save directory for test logger.
     log_dir = run_dir + f"output/seed{seed_idx:02d}/"
     test_cfg_dict['recovered'].eval_fn_cfg.logger \
         = test_cfg_dict['recovered'].eval_fn_cfg.logger.manually_recover(
@@ -178,7 +179,7 @@ def run_testing_from_filepath(data_cfg_filepath, model_cfg_filepath, test_cfg_fi
 
     return logger_test, data_cfg_dict, model_cfg_dict
 
-def run(
+def single_train_single_test(
     data_train_cfg_filepath: str,
     model_cfg_filepath: str,
     train_val_cfg_filepath: str,
@@ -227,3 +228,28 @@ def run(
     torch.save(results, (run_dir + f'output/seed{seed_idx:02d}/results.pt'))
 
     return results
+
+
+def single_train_multi_test(
+    data_train_cfg_filepath: str,
+    model_cfg_filepath: str,
+    train_val_cfg_filepath: str,
+    data_test_cfg_filepath_list: List[str],
+    test_cfg_filepath: str,
+    exp_id: str,
+    run_id: str,
+    seed_idx: str,
+    weights_only: bool =False
+):
+    
+    run_dir = f'experiments/{exp_id}/{run_id}/'
+
+    model, training, checkpoint_dir, train_val_cfg_dict, model_cfg_dict, data_cfg_dict \
+        = run_training_from_filepath(
+            data_cfg_filepath=data_train_cfg_filepath,
+            model_cfg_filepath=model_cfg_filepath,
+            train_val_cfg_filepath=train_val_cfg_filepath,
+            run_dir=run_dir,
+            seed_idx=seed_idx,
+            test_mode=False,
+        )

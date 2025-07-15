@@ -11,7 +11,7 @@ from general_utils import fileio as fileio_utils
 if __name__ == '__main__':
     # ---------------------------- Set directory ---------------------------- #
     base_dir = 'configs/models'
-    sub_dir = '__01'
+    sub_dir = 'aa01'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir)
     filename = fileio_utils.make_filename('0000')
 
@@ -19,8 +19,8 @@ if __name__ == '__main__':
     input_network = CallableConfig.from_callable(
         FCN, 
         FCNConfig(
-            layer_sizes=['embedding_dim___', 10],
-            # layer_sizes=None,
+            # layer_sizes=['embedding_dim___', 10],
+            layer_sizes=None,
             nonlinearities=[CallableConfig.from_callable(torch.nn.ReLU, ReLUConfig(), kind='class', recovery_mode='call')],
             dropouts=[None]
         ),
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     readout_network = CallableConfig.from_callable(
         FCN,
         FCNConfig(
-            layer_sizes=[rnn.args_cfg.hidden_size, 30, 2],
+            layer_sizes=[rnn.args_cfg.hidden_size, 80, 2],
             nonlinearities=[
                 CallableConfig.from_callable(torch.nn.GELU, GELUConfig(), kind='class', recovery_mode='call'), 
                 CallableConfig.from_callable(torch.nn.Identity, IdentityConfig(), kind='class', recovery_mode='call')

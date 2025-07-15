@@ -1,3 +1,4 @@
+from pathlib import Path
 import torch
 
 from data.sequences import Sequences
@@ -20,7 +21,7 @@ from general_utils import ml as ml_utils
 def main():
     # --------------------------- Set directory ----------------------------- #
     base_dir = 'configs/training'
-    sub_dir = '__00'
+    sub_dir = 'aa00'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir)
     filename = fileio_utils.make_filename('0000')
 
@@ -257,7 +258,6 @@ def main():
         dataloader=dataloader_train,
         loss_terms=[loss_term_1],
         evaluation=evaluation,
-        # save_validation_logger=True,
         h_0=None,
         logger_train=logger_train,
         criteria={
@@ -272,7 +272,7 @@ def main():
         compute_mean_for=['cross_entropy_loss', 'accuracy'],
         metric_tracker=metric_tracker,
         early_stopping=early_stopping,
-        num_epochs=3,
+        num_epochs=150,
         device=device,
         deterministic=False
     )
@@ -290,6 +290,12 @@ def main():
     _ = serialization_utils.serialize(train_val_cfg, train_val_cfg_filepath)
 
     # -------------------- Test deserialization/execution ------------------- #
+    # First delete, any file with suffix best, as a different epoch being best
+    # will cause an error during the test part of configure_testing.py.
+    model_dir = Path('experiments/__00/0000/output/seed00/models/')
+    for file in model_dir.glob('*_best.pt'):
+        file.unlink()
+
     (
         model, training, checkpoint_dir, train_val_cfg_dict, model_cfg_dict, data_cfg_dict
     ) = run_training_from_filepath(

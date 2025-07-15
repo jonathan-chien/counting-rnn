@@ -4,8 +4,6 @@ from pathlib import Path
 import torch
 from typing import Sequence, Union
 
-from ..config import TensorConfig
-from .. import recursion as recursion_utils
 from .. import serialization as serialization_utils
 from .. import tensor as tensor_utils
 
@@ -126,13 +124,9 @@ class Logger:
         """ 
         JSON serializable items plus dataclasses can be saved.
         """
-        def _convert(log):
-            # Convert tensors to TensorConfigs.
+        def convert(log):
+            # Convert tensors to TensorConfigs, then all dataclasses to tagged dicts.
             log = tensor_utils.recursive_tensor_to_tensor_config(log)
-
-            # Converts all dataclasses (including TensorConfig objects that may
-            # have been generated above and their TensorArgsConfig attributes)
-            # to tagged dicts.
             log = serialization_utils.recursive_dataclass_to_tagged_dict(log)
 
             return log
@@ -146,13 +140,13 @@ class Logger:
                     "Unrecognized value for `target`. Must be one of " 
                     f"['batch_logs', 'epoch_logs'] but got '{log_name}'."
                 ) 
-            setattr(self, log_name, _convert(getattr(self, log_name)))
+            setattr(self, log_name, convert(getattr(self, log_name)))
         
 
     def recover_from_serializable_format(self, target: Union[str, Sequence[str]]):
         """ 
         """
-        def _recover(log):
+        def recover(log):
             log = serialization_utils.recursive_tagged_dict_to_dataclass(log)
             log = serialization_utils.recursive_recover(log)
             return log
@@ -166,7 +160,7 @@ class Logger:
                     "Unrecognized value for `target`. Must be one of " 
                     f"['batch_logs', 'epoch_logs'] but got '{log_name}'."
                 ) 
-            setattr(self, log_name, _recover(getattr(self, log_name)))
+            setattr(self, log_name, recover(getattr(self, log_name)))
             
     
     def save(self):

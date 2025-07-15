@@ -13,7 +13,7 @@ from general_utils import serialization as serialization_utils
 def main():
     # --------------------------- Set directory ----------------------------- #
     base_dir = 'configs/datasets'
-    sub_dir = '__00'
+    sub_dir = 'aa00'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir)
     filename = fileio_utils.make_filename('0000')
 
@@ -76,8 +76,8 @@ def main():
     seq_lengths = SeqLengths(
         lengths={
             'pos' : {
-                'support' : TensorConfig.from_tensor(torch.arange(5)),
-                'pmf' : TensorConfig.from_tensor(data_utils.uniform_pmf(5))
+                'support' : TensorConfig.from_tensor(torch.tensor([5, 7, 9])),
+                'pmf' : TensorConfig.from_tensor(data_utils.uniform_pmf(3))
             },
             'neg' : {
                 'support' : TensorConfig.from_tensor(torch.arange(3)),

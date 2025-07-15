@@ -15,7 +15,7 @@ from general_utils import ml as ml_utils
 def main():
     # --------------------------- Set directory ----------------------------- #
     base_dir = 'configs/testing'
-    sub_dir = '__00'
+    sub_dir = 'aa00'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir)
     filename = fileio_utils.make_filename('0000')
 
