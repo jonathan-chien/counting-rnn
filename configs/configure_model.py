@@ -1,23 +1,15 @@
-from typing import List, Optional
-
 import torch
 
 from models import builder as model_builder
 from models.config import AutoRNNConfig, ElmanConfig, GRUConfig, FCNConfig, GELUConfig, IdentityConfig, ReLUConfig
 from models.networks import FCN
 from general_utils.config import CallableConfig
-from general_utils.serialization import serialize, deserialize, recursive_recover
+from general_utils import serialization as serialization_utils
 from general_utils import fileio as fileio_utils
 
 
 if __name__ == '__main__':
     # ---------------------------- Set directory ---------------------------- #
-    # output_dir, filename = fileio_utils.make_file_dir_and_id(
-    #     base_dir='configs/models',
-    #     sub_dir_1='000',
-    #     sub_dir_2='000',
-    #     file_ind = ('000', '000', '000')
-    # )
     base_dir = 'configs/models'
     sub_dir = '__01'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir)
@@ -27,7 +19,8 @@ if __name__ == '__main__':
     input_network = CallableConfig.from_callable(
         FCN, 
         FCNConfig(
-            layer_sizes=['embedding_dim___', 50],
+            layer_sizes=['embedding_dim___', 10],
+            # layer_sizes=None,
             nonlinearities=[CallableConfig.from_callable(torch.nn.ReLU, ReLUConfig(), kind='class', recovery_mode='call')],
             dropouts=[None]
         ),
@@ -99,26 +92,9 @@ if __name__ == '__main__':
 
     # Convert, serialize/save, de-serialize, reconstruct.
     model_cfg_filepath = output_dir / (filename + '.json')
-    _ = serialize(model_cfg, model_cfg_filepath)
-    # reconstructed_model_cfg = deserialize(model_cfg_filepath)
+    _ = serialization_utils.serialize(model_cfg, model_cfg_filepath)
 
     # ---------------------------- Test instantiation --------------------------- #
-    # # Create mock tokens and set device.
-    # mock_embedding_dim = 5
-    # device = torch.device(
-    #     'cuda' if torch.cuda.is_available() 
-    #     else 'mps:0' if torch.backends.mps.is_available() 
-    #     else 'cpu'
-    # )
-    # mock_tokens = torch.randn((2, mock_embedding_dim)).to(device)
-    # mock_input = torch.randn((10, mock_embedding_dim)).to(device)
-    # model = model_builder.test_model(
-    #     embedding_dim=mock_embedding_dim, 
-    #     model_cfg=reconstructed_model_cfg,
-    #     tokens=mock_tokens,
-    #     input_=mock_input,
-    #     device=device
-    # )
     device = torch.device(
         'cuda' if torch.cuda.is_available() 
         else 'mps:0' if torch.backends.mps.is_available() 
