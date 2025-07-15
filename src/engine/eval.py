@@ -186,8 +186,7 @@ def evaluate(
     h_0=None,
     deterministic=True,
     device='cuda',
-    move_results_to_cpu=True,
-    verbose=True
+    move_results_to_cpu=True
 ):
     """ 
     Logger instance is required, since the point of this function is to evaluate and record the performance/loss etc.
@@ -272,7 +271,7 @@ def evaluate(
                     )
                 )
 
-            logger.log_batch(epoch=0, batch=i_batch, **batch_log, verbose=False)
+            logger.log_batch(epoch_idx=0, batch_idx=i_batch, **batch_log, verbose=False)
 
         # Compute mean across batches for specified losses and performance metrics.
         batch_sizes = logger.get_logged_values(key='batch_size', level='batch')
@@ -287,10 +286,8 @@ def evaluate(
             and key in compute_mean_for
         }
 
-        # Optionally print.
-        if len(mean_values) > 0 and verbose:
-            for key, value in mean_values.items():
-                print(f"Mean {key}: {value}.")
+        # Log mean batch values as a single epoch.
+        logger.log_epoch(epoch_idx=0, **mean_values)
 
-    return logger, mean_values
+    return logger
 

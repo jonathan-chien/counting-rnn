@@ -55,8 +55,9 @@ class CallableConfig(FactoryConfig):
     kind: Literal['class', 'function']
     recovery_mode: Literal['call', 'get_callable']
     locked: bool = False
-    warn_if_locked: bool = True
-    raise_exception_if_locked: bool = False
+    # warn_if_locked: bool = True
+    # raise_exception_if_locked: bool = False
+    if_recover_while_locked: str = 'warn'
 
     @classmethod
     def from_callable(
@@ -67,8 +68,9 @@ class CallableConfig(FactoryConfig):
         recovery_mode: str,
         *,
         locked: bool = False, 
-        warn_if_locked: bool =True, 
-        raise_exception_if_locked: bool =False
+        # warn_if_locked: bool =True, 
+        # raise_exception_if_locked: bool =False
+        if_recover_while_locked: str = 'warn'
     ):
         """ 
         """
@@ -78,8 +80,9 @@ class CallableConfig(FactoryConfig):
             kind=kind,
             recovery_mode=recovery_mode,
             locked=locked,
-            warn_if_locked=warn_if_locked,
-            raise_exception_if_locked=raise_exception_if_locked
+            # warn_if_locked=warn_if_locked,
+            # raise_exception_if_locked=raise_exception_if_locked
+            if_recover_while_locked=if_recover_while_locked
         )
     
     @staticmethod
@@ -132,10 +135,19 @@ class CallableConfig(FactoryConfig):
             "The `recover` method was called on this object with self.path=" 
             f"{self.path}, but self.locked=True."
         )
-        if self.warn_if_locked and not self.raise_exception_if_locked:
+        # if self.warn_if_locked and not self.raise_exception_if_locked:
+        #     warnings.warn(message)
+        # elif self.raise_exception_if_locked:
+        #     raise RuntimeError(message)
+        if self.if_recover_while_locked == 'warn':
             warnings.warn(message)
-        elif self.raise_exception_if_locked:
+        elif self.if_recover_while_locked == 'raise_exception':
             raise RuntimeError(message)
+        elif self.if_recover_while_locked != 'silent':
+            raise ValueError(
+                f"Unrecognized value {self.if_recover_while_locked} for "
+                "self.if_recover_while_locked. Must be one of ['warn', 'raise_exception', 'silent']."
+            )
 
     def recover(self, **kwargs):
         """ 
@@ -192,8 +204,9 @@ class TensorConfig(CallableConfig):
         cls, 
         t,
         locked=False,
-        warn_if_locked=True,
-        raise_exception_if_locked=False
+        # warn_if_locked=True,
+        # raise_exception_if_locked=False
+        if_recover_while_locked: str = 'warn'
         ):
         """ 
         Convenience method to instantiate a TensorConfig object from a tensor.
@@ -208,8 +221,9 @@ class TensorConfig(CallableConfig):
             kind='function',
             recovery_mode='call',
             locked=locked,
-            warn_if_locked=warn_if_locked,
-            raise_exception_if_locked=raise_exception_if_locked
+            # warn_if_locked=warn_if_locked,
+            # raise_exception_if_locked=raise_exception_if_locked
+            if_recover_while_locked=if_recover_while_locked
         )
     
     def recover(self):
@@ -236,8 +250,9 @@ class TensorConfig(CallableConfig):
             kind=self.kind,
             recovery_mode=self.recovery_mode,
             locked=self.locked,
-            warn_if_locked=self.warn_if_locked,
-            raise_exception_if_locked=self.raise_exception_if_locked
+            # warn_if_locked=self.warn_if_locked,
+            # raise_exception_if_locked=self.raise_exception_if_locked
+            if_recover_while_locked=self.if_recover_while_locked
         )
         return super(TensorConfig, temporary_tensor_config).recover()
     

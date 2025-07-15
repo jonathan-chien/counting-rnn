@@ -87,7 +87,6 @@ class EvalFnConfig(ArgsConfig):
     deterministic: bool
     device: str
     move_results_to_cpu: bool
-    verbose: bool
 
 
 @dataclass
@@ -97,9 +96,9 @@ class TrainFnConfig(ArgsConfig):
     dataloader: CallableConfig
     loss_terms: List[CallableConfig]
     evaluation: EvalFnConfig
-    save_validation_logger: bool
+    # save_validation_logger: bool
     h_0: Optional[Union[Callable, TensorConfig]]
-    logger: Optional[CallableConfig]
+    logger_train: Optional[CallableConfig]
     criteria: Dict[str, CallableConfig]
     compute_mean_for: Optional[List[str]]
     metric_tracker: Optional[CallableConfig]

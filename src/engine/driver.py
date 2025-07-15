@@ -52,12 +52,6 @@ def run_training_from_filepath(data_cfg_filepath, model_cfg_filepath, train_val_
             dataset = sequences['val']
         )
     
-    # Add switch label.
-    train_val_cfg_dict['recovered'].train_fn_cfg.evaluation['switch_label'] \
-        = sequences['train'].special_tokens['switch']['label'].to(
-            train_val_cfg_dict['recovered'].train_fn_cfg.device
-        )
-    
     # Build and add checkpoint save directory.
     checkpoint_dir = run_dir + f"output/seed{seed_idx:02d}/" + "models"
     train_val_cfg_dict['recovered'].train_fn_cfg.metric_tracker = \
@@ -65,6 +59,25 @@ def run_training_from_filepath(data_cfg_filepath, model_cfg_filepath, train_val_
             checkpoint_dir=checkpoint_dir
         )
     
+    # Build and add logger save directory for train and val loggers..
+    log_dir = run_dir + f"output/seed{seed_idx:02d}/"
+    train_val_cfg_dict['recovered'].train_fn_cfg.logger_train \
+        = train_val_cfg_dict['recovered'].train_fn_cfg.logger_train.manually_recover(
+            log_dir=log_dir
+        )
+    train_val_cfg_dict['recovered'].train_fn_cfg.evaluation['logger'] \
+        = train_val_cfg_dict['recovered'].train_fn_cfg.evaluation['logger'].manually_recover(
+            log_dir=log_dir
+        )
+
+    # ------------------------ Manual add (no recover) ---------------------- #
+    # Add switch label.
+    train_val_cfg_dict['recovered'].train_fn_cfg.evaluation['switch_label'] \
+        = sequences['train'].special_tokens['switch']['label'].to(
+            train_val_cfg_dict['recovered'].train_fn_cfg.device
+        )
+    
+    # ------------------------ Register used configs ------------------------ #
     # Create config directory and save stuff here.
     config_dir = fileio_utils.make_dir(run_dir + 'config')
     serialization_utils.serialize(data_cfg_dict['base'], config_dir / 'data_train.json')
@@ -87,12 +100,13 @@ def run_training_from_filepath(data_cfg_filepath, model_cfg_filepath, train_val_
         **serialization_utils.shallow_asdict(train_fn_cfg)
     )
 
-    # TODO: Save logger.
+    # Save logger.
+    for logger in training[0], training[1]:
+        if logger is not None:
+            logger.convert_to_serializable_format(target=['batch_logs', 'epoch_logs'])
+            logger.save()
 
-    return training, checkpoint_dir, train_val_cfg_dict, model_cfg_dict, data_cfg_dict
-
-
-
+    return model, training, checkpoint_dir, train_val_cfg_dict, model_cfg_dict, data_cfg_dict
 
 def run_testing_from_filepath(data_cfg_filepath, model_cfg_filepath, test_cfg_filepath, run_dir, seed_idx, model_suffix='_best.pt', weights_only=False):
 
@@ -132,25 +146,37 @@ def run_testing_from_filepath(data_cfg_filepath, model_cfg_filepath, test_cfg_fi
             dataset = sequences['test']
         )
     
+    # Build and add logger save directory for train and val loggers..
+    log_dir = run_dir + f"output/seed{seed_idx:02d}/"
+    test_cfg_dict['recovered'].eval_fn_cfg.logger \
+        = test_cfg_dict['recovered'].eval_fn_cfg.logger.manually_recover(
+            log_dir=log_dir
+        )
+    
+    # ------------------------ Manual add (no recover) ---------------------- #
     # Add switch label.
     test_cfg_dict['recovered'].eval_fn_cfg.switch_label \
         = sequences['test'].special_tokens['switch']['label'].to(
             test_cfg_dict['recovered'].eval_fn_cfg.device
         )
     
+    # ------------------------ Register used configs ------------------------ #
     # Create config directory and save stuff here.
     config_dir = fileio_utils.make_dir(run_dir + 'config')
     serialization_utils.serialize(test_cfg_dict['base'], config_dir / 'testing.json')
 
     # ---------------------------- Run testing ------------------------------ #    
-    testing = evaluate(
+    logger_test = evaluate(
         model, 
         **serialization_utils.shallow_asdict(test_cfg_dict['recovered'].eval_fn_cfg)
     )
 
     # TODO: Save logger.
+    if logger_test is not None:
+        logger_test.convert_to_serializable_format(target=['batch_logs', 'epoch_logs'])
+        logger_test.save()
 
-    return testing, data_cfg_dict, model_cfg_dict
+    return logger_test, data_cfg_dict, model_cfg_dict
 
 def run(
     data_train_cfg_filepath: str,
@@ -168,7 +194,7 @@ def run(
 
     run_dir = f'experiments/{exp_id}/{run_id}/'
 
-    training, checkpoint_dir, train_val_cfg_dict, model_cfg_dict, data_cfg_dict \
+    model, training, checkpoint_dir, train_val_cfg_dict, model_cfg_dict, data_cfg_dict \
         = run_training_from_filepath(
             data_cfg_filepath=data_train_cfg_filepath,
             model_cfg_filepath=model_cfg_filepath,
@@ -179,7 +205,7 @@ def run(
         )
 
     
-    testing, data_cfg_dict, model_cfg_dict = run_testing_from_filepath(
+    logger_test, data_cfg_dict, model_cfg_dict = run_testing_from_filepath(
         data_cfg_filepath=data_test_cfg_filepath,
         model_cfg_filepath=model_cfg_filepath,
         test_cfg_filepath=test_cfg_filepath,
@@ -189,12 +215,13 @@ def run(
     )
 
     results = {
+        'model' : model,
         'training': training,
         'checkpoint_dir': checkpoint_dir, 
         'train_val_cfg_dict': train_val_cfg_dict,
         'model_cfg_dict': model_cfg_dict,
         'data_cfg_dict': data_cfg_dict,
-        'testing': testing
+        'testing': logger_test
     }
 
     torch.save(results, (run_dir + f'output/seed{seed_idx:02d}/results.pt'))

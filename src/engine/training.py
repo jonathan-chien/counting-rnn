@@ -252,10 +252,10 @@ def train(
     loss_terms,
     evaluation,
     h_0=None,
-    logger=None,
+    logger_train=None,
     criteria={'accuracy' : utils.compute_accuracy},
     compute_mean_for=None,
-    save_validation_logger=True,
+    # save_validation_logger=True,
     metric_tracker=None,
     early_stopping=None, 
     num_epochs=50, 
@@ -290,9 +290,13 @@ def train(
             f"model.tokens must be on user specified device {device} but is " 
             f"on {model.tokens.device}."
         )
+    
+    # If logger objects print, add demarcation before first epoch.
+    if logger_train.verbose_epoch or logger_val.verbose_epoch:
+        print('----------------------------------------')
 
     for i_epoch in range(num_epochs):
-        if logger: epoch_log = {}
+        if logger_train: epoch_log = {}
 
         for i_batch, (batch, labels, lengths, masks, seq_ind) in enumerate(dataloader):
             batch, labels, masks = batch.to(device), labels.to(device), masks.to(device)
@@ -341,7 +345,7 @@ def train(
                 }
 
             # Optionally log losses/performance metrics.
-            if logger: 
+            if logger_train: 
                 batch_log = {'batch_size' : batch.shape[0]}
                 batch_log.update(
                     {f'{name}_loss' : value for name, value in losses.items()}
@@ -356,13 +360,13 @@ def train(
                             for name, output in performance.items()
                         )     
                     ))
-                logger.log_batch(epoch=i_epoch, batch=i_batch, **batch_log)
+                logger_train.log_batch(epoch_idx=i_epoch, batch_idx=i_batch, **batch_log)
 
         # Take weighted average of loss/accuracy across batches to get training values.
-        if logger:
-            batch_sizes = logger.get_logged_values(key='batch_size', level='batch')
+        if logger_train:
+            batch_sizes = logger_train.get_logged_values(key='batch_size', level='batch')
             train_mean_values = {
-                key : logger.compute_weighted_sum(
+                key : logger_train.compute_weighted_sum(
                     key=key,
                     level='batch',
                     weights=batch_sizes/len(dataloader.dataset)
@@ -372,20 +376,29 @@ def train(
                 and key in compute_mean_for
             }
             epoch_log.update(train_mean_values)
+            logger_train.log_epoch(epoch_idx=i_epoch, **epoch_log)
 
         # Validate model on validation set after each epoch.
-        validation_logger, validation_mean_values = eval.evaluate(model, **evaluation)
-        if save_validation_logger: epoch_log['val_logger'] = validation_logger
-        epoch_log.update(
-            {f'val_{name}' : value for name, value in validation_mean_values.items()}
-        )
+        logger_val = eval.evaluate(model, **evaluation)
+        if len(logger_val.epoch_logs) != 1:
+            raise RuntimeError(
+                "There should be only one \"epoch\" consisting of passing all " 
+                f"validation data through model, but got {len(logger_val.epoch_logs)} epochs."
+            )
+        val_results = logger_val.get_epoch(epoch_idx=0) 
+        # if save_validation_logger: epoch_log['val_logger'] = validation_logger # The logged Logger object will not be easily JSON serializable
+        # epoch_log.update(
+        #     {f'val_{name}' : value for name, value in val_mean_values.items()}
+        # )
+        # Print validation results.
         
-        if logger: logger.log_epoch(epoch=i_epoch, **epoch_log)
-
+        # for name, value in val_results.items():
+        #     print(f"val_{name}: {value} \n")
+     
         # Optionally save model checkpoint.
         if metric_tracker:
             should_save, is_best = metric_tracker.should_save(
-                epoch_log[metric_tracker.metric_name], i_epoch
+                val_results[metric_tracker.metric_name], i_epoch
             )
             if should_save:
                 checkpoint = {
@@ -415,13 +428,17 @@ def train(
                 metric_tracker.save(checkpoint, i_epoch, is_best=is_best)
        
         if early_stopping:
-            early_stopping.update(epoch_log[early_stopping.metric_name])
+            early_stopping.update(val_results[early_stopping.metric_name])
             if early_stopping.should_stop_early(i_epoch):
                 if early_stopping.verbose: 
                     early_stopping.print_to_console()
-                return logger, metric_tracker, early_stopping
+                return logger_train, logger_val, metric_tracker, early_stopping, epoch_log
 
-    return logger, metric_tracker, early_stopping, epoch_log
+        # If logger objects print, add demarcation between epochs.
+        if logger_train.verbose_epoch or logger_val.verbose_epoch:
+            print('----------------------------------------')
+
+    return logger_train, logger_val, metric_tracker, early_stopping, epoch_log
     
 
 

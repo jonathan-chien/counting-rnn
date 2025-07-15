@@ -2,7 +2,6 @@ from dataclasses import fields, is_dataclass
 import importlib
 import inspect
 import types
-from typing import Any
 
 import torch
 
@@ -26,45 +25,8 @@ def shallow_asdict(d):
         raise TypeError("`shallow_asdict` should be called on dataclass instances.")
     return {f.name : getattr(d, f.name) for f in fields(d)}
 
-def serialize(cfg, filepath):
-    """ 
-    """
-    # Convert for serialization. TODO: implement recursive check for dicts, return Boolean, could allow file deletion if dicts don't match
-    serializable_cfg_dict = recursion_utils.recursive(
-        cfg,
-        branch_conditionals=(
-            recursion_utils.dict_branch, 
-            recursion_utils.tuple_branch, 
-            recursion_utils.list_branch, 
-            recursion_utils.dataclass_branch_with_transform_to_dict
-        ),
-        leaf_fns=(
-            lambda x: x,
-        )
-    )
 
-    # Serialize/save.
-    fileio_utils.save_to_json(serializable_cfg_dict, filepath, indent=2)
-    return serializable_cfg_dict
-
-def deserialize(filepath):
-    # Deserialize and reconstruct.
-    deserialized_cfg_dict = fileio_utils.load_from_json(filepath)
-    reconstructed_cfg = recursion_utils.recursive(
-        deserialized_cfg_dict,
-        branch_conditionals=(
-            recursion_utils.dict_branch_with_transform_to_dataclass,
-            recursion_utils.tuple_branch, 
-            recursion_utils.list_branch, 
-        ),
-        leaf_fns=(
-            lambda x: x,
-        )
-    )
-    return reconstructed_cfg
-
-
-# ----------------------------- Pre-serialization --------------------------- #
+# ------------------------------ Serialization ------------------------------ #
 def get_cls_path(x):
     """ 
     x is a class (object of class 'type') or an instance of a class.
@@ -97,9 +59,51 @@ def dataclass_instance_to_tagged_dict(x):
         return d
     else:
         return x
+    
+def recursive_dataclass_to_tagged_dict(x):
+    """ 
+    Takes nested structure dataclasses and converts all dataclasses to tagged
+    dicts.
+    """
+    # Convert for serialization. TODO: implement recursive check for dicts, return Boolean, could allow file deletion if dicts don't match
+    return recursion_utils.recursive(
+        x,
+        branch_conditionals=(
+            recursion_utils.dict_branch, 
+            recursion_utils.tuple_branch, 
+            recursion_utils.list_branch, 
+            recursion_utils.dataclass_branch_with_transform_to_dict
+        ),
+        leaf_fns=(
+            lambda a: a,
+        )
+    )
+    
+def serialize(cfg, filepath):
+    """ 
+    """
+    # # Convert for serialization. TODO: implement recursive check for dicts, return Boolean, could allow file deletion if dicts don't match
+    # serializable_cfg = recursion_utils.recursive(
+    #     cfg,
+    #     branch_conditionals=(
+    #         recursion_utils.dict_branch, 
+    #         recursion_utils.tuple_branch, 
+    #         recursion_utils.list_branch, 
+    #         recursion_utils.dataclass_branch_with_transform_to_dict
+    #     ),
+    #     leaf_fns=(
+    #         lambda x: x,
+    #     )
+    # )
+    # TODO: Could add call to tensor_utils.recursive_tensor_to_tensor_config here and just write tensors in configure_* scripts.
+    serializable = recursive_dataclass_to_tagged_dict(cfg)
+
+    # Serialize/save.
+    fileio_utils.save_to_json(serializable, filepath, indent=2)
+    return serializable
 
 
-# --------------------------- Post-de-serialization ------------------------- #    
+# ----------------------------- De-serialization ---------------------------- #    
 def is_tagged_dict(x, kind):
     """ 
     Check that x is a tagged dict of the right kind ('dataclass' or 'tensor').
@@ -150,6 +154,35 @@ def tagged_dict_to_dataclass_instance(x):
         return cls(**args)
     else:
         return x
+    
+def recursive_tagged_dict_to_dataclass(x):
+    return recursion_utils.recursive(
+        x,
+        branch_conditionals=(
+            recursion_utils.dict_branch_with_transform_to_dataclass,
+            recursion_utils.tuple_branch, 
+            recursion_utils.list_branch, 
+        ),
+        leaf_fns=(
+            lambda x: x,
+        )
+    )
+    
+def deserialize(filepath):
+    # Deserialize and reconstruct.
+    serializable = fileio_utils.load_from_json(filepath)
+
+    return recursion_utils.recursive(
+        serializable,
+        branch_conditionals=(
+            recursion_utils.dict_branch_with_transform_to_dataclass,
+            recursion_utils.tuple_branch, 
+            recursion_utils.list_branch, 
+        ),
+        leaf_fns=(
+            lambda x: x,
+        )
+    )
     
 def recursive_recover(x):
     """ 

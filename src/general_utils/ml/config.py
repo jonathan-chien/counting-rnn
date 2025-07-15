@@ -45,6 +45,8 @@ class MetricTrackerConfig(ArgsConfig):
 class LoggerConfig(ArgsConfig):
     log_dir: str
     log_name: str
+    verbose_batch: bool = False
+    verbose_epoch: bool = True
     print_flush_epoch: bool = False
     print_flush_batch: bool = False
 

@@ -1,5 +1,8 @@
 import torch
 
+from .config import TensorConfig
+from . import recursion as recursion_utils
+
 
 class DistributionSampler:
 
@@ -93,7 +96,24 @@ def tensor_to_numpy(x):
     """
     return x.numpy() if isinstance(x, torch.Tensor) else x
 
-
+def recursive_tensor_to_tensor_config(x):
+    """ 
+    Can be used to convert tensors nested in other structures for JSON serialization.
+    """
+    return recursion_utils.recursive(
+        x,
+        branch_conditionals=(
+            recursion_utils.dict_branch,
+            recursion_utils.list_branch,
+            recursion_utils.tuple_branch
+        ),
+        leaf_fns=(
+            lambda x: (
+                TensorConfig.from_tensor(x) 
+                if isinstance(x, torch.Tensor) else x
+            ),
+        )
+    )
 
 
 
