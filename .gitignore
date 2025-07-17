@@ -4,6 +4,8 @@
 *.xlsx
 *.docx
 *.json
+*.jsonl
+*.pt
 .vscode/
 
 # Ignore Jupyter notebook checkpoints.
