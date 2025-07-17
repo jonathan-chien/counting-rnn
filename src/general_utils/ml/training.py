@@ -207,9 +207,9 @@ class MetricTracker:
 def set_requires_grad(
     model: torch.nn.Module, 
     cfg: RequiresGradConfig,
-    mode: Literal['inclusion', 'exclusion'],
-    requires_grad: bool,
-    verbose=True
+    # mode: Literal['inclusion', 'exclusion'],
+    # requires_grad: bool,
+    # verbose=True
 ):
     """ 
     """
@@ -229,17 +229,17 @@ def set_requires_grad(
 
     named_params = list(model.named_parameters())
 
-    if mode == 'inclusion':
-        set_value(named_params, cfg.networks, requires_grad)
-    elif mode == 'exclusion':
+    if cfg.mode == 'inclusion':
+        set_value(named_params, cfg.networks, cfg.requires_grad)
+    elif cfg.mode == 'exclusion':
         for _, param in named_params:
-            param.requires_grad = requires_grad
-        set_value(named_params, cfg.networks, not(requires_grad))
+            param.requires_grad = cfg.requires_grad
+        set_value(named_params, cfg.networks, not(cfg.requires_grad))
     else:
         raise ValueError(
-            f"Got unrecognized value {mode} for `mode`. Must be 'inclusion' or 'exclusion'."
+            f"Got unrecognized value {cfg.mode} for `mode`. Must be 'inclusion' or 'exclusion'."
         )
-    if verbose:
+    if cfg.verbose:
         for param_name, param in named_params:
             if param.requires_grad:
                 print(f"{param_name} is active.")

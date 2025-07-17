@@ -98,7 +98,7 @@ def recursive_seed_sequence_spawn(
     validation_utils.validate_iterable_contents(
         num_children_per_level,
         predicate=validation_utils.is_pos_int,
-        expected="a positive int"
+        expected_description="a positive int"
     )
     validation_utils.validate_nonneg_int(depth)
     

@@ -13,9 +13,10 @@ from general_utils import serialization as serialization_utils
 def main():
     # --------------------------- Set directory ----------------------------- #
     base_dir = 'configs/datasets'
-    sub_dir = 'aa00'
-    output_dir = fileio_utils.make_dir(base_dir, sub_dir)
-    filename = fileio_utils.make_filename('0000')
+    sub_dir_1 = 'demo'
+    sub_dir_2 = '0000'
+    output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
+    filename = fileio_utils.make_filename('0007')
 
     # ---------------------- Reproducibility settings ----------------------- #
     SEED_KINDS = ['recovery', 'train', 'val', 'test']
@@ -76,8 +77,8 @@ def main():
     seq_lengths = SeqLengths(
         lengths={
             'pos' : {
-                'support' : TensorConfig.from_tensor(torch.tensor([5, 7, 9])),
-                'pmf' : TensorConfig.from_tensor(data_utils.uniform_pmf(3))
+                'support' : TensorConfig.from_tensor(torch.arange(7)),
+                'pmf' : TensorConfig.from_tensor(data_utils.uniform_pmf(7))
             },
             'neg' : {
                 'support' : TensorConfig.from_tensor(torch.arange(3)),

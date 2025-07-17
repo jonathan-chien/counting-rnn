@@ -72,8 +72,8 @@ def insert_embedding_dim(embedding_dim, model_cfg):
     return model
 
 def build_model_from_filepath(
-    data_cfg_filepath, 
     model_cfg_filepath, 
+    data_cfg_filepath, 
     seed_idx, # This is passed to the logic for constructing sequences; if a random rotation of hypercube is used to get tokens, this will impact what count/EOS tokens are associated with a model
     device, 
     test_pass=False

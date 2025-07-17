@@ -116,7 +116,7 @@ class TrainFnConfig(ArgsConfig):
 
 
 @dataclass
-class TrainValConfig(ContainerConfig):
+class TrainingConfig(ContainerConfig):
     train_fn_cfg: TrainFnConfig
     train_split_seed_idx: 0
     val_split_seed_idx: 0
@@ -124,7 +124,7 @@ class TrainValConfig(ContainerConfig):
     
 
 @dataclass
-class TestConfig(ContainerConfig):
+class TestingConfig(ContainerConfig):
     eval_fn_cfg: EvalFnConfig
     test_split_seed_idx: 0
     
@@ -136,7 +136,7 @@ class ExperimentConfig(ContainerConfig):
     data_training_cfg: Optional[Union[ArgsConfig, ContainerConfig]] = None 
     training_cfg: Optional[Union[ArgsConfig, ContainerConfig]] = None 
     model_cfg: Optional[Union[ArgsConfig, ContainerConfig]] = None 
-    data_testing_cfg: Optional[Union[ArgsConfig, ContainerConfig]] = None 
+    data_test_cfg: Optional[Union[ArgsConfig, ContainerConfig]] = None 
     testing_cfg: Optional[Union[ArgsConfig, ContainerConfig]] = None 
 
 # @dataclass

@@ -9,9 +9,9 @@ from engine import utils as engine_utils
 # from engine.loss import LossTerm, spectral_entropy, wrapped_cross_entropy_loss
 # from engine.config import (
 #     AdamWConfig, DataLoaderConfig, EarlyStoppingConfig, LoggerConfig, LossTermConfig,
-#     MetricTrackerConfig, RequiresGradConfig, TrainFnConfig, TrainValConfig
+#     MetricTrackerConfig, RequiresGradConfig, TrainFnConfig, TrainingConfig
 # )
-from engine.config import TrainFnConfig, TrainValConfig
+from engine.config import TrainFnConfig, TrainingConfig
 from general_utils.config import CallableConfig, TorchDeviceConfig
 from general_utils import fileio as fileio_utils
 from general_utils import serialization as serialization_utils
@@ -21,8 +21,9 @@ from general_utils import ml as ml_utils
 def main():
     # --------------------------- Set directory ----------------------------- #
     base_dir = 'configs/training'
-    sub_dir = 'aa00'
-    output_dir = fileio_utils.make_dir(base_dir, sub_dir)
+    sub_dir_1 = 'demo'
+    sub_dir_2 = '0000'
+    output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = fileio_utils.make_filename('0000')
 
     # ----------------------------------------------------------------------- #
@@ -31,28 +32,31 @@ def main():
             networks={
                 'input_network': [],
                 'rnn': ['ih'],
-                'output_network': []
+                'readout_network': []
             },
             mode='exclusion',
-            requires_grad=False
+            requires_grad=False,
+            verbose=True
         ),
         'with_input_network_freeze_except_for_input_layer': ml_utils.config.RequiresGradConfig(
             networks={
                 'input_network': ['0.weight', '0.bias'],
                 'rnn': [],
-                'output_network': []
+                'readout_network': []
             },
             mode='exclusion',
-            requires_grad=False
+            requires_grad=False,
+            verbose=True
         ),
         'none': ml_utils.config.RequiresGradConfig(
             networks={
                 'input_network': [],
                 'rnn': [],
-                'output_network': []
+                'readout_network': []
             },
             mode='inclusion',
-            requires_grad=True
+            requires_grad=True,
+            verbose=True
         )
     }
 
@@ -272,12 +276,12 @@ def main():
         compute_mean_for=['cross_entropy_loss', 'accuracy'],
         metric_tracker=metric_tracker,
         early_stopping=early_stopping,
-        num_epochs=150,
+        num_epochs=3,
         device=device,
         deterministic=False
     )
 
-    train_val_cfg = TrainValConfig(
+    training_cfg = TrainingConfig(
         train_fn_cfg=train_fn_cfg,
         train_split_seed_idx=0,
         val_split_seed_idx=0,
@@ -286,23 +290,21 @@ def main():
 
 
     # ----------------------------- Serialize ------------------------------- #
-    train_val_cfg_filepath = output_dir / (filename + '.json')
-    _ = serialization_utils.serialize(train_val_cfg, train_val_cfg_filepath)
+    training_cfg_filepath = output_dir / (filename + '.json')
+    _ = serialization_utils.serialize(training_cfg, training_cfg_filepath)
 
     # -------------------- Test deserialization/execution ------------------- #
     # First delete, any file with suffix best, as a different epoch being best
     # will cause an error during the test part of configure_testing.py.
-    model_dir = Path('experiments/__00/0000/output/seed00/models/')
+    model_dir = Path('experiments/demo/0000/output/seed00/models/')
     for file in model_dir.glob('*_best.pt'):
         file.unlink()
 
-    (
-        model, training, checkpoint_dir, train_val_cfg_dict, model_cfg_dict, data_cfg_dict
-    ) = run_training_from_filepath(
-        data_cfg_filepath='configs/datasets/__00/0000.json',
-        model_cfg_filepath='configs/models/__01/0000.json',
-        train_val_cfg_filepath=train_val_cfg_filepath,
-        run_dir='experiments/__00/0000/',
+    _ = run_training_from_filepath(
+        model_cfg_filepath='configs/models/demo/0001/0000.json',
+        data_train_cfg_filepath='configs/datasets/demo/0000/0005.json',
+        training_cfg_filepath=training_cfg_filepath,
+        exp_dir='experiments/demo/0000/',
         seed_idx=0,
         test_mode=True,
     )

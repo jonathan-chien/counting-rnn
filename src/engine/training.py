@@ -432,13 +432,13 @@ def train(
             if early_stopping.should_stop_early(i_epoch):
                 if early_stopping.verbose: 
                     early_stopping.print_to_console()
-                return logger_train, logger_val, metric_tracker, early_stopping, epoch_log
+                return logger_train, logger_val, metric_tracker, early_stopping
 
         # If logger objects print, add demarcation between epochs.
         if logger_train.verbose_epoch or logger_val.verbose_epoch:
             print('----------------------------------------')
 
-    return logger_train, logger_val, metric_tracker, early_stopping, epoch_log
+    return logger_train, logger_val, metric_tracker, early_stopping
     
 
 

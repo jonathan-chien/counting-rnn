@@ -1,8 +1,8 @@
 import torch
 
 from data.sequences import Sequences
-# from engine.config import DataLoaderConfig, EvalFnConfig, LoggerConfig, LossTermConfig, TestConfig
-from engine.config import EvalFnConfig, TestConfig
+# from engine.config import DataLoaderConfig, EvalFnConfig, LoggerConfig, LossTermConfig, TestingConfig
+from engine.config import EvalFnConfig, TestingConfig
 from engine.driver import run_testing_from_filepath
 # from engine.loss import LossTerm, spectral_entropy, wrapped_cross_entropy_loss
 from engine import utils as engine_utils
@@ -15,8 +15,9 @@ from general_utils import ml as ml_utils
 def main():
     # --------------------------- Set directory ----------------------------- #
     base_dir = 'configs/testing'
-    sub_dir = 'aa00'
-    output_dir = fileio_utils.make_dir(base_dir, sub_dir)
+    sub_dir_1 = 'demo'
+    sub_dir_2 = '0000'
+    output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = fileio_utils.make_filename('0000')
 
     # ------------------------- Set testing parameters ---------------------- #
@@ -126,24 +127,26 @@ def main():
         move_results_to_cpu=True,
     )
 
-    test_cfg = TestConfig(
+    testing_cfg = TestingConfig(
         eval_fn_cfg=eval_fn_cfg,
         test_split_seed_idx=0
     )
 
     # ----------------------------- Serialize ------------------------------- #
-    test_cfg_filepath = output_dir / (filename + '.json')
-    serialization_utils.serialize(test_cfg, test_cfg_filepath)
+    testing_cfg_filepath = output_dir / (filename + '.json')
+    serialization_utils.serialize(testing_cfg, testing_cfg_filepath)
 
     # -------------------- Test deserialization/execution ------------------- #
     run_testing_from_filepath(
-        data_cfg_filepath='configs/datasets/__00/0000.json',
-        model_cfg_filepath='configs/models/__01/0000.json',
+        model_cfg_filepath='configs/models/demo/0001/0000.json',
         # model_filepath='experiments/__00/0000/output/seed00/models/0_best.pt',
-        test_cfg_filepath=test_cfg_filepath,
-        run_dir='experiments/__00/0000/',
+        data_test_cfg_filepath='configs/datasets/demo/0000/0005.json',
+        testing_cfg_filepath=testing_cfg_filepath,
+        seed_idx=0,
+        exp_dir='experiments/demo/0000/',
+        train_run_id='demo_0001_0000_demo_0000_0005_demo_0000_0000',
         model_suffix='_best.pt',
-        seed_idx=0
+        weights_only=False
     )
 
 

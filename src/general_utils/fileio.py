@@ -6,9 +6,9 @@ from typing import Union
 import torch
 
 
-def make_dir(*path_parts: Union[str, Path], chdir=False):
+def make_dir(*path_parts: Union[str, Path], chdir=False, parents=True, exist_ok=True):
     dir = Path(*path_parts) 
-    dir.mkdir(parents=True, exist_ok=True)
+    dir.mkdir(parents=parents, exist_ok=exist_ok)
     if chdir: os.chdir(dir)
     return dir
 
@@ -50,7 +50,7 @@ def torch_load(filepath):
     with open(filepath, 'rb') as f:
         return torch.load(f)
     
-def get_filepath_with_suffix(dir, suffix):
+def get_filepath_with_suffix(dir, suffix, return_as='Path'):
     """ 
     """
     path = Path(dir)
@@ -66,7 +66,16 @@ def get_filepath_with_suffix(dir, suffix):
             f"{[str(m.name) for m in matches]}"
         )
     
-    return matches[0]
+    if return_as == 'str':
+        out = str(matches[0])
+    elif return_as != 'Path':
+        raise ValueError(
+            f"Unrecognized value {return_as} for return_as. Must be 'str' or 'Path'."
+        )
+    else:
+        out = matches[0]
+    
+    return out
     
 
 

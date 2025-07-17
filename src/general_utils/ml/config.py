@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import torch
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Literal, Optional, Tuple
 
 from ..config import ArgsConfig, CallableConfig
 
@@ -61,5 +61,7 @@ class DataLoaderConfig(ArgsConfig):
 @dataclass
 class RequiresGradConfig(ArgsConfig):
     networks: Dict[str, List[str]]
-    mode: str
+    mode: Literal['inclusion', 'exclusion']
     requires_grad: bool
+    verbose: bool
+     
