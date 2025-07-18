@@ -11,10 +11,10 @@ from general_utils import fileio as fileio_utils
 if __name__ == '__main__':
     # ---------------------------- Set directory ---------------------------- #
     base_dir = 'configs/models'
-    sub_dir_1 = 'demo'
+    sub_dir_1 = 'aaaa'
     sub_dir_2 = '0001'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
-    filename = fileio_utils.make_filename('0001')
+    filename = fileio_utils.make_filename('0000')
 
     # ----------------------- Configure input network ----------------------- #
     input_network = CallableConfig.from_callable(

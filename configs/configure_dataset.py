@@ -13,10 +13,10 @@ from general_utils import serialization as serialization_utils
 def main():
     # --------------------------- Set directory ----------------------------- #
     base_dir = 'configs/datasets'
-    sub_dir_1 = 'demo'
+    sub_dir_1 = 'aaaa'
     sub_dir_2 = '0000'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
-    filename = fileio_utils.make_filename('0007')
+    filename = fileio_utils.make_filename('9999')
 
     # ---------------------- Reproducibility settings ----------------------- #
     SEED_KINDS = ['recovery', 'train', 'val', 'test']
@@ -77,8 +77,8 @@ def main():
     seq_lengths = SeqLengths(
         lengths={
             'pos' : {
-                'support' : TensorConfig.from_tensor(torch.arange(7)),
-                'pmf' : TensorConfig.from_tensor(data_utils.uniform_pmf(7))
+                'support' : TensorConfig.from_tensor(torch.tensor([5, 7, 9])),
+                'pmf' : TensorConfig.from_tensor(data_utils.uniform_pmf(3))
             },
             'neg' : {
                 'support' : TensorConfig.from_tensor(torch.arange(3)),
@@ -95,7 +95,7 @@ def main():
         method='random_rotation',
         noise_distr=CallableConfig.from_callable(
             torch.distributions.Normal, 
-            NormalDistrConfig(loc=0, scale=0.05),
+            NormalDistrConfig(loc=0, scale=0.01),
             kind='class',
             recovery_mode='call'
         )

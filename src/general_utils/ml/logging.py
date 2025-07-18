@@ -2,7 +2,8 @@ import copy
 import json
 from pathlib import Path
 import torch
-from typing import Sequence, Union
+from typing import Optional, Sequence, Union
+import warnings
 
 from .. import serialization as serialization_utils
 from .. import tensor as tensor_utils
@@ -76,47 +77,102 @@ class Logger:
                     flush=self.print_flush_epoch
                 )
 
-    def get_batch(self, epoch_idx: int, batch_idx: int):
+    # def get_batch(self, epoch_idx: int, batch_idx: int):
+    #     """ 
+    #     """
+    #     try:
+    #         return copy.deepcopy(self.batch_logs[(epoch_idx, batch_idx)])
+    #     except KeyError:
+    #         raise IndexError(
+    #             f"No entry found for epoch {epoch_idx}, batch {batch_idx}."
+    #         )
+
+    # def get_epoch(self, epoch_idx: int):
+    #     """ 
+    #     """
+    #     try:
+    #         return copy.deepcopy(self.epoch_logs[epoch_idx])
+    #     except KeyError:
+    #         raise IndexError(
+    #             f"No entry found for epoch {epoch_idx}."
+    #         )
+    def get_entry(self, level: str, epoch_idx: int, batch_idx: Optional[int] = None):
         """ 
         """
-        try:
-            return copy.deepcopy(self.batch_logs[(epoch_idx, batch_idx)])
-        except KeyError:
-            raise IndexError(
-                f"No entry found for epoch {epoch_idx}, batch {batch_idx}."
+        if level == 'batch':
+            if batch_idx is None:
+                raise ValueError(
+                    f"`level` was passed in as 'batch', but no `batch_idx` was specified."
+                )
+            try:
+                return copy.deepcopy(self.batch_logs[(epoch_idx, batch_idx)])
+            except KeyError:
+                raise IndexError(
+                    f"No entry found for epoch {epoch_idx}, batch {batch_idx}."
+                )
+        elif level == 'epoch':
+            try:
+                return copy.deepcopy(self.epoch_logs[epoch_idx])
+            except KeyError:
+                raise IndexError(
+                    f"No entry found for epoch {epoch_idx}."
+                )
+        else:
+            raise ValueError(
+                f"Unrecognized value {level} for `level`. Must be in ['batch', 'epoch']."
             )
-
-    def get_epoch(self, epoch_idx: int):
+        
+    def get_all_entries(self, key: str, level: str, epoch_idx: Optional[int] = None):
         """ 
-        """
-        try:
-            return copy.deepcopy(self.epoch_logs[epoch_idx])
-        except KeyError:
-            raise IndexError(
-                f"No entry found for epoch {epoch_idx}."
-            )
-
-
-    def get_logged_values(self, key: str, level: str):
-        """ 
-        Retrieve all logged values so far, at either the batch or epoch level.
-        Will raise KeyError if any entries are missing the requested key.
         """
         if level not in ['batch', 'epoch']:
             raise ValueError(
                 f"Unrecognized value {level} for `level`. Must be 'batch' or 'epoch'."
             )
+        
         source = self.epoch_logs if level == 'epoch' else self.batch_logs
+
+        # If epoch index was provided for level='batch', retrieve only values 
+        # from that epoch, else return all batches from all epochs.
+        if level == 'batch' and epoch_idx is not None:
+            source = {
+                (i_epoch, i_batch): entry
+                for (i_epoch, i_batch), entry in source.items()
+                if i_epoch == epoch_idx
+            }
+
         try:
             values = [entry[key] for entry in source.values()]
         except KeyError:
             raise KeyError(
                 f"The key '{key}' is missing from one or more {level} entries."
             )
+        
         return torch.tensor(values)
+        
+
+    # def get_logged_values(self, key: str, level: str):
+    #     """ 
+    #     Retrieve all logged values so far, at either the batch or epoch level.
+    #     Will raise KeyError if any entries are missing the requested key.
+    #     """
+    #     if level not in ['batch', 'epoch']:
+    #         raise ValueError(
+    #             f"Unrecognized value {level} for `level`. Must be 'batch' or 'epoch'."
+    #         )
+    #     source = self.epoch_logs if level == 'epoch' else self.batch_logs
+    #     try:
+    #         values = [entry[key] for entry in source.values()]
+    #     except KeyError:
+    #         raise KeyError(
+    #             f"The key '{key}' is missing from one or more {level} entries."
+    #         )
+    #     return torch.tensor(values)
     
-    def compute_weighted_sum(self, key: str, level: str, weights: torch.Tensor):
-        values = self.get_logged_values(key=key, level=level)
+    def compute_weighted_sum(self, key: str, level: str, weights: torch.Tensor, epoch_idx: Optional[int] = None):
+        """ 
+        """
+        values = self.get_all_entries(key=key, level=level, epoch_idx=epoch_idx)
         tensor_utils.validate_tensor(weights, 1)
         return torch.sum(values * weights)
     
@@ -166,6 +222,9 @@ class Logger:
     def save(self):
         """ 
         """
+        # TODO: User is currently responsible for calling serialization method
+        # before attempting to save. Could add try except block for more explicit exception handling.
+
         batch_path = self.log_dir / f'{self.log_name}_batch_log.jsonl'
         epoch_path = self.log_dir / f'{self.log_name}_epoch_log.jsonl'
 
@@ -179,6 +238,10 @@ class Logger:
                 entry = {**entry, 'epoch_idx': epoch_idx}
                 f.write(json.dumps(entry, sort_keys=True) + '\n')
 
-    def reset(self):
+    def reset(self, warn=True):
+        """ 
+        """
+        if warn:
+            warnings.warn(f"Resetting logs for {self.log_name}.")
         self.batch_logs = {}
         self.epoch_logs = {}

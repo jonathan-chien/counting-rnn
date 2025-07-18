@@ -274,7 +274,7 @@ def evaluate(
             logger.log_batch(epoch_idx=0, batch_idx=i_batch, **batch_log, verbose=False)
 
         # Compute mean across batches for specified losses and performance metrics.
-        batch_sizes = logger.get_logged_values(key='batch_size', level='batch')
+        batch_sizes = logger.get_all_entries(key='batch_size', level='batch')
         mean_values = {
             key : logger.compute_weighted_sum(
                 key=key,

@@ -21,8 +21,8 @@ from general_utils import ml as ml_utils
 def main():
     # --------------------------- Set directory ----------------------------- #
     base_dir = 'configs/training'
-    sub_dir_1 = 'demo'
-    sub_dir_2 = '0000'
+    sub_dir_1 = 'aaaa'
+    sub_dir_2 = '0001'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = fileio_utils.make_filename('0000')
 
@@ -75,12 +75,11 @@ def main():
             ),
             weight=1.,
             optimizer=CallableConfig.from_callable(
-                torch.optim.AdamW,
-                ml_utils.config.AdamWConfig(
+                torch.optim.Adam,
+                ml_utils.config.AdamConfig(
                     lr=0.001, 
                     betas=(0.9, 0.999), 
                     eps=1e-08, 
-                    weight_decay=0.01, 
                     amsgrad=False
                 ),
                 kind='class',
@@ -106,12 +105,11 @@ def main():
             ),
             weight=1.,
             optimizer=CallableConfig.from_callable(
-                torch.optim.AdamW,
-                ml_utils.config.AdamWConfig(
+                torch.optim.Adam,
+                ml_utils.config.AdamConfig(
                     lr=0.001, 
                     betas=(0.9, 0.999), 
                     eps=1e-08, 
-                    weight_decay=0.01, 
                     amsgrad=False
                 ),
                 kind='class',
@@ -276,9 +274,9 @@ def main():
         compute_mean_for=['cross_entropy_loss', 'accuracy'],
         metric_tracker=metric_tracker,
         early_stopping=early_stopping,
-        num_epochs=3,
+        num_epochs=300,
         device=device,
-        deterministic=False
+        deterministic=True
     )
 
     training_cfg = TrainingConfig(

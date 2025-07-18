@@ -175,11 +175,11 @@ def run_training_from_filepath(
 
     # Get final validation epoch log.
     num_epochs_trained = len(logger_val.epoch_logs)
-    final_val_epoch_log = logger_val.get_epoch(epoch_idx=num_epochs_trained-1)
+    final_val_epoch_log = logger_val.get_entry(level='epoch', epoch_idx=num_epochs_trained-1)
 
     # Save metric tracker and early stopping objects.
-    torch.save(metric_tracker, f"{dirs['logs']}metric_tracker.pt")
-    torch.save(early_stopping, f"{dirs['logs']}early_stopping.pt")
+    torch.save(metric_tracker, dirs['logs'] / 'metric_tracker.pt')
+    torch.save(early_stopping, dirs['logs'] / 'early_stopping.pt')
 
     return {
         'model': model,
@@ -265,6 +265,7 @@ def run_testing_from_filepath(
     testing_cfg_dict['recovered'] = serialization_utils.recursive_recover(testing_cfg_dict['base']) 
 
     # -------------------- Register used (base) configs --------------------- #
+    serialization_utils.serialize(model_cfg_dict['base'], dirs['config'] / 'model.json')
     serialization_utils.serialize(data_test_cfg_dict['base'], dirs['config'] / 'data_test.json')
     serialization_utils.serialize(testing_cfg_dict['base'], dirs['config'] / 'testing.json')
 

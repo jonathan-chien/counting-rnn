@@ -15,7 +15,7 @@ from general_utils import ml as ml_utils
 def main():
     # --------------------------- Set directory ----------------------------- #
     base_dir = 'configs/testing'
-    sub_dir_1 = 'demo'
+    sub_dir_1 = 'aaaa'
     sub_dir_2 = '0000'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = fileio_utils.make_filename('0000')
@@ -110,7 +110,7 @@ def main():
         switch_label='switch_label___',
         loss_terms=[loss_term_1],
         logger=logger,
-        log_outputs=False,
+        log_outputs=True,
         criteria={
             'accuracy' : CallableConfig.from_callable(
                 engine_utils.compute_accuracy,

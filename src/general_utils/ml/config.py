@@ -13,6 +13,12 @@ class LossTermConfig(ArgsConfig):
     weight: float = 1.
     optimizer: Optional[CallableConfig] = None
 
+@dataclass
+class AdamConfig(ArgsConfig):
+    lr: float = 0.001, 
+    betas: tuple = (0.9, 0.999), 
+    eps: float = 1e-08, 
+    amsgrad: bool = False
 
 @dataclass
 class AdamWConfig(ArgsConfig):

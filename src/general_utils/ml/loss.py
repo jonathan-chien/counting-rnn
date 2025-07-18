@@ -52,7 +52,9 @@ class LossTerm:
 def wrapped_cross_entropy_loss(output, target, model=None):
     # if model is not None: 
     #     raise ValueError(invalid_input_message(model, 'model'))
-    return F.cross_entropy(output, target)
+    cross_entropy = torch.nn.CrossEntropyLoss()
+    return cross_entropy(output, target)
+    # return F.cross_entropy(output, target)
 
 def get_weight_hh(model):
     """ 

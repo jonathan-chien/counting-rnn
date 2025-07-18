@@ -322,7 +322,8 @@ def train(
             _, pred_labels = model.to_token(logits, deterministic=deterministic)
 
             # Shift masks forward by one since prediction is of next token.
-            shifted_masks = torch.roll(masks, shifts=-1, dims=0)
+            shifted_masks = torch.roll(masks, shifts=-1, dims=1)
+            # shifted_masks = masks.roll(-1, dims=1)
 
             # Compute losses.
             losses = {
@@ -331,8 +332,15 @@ def train(
                 )
                 for loss_term in loss_terms
             }
-            for loss_term in loss_terms: loss_term.step()
-            
+            for loss_term in loss_terms: 
+                loss_term.step()
+            # losses = {}
+            # for loss_term in loss_terms:
+            #     losses[loss_term.name] = loss_term.compute_loss(
+            #         logits[shifted_masks], labels[masks], model
+            #     )
+            #     loss_term.step()
+
             # Compute performance metrics.
             if criteria is not None:
                 performance = {
@@ -364,11 +372,12 @@ def train(
 
         # Take weighted average of loss/accuracy across batches to get training values.
         if logger_train:
-            batch_sizes = logger_train.get_logged_values(key='batch_size', level='batch')
+            batch_sizes = logger_train.get_all_entries(key='batch_size', level='batch', epoch_idx=i_epoch)
             train_mean_values = {
                 key : logger_train.compute_weighted_sum(
                     key=key,
                     level='batch',
+                    epoch_idx=i_epoch,
                     weights=batch_sizes/len(dataloader.dataset)
                 )
                 for key in batch_log.keys()
@@ -385,7 +394,7 @@ def train(
                 "There should be only one \"epoch\" consisting of passing all " 
                 f"validation data through model, but got {len(logger_val.epoch_logs)} epochs."
             )
-        val_results = logger_val.get_epoch(epoch_idx=0) 
+        val_results = logger_val.get_entry(level='epoch', epoch_idx=0) 
         # if save_validation_logger: epoch_log['val_logger'] = validation_logger # The logged Logger object will not be easily JSON serializable
         # epoch_log.update(
         #     {f'val_{name}' : value for name, value in val_mean_values.items()}
