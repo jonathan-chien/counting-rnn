@@ -5,16 +5,17 @@ from typing import Iterable
 
 from .sequences import Sequences
 from .config import DataConfig, SequencesConfig
-from general_utils import reproducibility as reproducibility_utils
+from general_utils.ml import reproducibility as reproducibility_utils
+from general_utils.ml.reproducibility import ReproducibilityConfig
 from general_utils import serialization as serialization_utils
 
 
-def build_hypercube_sequences(cfg: SequencesConfig) -> Sequences:
-    hypercube = cfg.elem
-    embedder = cfg.embedder
+def build_hypercube_sequences(sequences_cfg: SequencesConfig) -> Sequences:
+    hypercube = sequences_cfg.elem
+    embedder = sequences_cfg.embedder
 
     # Validate seq_lengths object.
-    cfg.seq_lengths.validate()
+    sequences_cfg.seq_lengths.validate()
 
     # Check that number of variables is large enough.
     if embedder.ambient_dim < hypercube.num_dims + 3: 
@@ -24,12 +25,12 @@ def build_hypercube_sequences(cfg: SequencesConfig) -> Sequences:
         )
     
     return Sequences(
-        num_seq=cfg.num_seq,
+        num_seq=sequences_cfg.num_seq,
         num_vars=hypercube.num_dims, # TODO: Eliminate this argument, see TODO in Sequences class
-        len_distr=cfg.seq_lengths.lengths,
+        len_distr=sequences_cfg.seq_lengths.lengths,
         elem_distr=hypercube.vertices,
         transform=embedder,
-        seq_order=cfg.seq_order
+        seq_order=sequences_cfg.seq_order
     )
 
 # def get_tokens(sequences, device):
@@ -91,7 +92,12 @@ def get_autoregressive_tokens(sequences):
     
 #     return sequences
 
-def build_split_sequences(data_cfg: DataConfig, build: Iterable[str], seed_idx: Iterable[int]):
+def build_split_sequences(
+    data_cfg: DataConfig, 
+    reproducibility_cfg: ReproducibilityConfig,
+    build: Iterable[str], 
+    seed_idx: Iterable[int]
+):
     """ 
     """
     split_names = [f.name for f in fields(data_cfg.split_cfg)]
@@ -120,7 +126,7 @@ def build_split_sequences(data_cfg: DataConfig, build: Iterable[str], seed_idx: 
     for split, seq_cfg in zip(build, sequences_cfgs):
         seq_cfg.num_seq = getattr(data_cfg.split_cfg, split)
         reproducibility_utils.apply_reproducibility_settings(
-            data_cfg.reproducibility_cfg, 
+            reproducibility_cfg, 
             seed_idx=seed_idx,
             split=split
         )
@@ -131,6 +137,7 @@ def build_split_sequences(data_cfg: DataConfig, build: Iterable[str], seed_idx: 
 
 def build_sequences_from_filepath(
     data_cfg_filepath: str, 
+    reproducibility_cfg_filepath: str,
     build: str, 
     seed_idx: int, 
     save_path: str = None,
@@ -138,14 +145,20 @@ def build_sequences_from_filepath(
 ):
     """ 
     """
-    
-    # Get config.
+    # Get base data config, get and recover (recovery not currently necessary,
+    # but more future proof) reproducibility config (recovery should be
+    # deterministic).
     data_cfg_dict = {}
     data_cfg_dict['base'] = serialization_utils.deserialize(data_cfg_filepath)
-   
-    # Apply recovery seed and recover.
+    reproducibility_cfg_dict = {}
+    reproducibility_cfg_dict['base'] = serialization_utils.deserialize(reproducibility_cfg_filepath)
+    reproducibility_cfg_dict['recovered'] = serialization_utils.recursive_recover(
+        reproducibility_cfg_dict['base']
+    )
+
+    # Apply recovery seed to deterministically recover all elements of data config.
     reproducibility_utils.apply_reproducibility_settings(
-        data_cfg_dict['base'].reproducibility_cfg, 
+        reproducibility_cfg_dict['recovered'], 
         seed_idx=seed_idx,
         split='recovery'
     )
@@ -153,8 +166,10 @@ def build_sequences_from_filepath(
         data_cfg_dict['base']
     )
 
+    # Apply split specific seeds to build data splits.
     sequences = build_split_sequences(
         data_cfg_dict['recovered'],
+        reproducibility_cfg_dict['recovered'],
         build=build,
         seed_idx=seed_idx
     )
@@ -185,5 +200,5 @@ def build_sequences_from_filepath(
         torch.save(sequences, save_path)
         serialization_utils.serialize(data_cfg_dict['recovered'], save_path)
 
-    return sequences, data_cfg_dict
+    return sequences, data_cfg_dict, reproducibility_cfg_dict
 

@@ -74,14 +74,16 @@ def insert_embedding_dim(embedding_dim, model_cfg):
 def build_model_from_filepath(
     model_cfg_filepath, 
     data_cfg_filepath, 
+    reproducibility_cfg_filepath,
     seed_idx, # This is passed to the logic for constructing sequences; if a random rotation of hypercube is used to get tokens, this will impact what count/EOS tokens are associated with a model
     device, 
     test_pass=False
 ):
 
     # Build sequences in order to get embedding dimension and tokens.
-    sequences, data_cfg_dict = data_builder.build_sequences_from_filepath(
-        data_cfg_filepath, 
+    sequences, data_cfg_dict, reproducibility_cfg_dict = data_builder.build_sequences_from_filepath(
+        data_cfg_filepath=data_cfg_filepath, 
+        reproducibility_cfg_filepath=reproducibility_cfg_filepath,
         build=['train'], # Any split will do, tokens should be the same across all splits
         seed_idx=seed_idx,
         print_to_console=False
@@ -110,4 +112,4 @@ def build_model_from_filepath(
         joined = model.generate(input_)
         print(f"Input joined with output of generation: \n {joined}.")
 
-    return model, model_cfg_dict, data_cfg_dict
+    return model, model_cfg_dict, data_cfg_dict, reproducibility_cfg_dict

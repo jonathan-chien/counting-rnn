@@ -6,10 +6,23 @@ from typing import Union
 import torch
 
 
+def get_dir(*path_parts):
+    path = Path(*path_parts)
+    if not path.exists():
+            raise FileNotFoundError(
+                f"Path {path} does not exist."
+            )
+    elif not path.is_dir():
+        raise NotADirectoryError(
+            f"Path {path} exists but is not a directory."
+        )
+    return path
+
 def make_dir(*path_parts: Union[str, Path], chdir=False, parents=True, exist_ok=True):
     dir = Path(*path_parts) 
     dir.mkdir(parents=parents, exist_ok=exist_ok)
-    if chdir: os.chdir(dir)
+    if chdir: 
+        os.chdir(dir)
     return dir
 
 def make_filename(*file_ind, joiner='_'):

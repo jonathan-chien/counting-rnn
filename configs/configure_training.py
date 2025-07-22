@@ -274,7 +274,7 @@ def main():
         compute_mean_for=['cross_entropy_loss', 'accuracy'],
         metric_tracker=metric_tracker,
         early_stopping=early_stopping,
-        num_epochs=300,
+        num_epochs=150,
         device=device,
         deterministic=True
     )
@@ -302,6 +302,7 @@ def main():
         model_cfg_filepath='configs/models/demo/0001/0000.json',
         data_train_cfg_filepath='configs/datasets/demo/0000/0005.json',
         training_cfg_filepath=training_cfg_filepath,
+        reproducibility_cfg_filepath='configs/reproducibility/aa/0000.json',
         exp_dir='experiments/demo/0000/',
         seed_idx=0,
         test_mode=True,

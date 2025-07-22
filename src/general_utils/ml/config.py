@@ -2,9 +2,10 @@ from dataclasses import dataclass
 import torch
 from typing import Any, Callable, Dict, List, Literal, Optional, Tuple
 
-from ..config import ArgsConfig, CallableConfig
+from ..config import ArgsConfig, ContainerConfig, CallableConfig, SeedConfig
 
 
+# ---------------------------- Training/Eval -------------------------------- #
 @dataclass
 class LossTermConfig(ArgsConfig):
     name: str
@@ -13,12 +14,32 @@ class LossTermConfig(ArgsConfig):
     weight: float = 1.
     optimizer: Optional[CallableConfig] = None
 
+
+@dataclass
+class LoggerConfig(ArgsConfig):
+    log_dir: str
+    log_name: str
+    verbose_batch: bool = False
+    verbose_epoch: bool = True
+    print_flush_epoch: bool = False
+    print_flush_batch: bool = False
+
+
+@dataclass
+class DataLoaderConfig(ArgsConfig):
+    collate_fn: Optional[Callable[[List[Tuple]], Any]]
+    batch_size: int = 128
+    shuffle: bool = True
+
+
+# ------------------------------ Training ----------------------------------- #
 @dataclass
 class AdamConfig(ArgsConfig):
     lr: float = 0.001, 
     betas: tuple = (0.9, 0.999), 
     eps: float = 1e-08, 
     amsgrad: bool = False
+
 
 @dataclass
 class AdamWConfig(ArgsConfig):
@@ -48,26 +69,24 @@ class MetricTrackerConfig(ArgsConfig):
 
 
 @dataclass
-class LoggerConfig(ArgsConfig):
-    log_dir: str
-    log_name: str
-    verbose_batch: bool = False
-    verbose_epoch: bool = True
-    print_flush_epoch: bool = False
-    print_flush_batch: bool = False
-
-
-@dataclass
-class DataLoaderConfig(ArgsConfig):
-    collate_fn: Optional[Callable[[List[Tuple]], Any]]
-    batch_size: int = 128
-    shuffle: bool = True
-
-
-@dataclass
 class RequiresGradConfig(ArgsConfig):
     networks: Dict[str, List[str]]
     mode: Literal['inclusion', 'exclusion']
     requires_grad: bool
     verbose: bool
+
+
+# ---------------------------- Reproducibility ------------------------------ #
+@dataclass
+class TorchDeterminismConfig(ArgsConfig):
+    use_deterministic_algos: bool = False
+    cudnn_deterministic: bool = False
+    cudnn_benchmark: bool = True
+
+
+@dataclass
+class ReproducibilityConfig(ContainerConfig):
+    entropy: int
+    seed_cfg_list: List[Dict[str, SeedConfig]]
+    torch_determinism_cfg_dict : Dict[str, TorchDeterminismConfig]
      

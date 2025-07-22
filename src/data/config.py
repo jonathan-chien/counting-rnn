@@ -80,7 +80,6 @@ class SplitConfig(config_utils.ContainerConfig):
 class DataConfig(config_utils.ContainerConfig):
     sequences_cfg: Dict[str, SequencesConfig]
     split_cfg: SplitConfig
-    reproducibility_cfg: config_utils.ReproducibilityConfig
     
 
 

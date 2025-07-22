@@ -8,7 +8,7 @@ import torch
 from . serialization import get_cls_path, get_fn_path, load_from_path, shallow_asdict
 
 
-# ------------------------------ Config types ------------------------------- #
+# ---------------------------- Dataclass configs ---------------------------- #
 @dataclass
 class ArgsConfig:
     """
@@ -257,22 +257,8 @@ class TensorConfig(CallableConfig):
         return super(TensorConfig, temporary_tensor_config).recover()
     
 
-# ---------------------------- Reproducibility ------------------------------ #
+# ----------------------------- Seed utils ---------------------------------- #
 @dataclass
 class SeedConfig(ArgsConfig):
     torch_seed: int
     cuda_seed: int
-
-
-@dataclass
-class TorchDeterminismConfig(ArgsConfig):
-    use_deterministic_algos: bool = False
-    cudnn_deterministic: bool = False
-    cudnn_benchmark: bool = True
-
-
-@dataclass
-class ReproducibilityConfig(ContainerConfig):
-    entropy: int
-    seed_cfg_list: List[Dict[str, SeedConfig]]
-    torch_determinism_cfg_dict : Dict[str, TorchDeterminismConfig]
