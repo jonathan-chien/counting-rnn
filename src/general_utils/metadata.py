@@ -4,13 +4,14 @@ from pathlib import Path
 import platform
 import socket
 import subprocess
+import textwrap
 from typing import Union
 import warnings
 
 from . import fileio as fileio_utils
 
 
-def collect_metadata(additional_info: dict, short=False, must_be_clean=True):
+def collect_metadata(additional_info: dict, short=False, enforce_clean_git_tree=True):
     """ 
     """
     metadata = {
@@ -19,7 +20,7 @@ def collect_metadata(additional_info: dict, short=False, must_be_clean=True):
         'user': getpass.getuser(),
         'platform': platform.platform(),
         'python_version': platform.python_version(),
-        'git_version': get_commit_hash(short=short, must_be_clean=must_be_clean),
+        'git_version': get_commit_hash(short=short, enforce_clean_git_tree=enforce_clean_git_tree),
         'git_branch': get_git_branch(),
         'git_clean': is_git_tree_clean(),
     }
@@ -31,7 +32,7 @@ def collect_and_save_metadata(
     additional_info: dict, 
     filepath: Union[str, Path], 
     short=False, 
-    must_be_clean=True, 
+    enforce_clean_git_tree=True, 
     overwrite=False
 ):
     """
@@ -39,7 +40,7 @@ def collect_and_save_metadata(
     metadata = collect_metadata(
         additional_info=additional_info, 
         short=short, 
-        must_be_clean=must_be_clean
+        enforce_clean_git_tree=enforce_clean_git_tree
     )
 
     filepath = Path(filepath)
@@ -73,13 +74,13 @@ def get_git_branch():
     )
     return result.stdout.strip()
 
-def get_commit_hash(short=False, must_be_clean=True):
+def get_commit_hash(short=False, enforce_clean_git_tree=True):
     """ 
     """
     if not is_git_tree_clean():
-        if must_be_clean:
+        if enforce_clean_git_tree:
             raise RuntimeError(
-                "Git tree is dirty (must_be_clean=True)."
+                "Git tree is dirty (enforce_clean_git_tree=True)."
             )
         else:
             warnings.warn("Git Tree is dirty!")
@@ -92,7 +93,7 @@ def get_commit_hash(short=False, must_be_clean=True):
      
     return result.stdout.strip()
 
-def create_textfile(content: str, filepath: Union[str, Path] = 'README.md', overwrite=False):
+def create_textfile(content: str, filepath: Union[str, Path] = 'README.md', dedent=False, overwrite=False):
     """ 
     """
     filepath = Path(filepath)
@@ -101,5 +102,9 @@ def create_textfile(content: str, filepath: Union[str, Path] = 'README.md', over
             f"The file {filepath} already exists (`overwrite` = False)."
         )
 
+    if dedent:
+        content = textwrap.dedent(content)
+
     filepath.write_text(content, encoding='utf-8')
+    
     return filepath

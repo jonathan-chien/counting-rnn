@@ -5,6 +5,7 @@ import warnings
 
 from .. import tensor as tensor_utils
 from .config import RequiresGradConfig
+from .. import validation as validation_utils
 
 
 class EarlyStopping:
@@ -15,6 +16,7 @@ class EarlyStopping:
         metric_name: str,
         patience: int,
         mode : str,
+        tol: float = 1e-4,
         min_epochs_before_stopping: int = 1,
         verbose=True,
         disabled=False
@@ -29,9 +31,11 @@ class EarlyStopping:
             raise ValueError(
                 f"Unrecognized value {mode} for `mode`. Must be one of ['min', 'max']."
             )
+        validation_utils.validate_nonneg_float(tol)
         self.metric_name = metric_name
         self.patience = patience
         self.mode = mode
+        self.tol = tol
         self.min_epochs_before_stopping = min_epochs_before_stopping
         self.verbose = verbose
         self.disabled = disabled
@@ -46,6 +50,22 @@ class EarlyStopping:
         self.recent_vals = self.recent_vals.roll(-1)
         self.recent_vals[-1] = tensor_utils.tensor_to_cpu_python_scalar(x)
 
+    # def should_stop_early(self, epoch_idx):
+    #     """ 
+    #     """
+    #     if self.disabled or epoch_idx + 1 < self.min_epochs_before_stopping: 
+    #         return False
+
+    #     diffs = torch.diff(self.recent_vals, n=1)
+    #     diffs[torch.abs(diffs) < self.tol] = 0
+    #     if (
+    #         (self.mode == 'min' and (diffs > 0).all())
+    #         or (self.mode == 'max' and (diffs < 0).all())
+    #     ):
+    #         self.stopped_after_epoch = epoch_idx
+    #         return True
+        
+    #     return False
     def should_stop_early(self, epoch_idx):
         """ 
         """
@@ -54,8 +74,8 @@ class EarlyStopping:
 
         diffs = torch.diff(self.recent_vals, n=1)
         if (
-            (self.mode == 'min' and (diffs > 0).all())
-            or (self.mode == 'max' and (diffs < 0).all())
+            (self.mode == 'min' and (diffs > self.tol).all())
+            or (self.mode == 'max' and (diffs < -self.tol).all())
         ):
             self.stopped_after_epoch = epoch_idx
             return True
@@ -69,7 +89,7 @@ class EarlyStopping:
                 "has been reached, but self.should_stop_early has not returned True yet."
             )
         print(
-            f"Early stopping condition reached after epoch {self.stopped_after_epoch}.\n"
+            f"Early stopping condition reached after epoch {self.stopped_after_epoch} with tol = {self.tol}.\n"
             f"Tracked value over last {self.patience+1} epochs: {self.recent_vals}.\n"
             f"Final changes prior to early stopping: {torch.diff(self.recent_vals, n=1)}."
         )

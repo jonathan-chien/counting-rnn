@@ -831,7 +831,7 @@ def run_curriculum(
             print(f"Curriculum stage: {i_stage}")
             print("----------------------------------------------------------------------")
 
-            training, testing, _ = run(
+            training, testing, exp_dir = run(
                 model_cfg_ref_list=model_cfg_ref_list, # Iterated over within run for each stage
                 pretrained_model_filepath_list=pretrained_model_filepath_list, # Iterated over within run for each stage
                 data_train_cfg_ref_list=[data_train_cfg_ref],
@@ -870,7 +870,7 @@ def run_curriculum(
                 for train_run_id in training.keys()
             ]
 
-    return curriculum_results, pretrained_model_filepath_list
+    return curriculum_results, pretrained_model_filepath_list, exp_dir
 
 
        

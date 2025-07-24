@@ -55,6 +55,7 @@ class EarlyStoppingConfig(ArgsConfig):
     metric_name: str
     patience: int
     mode: str
+    tol: float
     min_epochs_before_stopping: int
     verbose: bool = True
     disabled: bool = False

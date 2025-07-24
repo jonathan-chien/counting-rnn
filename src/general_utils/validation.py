@@ -15,6 +15,15 @@ def is_pos_int(x):
 def is_nonneg_int(x):
     return (is_int(x) and x >= 0)
 
+def is_float(x):
+    return isinstance(x, float)
+
+def is_pos_float(x):
+    return (is_float(x) and x > 0)
+
+def is_nonneg_float(x):
+    return (is_float(x) and x >= 0)
+
 def is_str(x):
     return isinstance(x, str)
 
@@ -38,6 +47,18 @@ def validate_pos_int(x):
 def validate_nonneg_int(x):
     if not is_nonneg_int(x):
         raise ValueError(error_message("a non-negative int", x))
+    
+def validate_float(x):
+    if not is_float(x):
+        return ValueError(error_message("a float", x))
+    
+def validate_pos_float(x):
+    if not is_pos_float(x):
+        return ValueError(error_message("a positive float", x))
+    
+def validate_nonneg_float(x):
+    if not is_nonneg_float(x):
+        return ValueError(error_message("a non-negative float", x))
     
 def validate_str(x):
     if not is_str(x):

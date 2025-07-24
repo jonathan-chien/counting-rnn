@@ -57,7 +57,7 @@ class CallableConfig(FactoryConfig):
     locked: bool = False
     # warn_if_locked: bool = True
     # raise_exception_if_locked: bool = False
-    if_recover_while_locked: str = 'warn'
+    if_recover_while_locked: Literal['print', 'warn', 'raise_exception', 'silent'] = 'warn'
 
     @classmethod
     def from_callable(
@@ -132,14 +132,16 @@ class CallableConfig(FactoryConfig):
         """ 
         """
         message = (
-            "The `recover` method was called on this object with self.path=" 
-            f"{self.path}, but self.locked=True."
+            "The `recover` method was called on an object with self.path=" 
+            f"{self.path}, but recovery will be deferred, as self.locked=True."
         )
         # if self.warn_if_locked and not self.raise_exception_if_locked:
         #     warnings.warn(message)
         # elif self.raise_exception_if_locked:
         #     raise RuntimeError(message)
-        if self.if_recover_while_locked == 'warn':
+        if self.if_recover_while_locked == 'print':
+            print(message)
+        elif self.if_recover_while_locked == 'warn':
             warnings.warn(message)
         elif self.if_recover_while_locked == 'raise_exception':
             raise RuntimeError(message)
@@ -156,7 +158,7 @@ class CallableConfig(FactoryConfig):
             self._output_if_locked()
             return self
         elif self.recovery_mode == 'call':
-            print(self.path) # Development/debugging
+            # print(self.path) # Development/debugging
             return self._call(**kwargs)
         elif self.recovery_mode == 'get_callable':
             if len(kwargs) != 0:
@@ -165,7 +167,7 @@ class CallableConfig(FactoryConfig):
                     "self.recovery_mode='get_callable', `recover` is a wrapper " 
                     "to `_get_callable`, which takes no arguments."
                 )
-            print(self.path) # Development/debugging
+            # print(self.path) # Development/debugging
             return self._get_callable()
         else:
             raise ValueError(
