@@ -118,6 +118,7 @@ def run_training_from_filepath(
     serialization_utils.serialize(data_train_cfg_dict['base'], dirs['config'] / 'data_train.json')
     serialization_utils.serialize(model_cfg_dict['base'], dirs['config'] / 'model.json')
     serialization_utils.serialize(training_cfg_dict['base'], dirs['config'] / 'training.json')
+    serialization_utils.serialize(reproducibility_cfg_dict['base'], dirs['config'] / 'reproducibility.json')
 
     # ------------------ Manually recover deferred items -------------------- #
     # Fill in model parameters (optimizers instantiated here).
@@ -200,6 +201,7 @@ def run_training_from_filepath(
 
     return {
         'model': model,
+        'sequences' : sequences,
         'final_val_epoch_log': final_val_epoch_log,
         'logger_train': logger_train,
         'logger_val': logger_val,
@@ -290,6 +292,7 @@ def run_testing_from_filepath(
     serialization_utils.serialize(model_cfg_dict['base'], dirs['config'] / 'model.json')
     serialization_utils.serialize(data_test_cfg_dict['base'], dirs['config'] / 'data_test.json')
     serialization_utils.serialize(testing_cfg_dict['base'], dirs['config'] / 'testing.json')
+    serialization_utils.serialize(reproducibility_cfg_dict['base'], dirs['config'] / 'reproducibility.json')
 
     # ------------------ Manually recover deferred items -------------------- #
     # Add dataset to dataloader. If string placeholder was used for batch size,
@@ -337,6 +340,8 @@ def run_testing_from_filepath(
 
     return {
         'logger_test': logger_test, 
+        'model' : model,
+        'sequences' : sequences,
         'data_test_cfg_dict': data_test_cfg_dict, 
         'model_cfg_dict': model_cfg_dict,
         'testing_cfg_dict': testing_cfg_dict,

@@ -94,7 +94,7 @@ def detach_tensor(x):
 def tensor_to_numpy(x):
     """ 
     """
-    return x.numpy() if isinstance(x, torch.Tensor) else x
+    return x.detach().cpu().numpy() if isinstance(x, torch.Tensor) else x
 
 def recursive_tensor_to_tensor_config(x):
     """ 

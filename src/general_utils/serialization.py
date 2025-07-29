@@ -69,9 +69,10 @@ def recursive_dataclass_to_tagged_dict(x):
     return recursion_utils.recursive(
         x,
         branch_conditionals=(
-            recursion_utils.dict_branch, 
             recursion_utils.tuple_branch, 
             recursion_utils.list_branch, 
+            recursion_utils.dataframe_branch,
+            recursion_utils.dict_branch, 
             recursion_utils.dataclass_branch_with_transform_to_dict
         ),
         leaf_fns=(
@@ -159,9 +160,10 @@ def recursive_tagged_dict_to_dataclass(x):
     return recursion_utils.recursive(
         x,
         branch_conditionals=(
-            recursion_utils.dict_branch_with_transform_to_dataclass,
             recursion_utils.tuple_branch, 
             recursion_utils.list_branch, 
+            recursion_utils.dataframe_branch,
+            recursion_utils.dict_branch_with_transform_to_dataclass,
         ),
         leaf_fns=(
             lambda x: x,
@@ -169,20 +171,23 @@ def recursive_tagged_dict_to_dataclass(x):
     )
     
 def deserialize(filepath):
+    """ 
+    """
     # Deserialize and reconstruct.
     serializable = fileio_utils.load_from_json(filepath)
 
-    return recursion_utils.recursive(
-        serializable,
-        branch_conditionals=(
-            recursion_utils.dict_branch_with_transform_to_dataclass,
-            recursion_utils.tuple_branch, 
-            recursion_utils.list_branch, 
-        ),
-        leaf_fns=(
-            lambda x: x,
-        )
-    )
+    # return recursion_utils.recursive(
+    #     serializable,
+    #     branch_conditionals=(
+    #         recursion_utils.dict_branch_with_transform_to_dataclass,
+    #         recursion_utils.tuple_branch, 
+    #         recursion_utils.list_branch, 
+    #     ),
+    #     leaf_fns=(
+    #         lambda x: x,
+    #     )
+    # )
+    return recursive_tagged_dict_to_dataclass(serializable)
     
 def recursive_recover(x):
     """ 
@@ -192,9 +197,10 @@ def recursive_recover(x):
     return recursion_utils.recursive(
         x,
         branch_conditionals=(
-            recursion_utils.dict_branch,
             recursion_utils.list_branch,
             recursion_utils.tuple_branch,
+            recursion_utils.dataframe_branch,
+            recursion_utils.dict_branch,
             recursion_utils.dataclass_branch_with_factory_config
         ),
         leaf_fns=(

@@ -1,4 +1,5 @@
 from dataclasses import is_dataclass, fields
+import pandas as pd
 
 from . import serialization as serialization_utils
 
@@ -41,9 +42,7 @@ def handle_dict_with_transform_to_dataclass(d, recurse):
     However, since we wish both to descend recursively into tagged dicts and to
     transform them into dataclasses, it seems there is no way to keep these
     separate without compromising the integrity and safety of the `recursive`
-    function itself. This solution confines the breaking of the separation of
-    branches and leaves to this function, while preserving the `recursive` 
-    function's generality.
+    function itself.
     """
     d = {k : recurse(v) for k, v in d.items()}
     x = serialization_utils.tagged_dict_to_dataclass_instance(d)
@@ -78,9 +77,9 @@ dataclass_branch = (is_dataclass, handle_dataclass)
 
 def handle_dataclass_with_transform_to_dict(d, recurse):
     """ 
-    This function breaks the rule of separating branch conditions from leaf
+    This function breaks the pattern of separating branch conditions from leaf
     transformations, as a transformation is applied here after branching.
-    See documentation for handle_dict_with_transform, as this problem is the 
+    See documentation for handle_dict_with_transform, as this siutation is the 
     dual of the one addressed there.
 
     NB: Attempting to reconstruct the dataclass from the result of the dict
@@ -107,14 +106,25 @@ def handle_dataclass_with_factory_config(d, recurse):
     # Descend recursively into dataclass first.
     d_transformed = handle_dataclass(d, recurse)
 
-    # Better to check this inside of here, that way this condition is always
-    # checked for any dataclass. Otherwise, if separate branch conditionals
-    # are used in the recursive function, and dataclass_branch comes first, 
-    # the conditional check loop will short circuit, and deeper items may not
-    # be reached.
+    # Better to check this here, so that this condition is always checked for
+    # any dataclass. Otherwise, if separate branch conditionals are used in the
+    # recursive function, and dataclass_branch comes first, the conditional
+    # check loop will short circuit, and deeper items may not be reached.
     if isinstance(d_transformed, FactoryConfig):
         return d_transformed.recover()
     else:
         return d_transformed
 
 dataclass_branch_with_factory_config = (is_dataclass, handle_dataclass_with_factory_config)
+
+def is_dataframe(x):
+    """ 
+    """
+    return isinstance(x, pd.DataFrame)
+
+def handle_dataframe(df, recurse):
+    """ 
+    """
+    return df.map(recurse)
+
+dataframe_branch = (is_dataframe, handle_dataframe)

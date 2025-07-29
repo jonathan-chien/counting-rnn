@@ -435,7 +435,7 @@ class AutoRNN(nn.Module):
         # Store hidden state and logits produced by input of switch token. This
         # is the first timestep of the "generated" portion, since the output
         # will be the first generated value.
-        generated['hidden'][:, 0, :] = h_n.squeeze()
+        generated['hidden'][:, 0, :] = h_n.squeeze(dim=0)
         generated['logits'][:, 0, :] = input_seqs_final_logits
         
         # Store predicted token from last timepoint of forward pass above as 
@@ -458,7 +458,7 @@ class AutoRNN(nn.Module):
             ) 
 
             # Store network state/readout from current step.
-            generated['hidden'][:, i_step, :] = h_n.squeeze()
+            generated['hidden'][:, i_step, :] = h_n.squeeze(dim=0)
             generated['logits'][:, i_step, :] = current_logits
 
             # Predict next timestep.
