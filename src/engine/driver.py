@@ -33,7 +33,7 @@ def get_filepath_from_ref(config_kind, ref, file_ext):
     return f'configs/{config_kind}/{ref}{file_ext}'
 
     
-def run_training_from_filepath(
+def run_and_save_training_from_filepath(
     model_cfg_filepath, 
     data_train_cfg_filepath, 
     training_cfg_filepath, 
@@ -79,7 +79,7 @@ def run_training_from_filepath(
     # output_dir = train_run_dir + f'output/'
 
     # Used to manually save configs below after they are loaded in.
-    dirs['config'] = fileio_utils.make_dir(dirs['train_run'], 'config')
+    dirs['configs'] = fileio_utils.make_dir(dirs['train_run'], 'configs')
     # config_dir = fileio_utils.make_dir(dirs['train_run'], 'config')
 
     # -------------------------- Build dataset ------------------------------ #    
@@ -214,49 +214,21 @@ def run_training_from_filepath(
         'dirs': dirs
     }
 
+
 def run_testing_from_filepath(
     model_cfg_filepath, 
     data_test_cfg_filepath, 
     testing_cfg_filepath, 
     reproducibility_cfg_filepath,
     seed_idx, 
-    exp_dir, 
-    train_run_id,
-    test_run_id_suffix='',
     model_filepath=None,
-    model_suffix='_best.pt', 
-    weights_only=False
+    log_dir=None,
+    weights_only=False,
+    log_outputs_override=False
 ):
-    # ---------------------- Build all directories/paths -------------------- #
-    # Build path to models (this is based solely on training params) if not provided.
-    if model_filepath is None:
-        models_dir = fileio_utils.get_dir(exp_dir, f'seed{seed_idx:02d}', 'train', train_run_id, 'output', 'models')
-        # models_dir = f'{exp_dir}seed{seed_idx:02d}/train/{train_run_id}/output/models/'
-        model_filepath = fileio_utils.get_filepath_with_suffix(models_dir, model_suffix)
-
-    # Build test run ID.
-    data_test_id = get_id_from_filepath(data_test_cfg_filepath, depth=3)
-    testing_id = get_id_from_filepath(testing_cfg_filepath, depth=3)
-    reproducibility_id = get_id_from_filepath(reproducibility_cfg_filepath, depth=2)
-    test_run_id = '_'.join([train_run_id, data_test_id, testing_id, reproducibility_id]) + test_run_id_suffix
-    # test_run_id = f'{train_run_id}_{data_test_id}_{testing_id}'
-    # test_run_id = train_run_id + '_' + test_run_id 
-
-    dirs = {}
-
-    # Creat test run dir. Test results and logger will be stored here.
-    dirs['test_run'] = fileio_utils.make_dir(
-        exp_dir, f'seed{seed_idx:02d}', 'test', test_run_id, exist_ok=False
-    )
-    # test_run_dir = exp_dir + f'seed{seed_idx:02d}/test/' + test_run_id + '/'
-
-    # Build directory to pass to Logger constructor.
-    dirs['logs'] = fileio_utils.make_dir(dirs['test_run'], 'output', 'logs')
-    # output_dir = test_run_dir + 'output/'
-
-    # Directory where used base configs will be saved directly.
-    dirs['config'] = fileio_utils.make_dir(dirs['test_run'], 'config')
-
+    """ 
+    Runs testing process from config filepath names.
+    """
     # -------------------------- Build dataset ------------------------------ #    
     # Build training, validation, and test splits. Embedding dim needed for 
     # model instantiation below.
@@ -288,12 +260,6 @@ def run_testing_from_filepath(
     testing_cfg_dict['base'] = serialization_utils.deserialize(testing_cfg_filepath)
     testing_cfg_dict['recovered'] = serialization_utils.recursive_recover(testing_cfg_dict['base']) 
 
-    # -------------------- Register used (base) configs --------------------- #
-    serialization_utils.serialize(model_cfg_dict['base'], dirs['config'] / 'model.json')
-    serialization_utils.serialize(data_test_cfg_dict['base'], dirs['config'] / 'data_test.json')
-    serialization_utils.serialize(testing_cfg_dict['base'], dirs['config'] / 'testing.json')
-    serialization_utils.serialize(reproducibility_cfg_dict['base'], dirs['config'] / 'reproducibility.json')
-
     # ------------------ Manually recover deferred items -------------------- #
     # Add dataset to dataloader. If string placeholder was used for batch size,
     # replace with size of testing dataset.
@@ -309,8 +275,16 @@ def run_testing_from_filepath(
     # log_dir = run_dir + f"output/seed{seed_idx:02d}/"
     testing_cfg_dict['recovered'].eval_fn_cfg.logger \
         = testing_cfg_dict['recovered'].eval_fn_cfg.logger.manually_recover(
-            log_dir=dirs['logs']
+            log_dir=('' if log_dir is None else log_dir)
         )
+    
+    # Hidden states, logits etc. might not be saved at test time to save space.
+    # To analyze these, re-run testing from configs, but with the log_outputs_override 
+    # arg set to True. The log_outputs arg to the eval function does not affect
+    # the logger object's attributes but causes hidden states etc. to be
+    # registered to the logger.
+    if log_outputs_override:
+        testing_cfg_dict['recovered'].eval_fn_cfg.log_outputs = True
     
     # ------------------------ Manual add (no recover) ---------------------- #
     # Add switch label.
@@ -333,6 +307,86 @@ def run_testing_from_filepath(
         **serialization_utils.shallow_asdict(testing_cfg_dict['recovered'].eval_fn_cfg)
     )
 
+    return logger_test, model, sequences, model_cfg_dict, data_test_cfg_dict, testing_cfg_dict, reproducibility_cfg_dict
+
+def get_model_filepath(exp_dir, seed_idx, train_run_id, model_suffix):
+    """ 
+    """
+    models_dir = fileio_utils.get_dir(exp_dir, f'seed{seed_idx:02d}', 'train', train_run_id, 'output', 'models')
+    return fileio_utils.get_filepath_with_suffix(models_dir, model_suffix)
+
+def run_and_save_testing_from_filepath(
+    model_cfg_filepath, 
+    data_test_cfg_filepath, 
+    testing_cfg_filepath, 
+    reproducibility_cfg_filepath,
+    seed_idx, 
+    exp_dir, 
+    train_run_id,
+    test_run_id_suffix='',
+    model_filepath=None,
+    model_suffix='_best.pt', 
+    weights_only=False
+):
+    """ 
+    Wrapper around run_testing_from_filepath that also creates directories and
+    orchestrates file operations/saving.
+    """
+    # ---------------------- Build all directories/paths -------------------- #
+    # Build path to models (this is based solely on training params) if not provided.
+    if model_filepath is None:
+        # models_dir = fileio_utils.get_dir(exp_dir, f'seed{seed_idx:02d}', 'train', train_run_id, 'output', 'models')
+        # model_filepath = fileio_utils.get_filepath_with_suffix(models_dir, model_suffix)
+        model_filepath = get_model_filepath(exp_dir, seed_idx, train_run_id, model_suffix)
+    
+    # Build test run ID.
+    data_test_id = get_id_from_filepath(data_test_cfg_filepath, depth=3)
+    testing_id = get_id_from_filepath(testing_cfg_filepath, depth=3)
+    reproducibility_id = get_id_from_filepath(reproducibility_cfg_filepath, depth=2)
+    test_run_id = '_'.join([train_run_id, data_test_id, testing_id, reproducibility_id]) + test_run_id_suffix
+    # test_run_id = f'{train_run_id}_{data_test_id}_{testing_id}'
+    # test_run_id = train_run_id + '_' + test_run_id 
+
+    dirs = {}
+
+    # Create test run dir. Test results and logger will be stored here.
+    dirs['test_run'] = fileio_utils.make_dir(
+        exp_dir, f'seed{seed_idx:02d}', 'test', test_run_id, exist_ok=False
+    )
+    # test_run_dir = exp_dir + f'seed{seed_idx:02d}/test/' + test_run_id + '/'
+
+    # Build directory to pass to Logger constructor.
+    dirs['logs'] = fileio_utils.make_dir(dirs['test_run'], 'output', 'logs')
+    # output_dir = test_run_dir + 'output/'
+
+    # Directory where used base configs will be saved directly.
+    dirs['configs'] = fileio_utils.make_dir(dirs['test_run'], 'configs')
+
+    (
+        logger_test, 
+        model, 
+        sequences, 
+        model_cfg_dict, 
+        data_test_cfg_dict, 
+        testing_cfg_dict, 
+        reproducibility_cfg_dict
+    ) = run_testing_from_filepath(
+        model_cfg_filepath=model_cfg_filepath, 
+        data_test_cfg_filepath=data_test_cfg_filepath, 
+        testing_cfg_filepath=testing_cfg_filepath, 
+        reproducibility_cfg_filepath=reproducibility_cfg_filepath,
+        seed_idx=seed_idx, 
+        log_dir=dirs['logs'],
+        model_filepath=model_filepath,
+        weights_only=weights_only
+    )
+
+    # -------------------- Register used (base) configs --------------------- #
+    serialization_utils.serialize(model_cfg_dict['base'], dirs['config'] / 'model.json')
+    serialization_utils.serialize(data_test_cfg_dict['base'], dirs['config'] / 'data_test.json')
+    serialization_utils.serialize(testing_cfg_dict['base'], dirs['config'] / 'testing.json')
+    serialization_utils.serialize(reproducibility_cfg_dict['base'], dirs['config'] / 'reproducibility.json')
+
     # TODO: Save logger.
     if logger_test is not None:
         logger_test.convert_to_serializable_format(target=['batch_logs', 'epoch_logs'])
@@ -349,187 +403,140 @@ def run_testing_from_filepath(
         'dirs': dirs
     }
 
-# def single_train_single_test(
-#     data_train_cfg_filepath: str,
-#     model_cfg_filepath: str,
-#     training_cfg_filepath: str,
-#     data_test_cfg_filepath: str,
-#     testing_cfg_filepath: str,
-#     exp_id: str,
-#     run_id: str,
-#     seed_idx: str,
-#     weights_only: bool =False
-# ):
-#     """ 
-#     """
-
-#     run_dir = f'experiments/{exp_id}/{run_id}/'
-
-#     model, training, checkpoint_dir, training_cfg_dict, model_cfg_dict, data_cfg_dict \
-#         = run_training_from_filepath(
-#             data_cfg_filepath=data_train_cfg_filepath,
-#             model_cfg_filepath=model_cfg_filepath,
-#             training_cfg_filepath=training_cfg_filepath,
-#             run_dir=run_dir,
-#             seed_idx=seed_idx,
-#             test_mode=False,
-#         )
-
-    
-#     logger_test, data_cfg_dict, model_cfg_dict = run_testing_from_filepath(
-#         data_cfg_filepath=data_test_cfg_filepath,
-#         model_cfg_filepath=model_cfg_filepath,
-#         testing_cfg_filepath=testing_cfg_filepath,
-#         run_dir=run_dir,
-#         seed_idx=seed_idx,
-#         weights_only=weights_only
-#     )
-
-#     results = {
-#         'model' : model,
-#         'training': training,
-#         'checkpoint_dir': checkpoint_dir, 
-#         'training_cfg_dict': training_cfg_dict,
-#         'model_cfg_dict': model_cfg_dict,
-#         'data_cfg_dict': data_cfg_dict,
-#         'testing': logger_test
-#     }
-
-#     torch.save(results, (run_dir + f'output/seed{seed_idx:02d}/results.pt'))
-
-#     return results
-
-
-# def single_train_multi_test(
-#     data_train_cfg_filepath: str,
-#     model_cfg_filepath: str,
-#     training_cfg_filepath: str,
-#     data_test_cfg_filepath_list: List[str],
-#     testing_cfg_filepath: str,
-#     exp_id: str,
-#     run_id: str,
-#     seed_idx: str,
-#     weights_only: bool =False
-# ):
-    
-#     run_dir = f'experiments/{exp_id}/{run_id}/'
-
-#     model, training, checkpoint_dir, training_cfg_dict, model_cfg_dict, data_cfg_dict \
-#         = run_training_from_filepath(
-#             data_cfg_filepath=data_train_cfg_filepath,
-#             model_cfg_filepath=model_cfg_filepath,
-#             training_cfg_filepath=training_cfg_filepath,
-#             run_dir=run_dir,
-#             seed_idx=seed_idx,
-#             test_mode=False,
-#         )
-
-# def run(
-#     model_cfg_ref_list,
-#     data_train_cfg_ref_list,
-#     training_cfg_ref_list,
-#     data_test_cfg_ref_list,
-#     testing_cfg_ref_list,
-#     seed_idx,
-#     exp_group_id,
-#     exp_id,
-#     exp_dir_with_seed_exist_ok=False, # Can be set to True for curriculum learning, else leave False to help prevent overwriting.
-#     run_id_suffix='',
-#     pretrained_model_filepath_list=None,
-#     model_suffix='_best.pt',
+# def run_and_save_testing_from_filepath(
+#     model_cfg_filepath, 
+#     data_test_cfg_filepath, 
+#     testing_cfg_filepath, 
+#     reproducibility_cfg_filepath,
+#     seed_idx, 
+#     exp_dir, 
+#     train_run_id,
+#     test_run_id_suffix='',
+#     model_filepath=None,
+#     model_suffix='_best.pt', 
 #     weights_only=False
 # ):
-#     # Build experiment directory.
-#     exp_dir = fileio_utils.make_dir('experiments', exp_group_id, exp_id)
+#     # ---------------------- Build all directories/paths -------------------- #
+#     # Build path to models (this is based solely on training params) if not provided.
+#     if model_filepath is None:
+#         models_dir = fileio_utils.get_dir(exp_dir, f'seed{seed_idx:02d}', 'train', train_run_id, 'output', 'models')
+#         # models_dir = f'{exp_dir}seed{seed_idx:02d}/train/{train_run_id}/output/models/'
+#         model_filepath = fileio_utils.get_filepath_with_suffix(models_dir, model_suffix)
 
-#     # Raise exception if a directory for the requested seed already exists.
-#     exp_dir_with_seed = exp_dir / f'seed{seed_idx:02d}'
-#     if exp_dir_with_seed.exists() and not exp_dir_with_seed_exist_ok:
-#         raise FileExistsError(
-#             f"{exp_dir_with_seed} already exists!"
+#     # Build test run ID.
+#     data_test_id = get_id_from_filepath(data_test_cfg_filepath, depth=3)
+#     testing_id = get_id_from_filepath(testing_cfg_filepath, depth=3)
+#     reproducibility_id = get_id_from_filepath(reproducibility_cfg_filepath, depth=2)
+#     test_run_id = '_'.join([train_run_id, data_test_id, testing_id, reproducibility_id]) + test_run_id_suffix
+#     # test_run_id = f'{train_run_id}_{data_test_id}_{testing_id}'
+#     # test_run_id = train_run_id + '_' + test_run_id 
+
+#     dirs = {}
+
+#     # Create test run dir. Test results and logger will be stored here.
+#     dirs['test_run'] = fileio_utils.make_dir(
+#         exp_dir, f'seed{seed_idx:02d}', 'test', test_run_id, exist_ok=False
+#     )
+#     # test_run_dir = exp_dir + f'seed{seed_idx:02d}/test/' + test_run_id + '/'
+
+#     # Build directory to pass to Logger constructor.
+#     dirs['logs'] = fileio_utils.make_dir(dirs['test_run'], 'output', 'logs')
+#     # output_dir = test_run_dir + 'output/'
+
+#     # Directory where used base configs will be saved directly.
+#     dirs['config'] = fileio_utils.make_dir(dirs['test_run'], 'config')
+
+#     # -------------------------- Build dataset ------------------------------ #    
+#     # Build training, validation, and test splits. Embedding dim needed for 
+#     # model instantiation below.
+#     sequences, data_test_cfg_dict, reproducibility_cfg_dict \
+#         = data_builder.build_sequences_from_filepath(
+#             data_cfg_filepath=data_test_cfg_filepath,
+#             reproducibility_cfg_filepath=reproducibility_cfg_filepath,
+#             build=['test'],
+#             seed_idx=seed_idx,
+#             print_to_console=False
 #         )
 
-#     # Validate pretrained_model_filepath_list.
-#     if pretrained_model_filepath_list is not None:
-#         validation_utils.validate_iterable_contents(
-#             pretrained_model_filepath_list, 
-#             validation_utils.is_str, 
-#             expected_description='a string'
+#     # ------------------------ Load trained model --------------------------- #   
+#     model, model_cfg_dict, _, _ = model_builder.build_model_from_filepath(
+#         model_cfg_filepath=model_cfg_filepath, 
+#         data_cfg_filepath=data_test_cfg_filepath, # Just need embedding dimension and tokens which should match.
+#         reproducibility_cfg_filepath=reproducibility_cfg_filepath,
+#         seed_idx=seed_idx, 
+#         device='cpu', # No test pass here, model will be moved to device stored in training_cfg.train_fn_cfg in the train function 
+#         test_pass=False
+#     )
+
+#     # models_dir = run_dir + f"output/seed{seed_idx:02d}/models/"
+#     checkpoint = torch.load(model_filepath, weights_only=weights_only)
+#     model.load_state_dict(checkpoint['model_state_dict'])
+
+#     # -------------------- Retrieve train/val config ------------------------ #
+#     testing_cfg_dict = {}
+#     testing_cfg_dict['base'] = serialization_utils.deserialize(testing_cfg_filepath)
+#     testing_cfg_dict['recovered'] = serialization_utils.recursive_recover(testing_cfg_dict['base']) 
+
+#     # -------------------- Register used (base) configs --------------------- #
+#     serialization_utils.serialize(model_cfg_dict['base'], dirs['config'] / 'model.json')
+#     serialization_utils.serialize(data_test_cfg_dict['base'], dirs['config'] / 'data_test.json')
+#     serialization_utils.serialize(testing_cfg_dict['base'], dirs['config'] / 'testing.json')
+#     serialization_utils.serialize(reproducibility_cfg_dict['base'], dirs['config'] / 'reproducibility.json')
+
+#     # ------------------ Manually recover deferred items -------------------- #
+#     # Add dataset to dataloader. If string placeholder was used for batch size,
+#     # replace with size of testing dataset.
+#     testing_cfg_dict['recovered'].eval_fn_cfg.dataloader \
+#         = testing_cfg_dict['recovered'].eval_fn_cfg.dataloader.manually_recover(
+#             dataset = sequences['test'],
+#             batch_size=len(sequences['test']) 
+#             if isinstance(testing_cfg_dict['recovered'].eval_fn_cfg.dataloader.args_cfg.batch_size, str)
+#             else testing_cfg_dict['recovered'].eval_fn_cfg.dataloader.args_cfg.batch_size
 #         )
-#         if len(pretrained_model_filepath_list) != len(model_cfg_ref_list):
-#             raise RuntimeError(
-#                 "Length of `pretrained_model_filepath_list` "
-#                 f"({len(pretrained_model_filepath_list)}) does not match that " 
-#                 f"of `model_cfg_ref_list` ({len(model_cfg_ref_list)})."
-#             )
-#     else:
-#         pretrained_model_filepath_list = [None for _ in range(len(model_cfg_ref_list))]
+    
+#     # Build and add logger save directory for test logger.
+#     # log_dir = run_dir + f"output/seed{seed_idx:02d}/"
+#     testing_cfg_dict['recovered'].eval_fn_cfg.logger \
+#         = testing_cfg_dict['recovered'].eval_fn_cfg.logger.manually_recover(
+#             log_dir=dirs['logs']
+#         )
+    
+#     # ------------------------ Manual add (no recover) ---------------------- #
+#     # Add switch label.
+#     testing_cfg_dict['recovered'].eval_fn_cfg.switch_label \
+#         = sequences['test'].special_tokens['switch']['label'].to(
+#             testing_cfg_dict['recovered'].eval_fn_cfg.device
+#         )
 
-#     training = {}
-#     testing = {}
-#     for data_train_cfg_ref in data_train_cfg_ref_list:
-#         for (model_cfg_ref, pretrained_model_filepath) in zip(model_cfg_ref_list, pretrained_model_filepath_list):
-#             for training_cfg_ref in training_cfg_ref_list:
+#     # ---------------------------- Run testing ------------------------------ # 
+#     # Re-apply split seed immediately prior to testing.
+#     # Re-apply split seed immediately prior to training 
+#     ml_utils.reproducibility.apply_reproducibility_settings(
+#         reproducibility_cfg=reproducibility_cfg_dict['recovered'],
+#         seed_idx=seed_idx,
+#         split='test'
+#     )
 
-#                 # Get config filepaths.
-#                 data_train_cfg_filepath = get_filepath_from_ref('datasets', data_train_cfg_ref, '.json')
-#                 model_cfg_filepath = get_filepath_from_ref('models', model_cfg_ref, '.json')
-#                 training_cfg_filepath = get_filepath_from_ref('training', training_cfg_ref, '.json')
-#                 # data_train_cfg_filepath = f'configs/datasets/{data_train_cfg_ref}.json'
-#                 # model_cfg_filepath = f'configs/models/{model_cfg_ref}.json'
-#                 # training_cfg_filepath = f'configs/training/{training_cfg_ref}.json'
+#     logger_test = evaluate(
+#         model, 
+#         **serialization_utils.shallow_asdict(testing_cfg_dict['recovered'].eval_fn_cfg)
+#     )
 
+#     # TODO: Save logger.
+#     if logger_test is not None:
+#         logger_test.convert_to_serializable_format(target=['batch_logs', 'epoch_logs'])
+#         logger_test.save()
 
-#                 training_run = run_training_from_filepath(
-#                     data_train_cfg_filepath=data_train_cfg_filepath,
-#                     model_cfg_filepath=model_cfg_filepath,
-#                     pretrained_model_filepath=pretrained_model_filepath,
-#                     training_cfg_filepath=training_cfg_filepath,
-#                     seed_idx=seed_idx,
-#                     exp_dir=exp_dir,
-#                     train_run_id_suffix=run_id_suffix,
-#                     test_mode=False
-#                 )
-#                 training[training_run['train_run_id']] = training_run
-
-#                 # # Build train run id and check against the one returned above.
-#                 # train_run_id = '_'.join(
-#                 #     get_id_from_filepath(get_filepath_from_ref(ref, ))
-#                 #     for ref in [data_train_cfg_ref, model_cfg_ref, training_cfg_ref]
-#                 # )
-#                 # # f'{data_train_cfg_ref}_{model_cfg_ref}_{training_cfg_ref}'
-#                 # if train_run_id != training['train_run_id']:
-#                 #     raise RuntimeError(
-#                 #         f"The train_run_id '{train_run_id}' constructed from "
-#                 #         "the input lists of config files does not match the " 
-#                 #         f"train_run_id '{training['train_run_id']}' constructed, "
-#                 #         "used, and returned by the run_training_from_filepath function."
-#                 #     )
-                
-#                 for data_test_cfg_ref in data_test_cfg_ref_list:
-#                     for testing_cfg_ref in testing_cfg_ref_list:
-
-#                         # Get config filepaths.
-#                         data_test_cfg_filepath = get_filepath_from_ref('datasets', data_test_cfg_ref, '.json')
-#                         testing_cfg_filepath = get_filepath_from_ref('testing', testing_cfg_ref, '.json')
-#                         # data_test_cfg_filepath = f'configs/datasets/{data_test_cfg_ref}'
-#                         # testing_cfg_filepath = f'configs/testing/{testing_cfg_ref}'
-
-#                         testing_run = run_testing_from_filepath(
-#                             data_test_cfg_filepath=data_test_cfg_filepath,
-#                             model_cfg_filepath=model_cfg_filepath,
-#                             model_filepath=None, # If None, will build path to models from exp_dir and train_run_id
-#                             testing_cfg_filepath=testing_cfg_filepath, 
-#                             seed_idx=seed_idx,
-#                             exp_dir=exp_dir,
-#                             train_run_id=training_run['train_run_id'], # train_run_id from most recent iteration
-#                             test_run_id_suffix=run_id_suffix,
-#                             model_suffix=model_suffix,
-#                             weights_only=weights_only
-#                         )
-#                         testing[testing_run['test_run_id']] = testing_run
-                
-#     return training, testing, exp_dir
+#     return {
+#         'logger_test': logger_test, 
+#         'model' : model,
+#         'sequences' : sequences,
+#         'data_test_cfg_dict': data_test_cfg_dict, 
+#         'model_cfg_dict': model_cfg_dict,
+#         'testing_cfg_dict': testing_cfg_dict,
+#         'test_run_id': test_run_id,
+#         'dirs': dirs
+#     }
 
 def run(
     model_cfg_ref_list,
@@ -590,7 +597,7 @@ def run(
                         # training_cfg_filepath = f'configs/training/{training_cfg_ref}.json'
 
 
-                        training_run = run_training_from_filepath(
+                        training_run = run_and_save_training_from_filepath(
                             data_train_cfg_filepath=data_train_cfg_filepath,
                             model_cfg_filepath=model_cfg_filepath,
                             pretrained_model_filepath=pretrained_model_filepath,
@@ -614,7 +621,7 @@ def run(
                         #         f"The train_run_id '{train_run_id}' constructed from "
                         #         "the input lists of config files does not match the " 
                         #         f"train_run_id '{training['train_run_id']}' constructed, "
-                        #         "used, and returned by the run_training_from_filepath function."
+                        #         "used, and returned by the run_and_save_training_from_filepath function."
                         #     )
                         
                         for data_test_cfg_ref in data_test_cfg_ref_list:
@@ -626,7 +633,7 @@ def run(
                                 # data_test_cfg_filepath = f'configs/datasets/{data_test_cfg_ref}'
                                 # testing_cfg_filepath = f'configs/testing/{testing_cfg_ref}'
 
-                                testing_run = run_testing_from_filepath(
+                                testing_run = run_and_save_testing_from_filepath(
                                     data_test_cfg_filepath=data_test_cfg_filepath,
                                     model_cfg_filepath=model_cfg_filepath,
                                     model_filepath=None, # If None, will build path to models from exp_dir and train_run_id
@@ -642,79 +649,6 @@ def run(
                                 testing[testing_run['test_run_id']] = testing_run
                 
     return training, testing, exp_dir
-
-
-# def run_curriculum(
-#     model_cfg_ref: str,
-#     data_train_cfg_ref_list: List[str],
-#     pretrained_model_filepath: Optional[str],
-#     training_cfg_ref_list: List[str],
-#     data_test_cfg_ref_list: List[str],
-#     testing_cfg_ref_list: List[str],
-#     seed_idx,
-#     exp_group_id,
-#     exp_id,
-#     model_suffix='_best.pt',
-#     weights_only=False
-# ):
-    
-#     # Validation.
-#     list_lengths = []
-#     for ref_list in [
-#         data_train_cfg_ref_list,
-#         training_cfg_ref_list,
-#         data_test_cfg_ref_list,
-#         testing_cfg_ref_list
-#     ]:
-#         validation_utils.validate_iterable_contents(
-#             ref_list,
-#             validation_utils.is_string,
-#             expected_description='a string'
-#         )
-#         list_lengths.append(len(ref_list))
-#     if len(set(list_lengths)) != 1:
-#         raise RuntimeError(
-#             "data_train_cfg_ref_list, training_cfg_ref_list, data_test_cfg_ref_list, " 
-#             "testing_cfg_ref_list must all be the same length."
-#         )
-#     num_stages = set(list_lengths)[0]
-    
-#     # Expand model_cfg_ref into list to match.
-#     model_cfg_ref_list = [model_cfg_ref for _ in range(num_stages)]
-    
-#     # Sequentially call run to execute curriculum.
-#     for i_stage, (
-#         data_train_cfg_ref,
-#         model_cfg_ref,
-#         training_cfg_ref,
-#         data_test_cfg_ref,
-#         testing_cfg_ref
-#     ) in enumerate(zip(
-#         data_train_cfg_ref_list,
-#         model_cfg_ref_list,
-#         training_cfg_ref_list,
-#         data_test_cfg_ref_list,
-#         testing_cfg_ref_list
-#     )):
-#         training, testing = run(
-#             data_train_cfg_ref_list=[data_train_cfg_ref],
-#             model_cfg_ref_list=[model_cfg_ref],
-#             pretrained_model_filepath_list=[pretrained_model_filepath],
-#             training_cfg_ref_list=[training_cfg_ref],
-#             data_test_cfg_ref_list=[data_test_cfg_ref],
-#             testing_cfg_ref_list=[testing_cfg_ref],
-#             seed_idx=seed_idx,
-#             exp_group_id=exp_group_id,
-#             exp_id=exp_id,
-#             run_id_suffix=f'_c{i_stage:02d}', # append _c00, _c01, etc. for easier tracking of stages of learning
-#             model_suffix=model_suffix,
-#             weights_only=weights_only
-#         )
-
-#         # Update pretrained_model_filepath variable for next step.
-#         pretrained_model_filepath = fileio_utils.get_filepath_with_suffix(
-#             training['checkpoint_dir'], model_suffix
-#         )
 
 def run_curriculum(
     model_cfg_ref_list: List[str],

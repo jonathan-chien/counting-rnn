@@ -1,8 +1,4 @@
-import numpy as np
-import torch
-
-
-def subplot_dims(num_subplots, layout='balanced_wide', distance=2):
+def subplot_dims(num_subplots, layout='wide', distance=2):
     """ 
     For a given number of desired subplots, returns grid shape as close to a 
     square as possible, without leaving too many grid entries blank.

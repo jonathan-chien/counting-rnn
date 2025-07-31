@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 import torch
-from typing import Any, Callable, Dict, List, Literal, Optional, Tuple
+from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, TYPE_CHECKING
 
 from ..config import ArgsConfig, ContainerConfig, CallableConfig, SeedConfig
-
+if TYPE_CHECKING: from .training import StoppingStrategy
 
 # ---------------------------- Training/Eval -------------------------------- #
 @dataclass
@@ -51,11 +51,19 @@ class AdamWConfig(ArgsConfig):
 
 
 @dataclass
+class NoImprovementStoppingConfig(ArgsConfig):
+    patience: int
+    mode: str 
+    tol: float = 1e-6
+
+
+@dataclass
 class EarlyStoppingConfig(ArgsConfig):
     metric_name: str
-    patience: int
-    mode: str
-    tol: float
+    # patience: int
+    # mode: str
+    # tol: float
+    strategy: 'StoppingStrategy'
     min_epochs_before_stopping: int
     verbose: bool = True
     disabled: bool = False

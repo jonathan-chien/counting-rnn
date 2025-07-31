@@ -46,7 +46,7 @@ from general_utils import tensor as tensor_utils
 #         self.recent_vals = self.recent_vals.roll(-1)
 #         self.recent_vals[-1] = tensor_utils.tensor_to_cpu_python_scalar(x)
 
-#     def should_stop_early(self, epoch_idx):
+#     def should_stop(self, epoch_idx):
 #         """ 
 #         """
 #         if self.disabled or epoch_idx + 1 < self.min_epochs_before_stopping: 
@@ -66,7 +66,7 @@ from general_utils import tensor as tensor_utils
 #         if self.stopped_after_epoch is None:
 #             raise RuntimeError(
 #                 "Attempting to print to console that early stopping condition " 
-#                 "has been reached, but self.should_stop_early has not returned True yet."
+#                 "has been reached, but self.should_stop has not returned True yet."
 #             )
 #         print(
 #             f"Early stopping condition reached after epoch {self.stopped_after_epoch}.\n"
@@ -438,7 +438,7 @@ def train(
        
         if early_stopping:
             early_stopping.update(val_results[early_stopping.metric_name])
-            if early_stopping.should_stop_early(i_epoch):
+            if early_stopping.should_stop(i_epoch):
                 if early_stopping.verbose: 
                     early_stopping.print_to_console()
                 return logger_train, logger_val, metric_tracker, early_stopping
