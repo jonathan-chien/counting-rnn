@@ -160,94 +160,6 @@ class Hypercube:
         }
 
 
-# @dataclass
-# class SeqLengths:
-#     """ 
-#     Helper class for validating and storing in a format compatible with the
-#     Sequence class N distributions over the respective lengths of N sequences,
-#     for a natural number N.
-
-#     lengths : dict
-#         dict where each key is the name of a kind of sequence (e.g. 'pos', 
-#         'neg'), and each value is a dict with the following keys:
-#             'support' : 1D tensor of non-negative ints.
-#             'pmf' : 1D tensor of probability masses, same legnth as 'support'.
-#     """
-#     lengths: Dict[str, Dict[str, torch.Tensor]]
-
-#     def __post_init__(self):
-#         for name, entry in self.lengths.items():
-#             try:
-#                 support, pmf = entry['support'], entry['pmf']
-#                 tensor_utils.validate_tensor(support, 1)
-#                 utils.validate_pmf(pmf, len(support))
-#             except Exception as e:
-#                 raise ValueError(f"Validation failed for '{name}'.") from e
-
-# class SeqLengths:
-#     """ 
-#     Helper class for validating and storing in a format compatible with the
-#     Sequence class N distributions over the respective lengths of N sequences,
-#     for a natural number N.
-#     """
-#     def __init__(self, lengths):
-#         """ 
-#         Parameters
-#         ----------
-#         lengths : dict
-#             dict where each key is the name of a kind of sequence (e.g. 'pos', 
-#             'neg'), and each value is a dict with the following keys:
-#                 'support' : 1D tensor of non-negative ints.
-#                 'pmf' : 1D tensor of probability masses, same legnth as 'support'.
-#                 'dtype' : dict with the following keys:
-#                     'support' : torch.dtype of support tensor
-#                     'pmf' : torch.dtype of support tensor
-
-#         Returns
-#         -------
-#         Sets attribute `lengths`, which is a dictionary with keys corresponding
-#         to `names`; each value is a dict with keys 'support' and 'pmf', 
-#         containing the supplied support and pmf.
-#         """
-#         self.lengths = dict()
-#         for name, entry in lengths.items():
-#             support, pmf = entry['support'], entry['pmf']
-#             tensor_utils.validate_tensor(support)
-#             utils.validate_pmf(pmf, len(support))
-#             self.lengths[name] = {'support' : support, 'pmf' : pmf}
-                
-# class SeqLengths:
-#     """ 
-#     Helper class for validating and storing in a format compatible with the
-#     Sequence class N distributions over the respective lengths of N sequences,
-#     for a natural number N.
-#     """
-#     def __init__(self, *args):
-#         """ 
-#         Parameters
-#         ----------
-#         Each argument should be a triple (support, pmf, name). For the k_th
-#         argument, `support` is a list/tuple of non-negative integers
-#         corresponding to the support of the k_th distribution over sequence
-#         lengths for a Sequences object, `pmf` is a 1d tensor consisting of the
-#         corresponding pmf, and `name` is a string corresponding to that
-#         distribution/Sequences object.
-
-#         Returns
-#         -------
-#         Sets attribute `lengths`, which is a dictionary with keys corresponding
-#         to `names`; each value is a dict with keys 'support' and 'pmf', 
-#         containing the supplied support and pmf.
-#         """
-#         self.lengths = dict()
-#         for arg in args:
-#             tensor_utils.validate_tensor(arg[0], 1)
-#             tensor_utils.validate_pmf(arg[1], len(arg[0]))
-#             self.lengths[arg[2]] = {
-#                 'support' : arg[0],
-#                 'pmf' : arg[1]
-#             }
-
 class Sequences(Dataset):
     """ 
     Creates sequences that consist of elements drawn from two sets. May expand 
@@ -674,32 +586,5 @@ class Embedder:
         """
         
         transformed = self.apply_deterministic_transform(data)
-        # num_datapoints, num_dims = data.shape
-    
-        # # E.g. this could be to center hypercube at 0 before rotation.
-        # if self.offset_1 is not None: data += self.offset_1
-
-        # if num_dims > self.ambient_dim:
-        #     raise ValueError(
-        #         f"Dimensionality of data is {num_dims}, but cannot be greater "
-        #         f"than value of attribute `ambient_dim`({self.ambient_dim})."
-        #     )
-        # else:
-        #     extra_dims = self.ambient_dim - num_dims
-
-        # # Pad with zeros to introduce any extra dimensions. 
-        # data_padded = torch.cat(
-        #     (data, torch.zeros((num_datapoints, extra_dims))), dim=1
-        # )
-
-        # transformed = (
-        #     data_padded @ self.lin_transform 
-        #     if self.lin_transform is not None else data_padded
-        # )
-            
-        transformed = self._noise(transformed)
-
-        # if self.offset_2 is not None: transformed += self.offset_2
-        
-        return transformed
+        return self._noise(transformed)
     

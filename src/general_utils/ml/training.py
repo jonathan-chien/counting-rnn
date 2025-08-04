@@ -16,9 +16,6 @@ class EarlyStopping:
         self, 
         metric_name: str,
         strategy,
-        # patience: int,
-        # mode : str,
-        # tol: float = 1e-4,
         min_epochs_before_stopping: int = 1,
         verbose=True,
         disabled=False
@@ -29,21 +26,12 @@ class EarlyStopping:
         environment can access the verbose attribute to know whether or not
         to print to console. 
         """
-        # if mode not in ['min', 'max']: 
-        #     raise ValueError(
-        #         f"Unrecognized value {mode} for `mode`. Must be one of ['min', 'max']."
-        #     )
-        # validation_utils.validate_nonneg_float(tol)
         self.metric_name = metric_name
-        # self.patience = patience
-        # self.mode = mode
-        # self.tol = tol
         self.strategy = strategy
         self.min_epochs_before_stopping = min_epochs_before_stopping
         self.verbose = verbose
         self.disabled = disabled
 
-        # self.recent_vals = torch.full((self.patience + 1,), torch.nan)
         self.condition_reached_at_epoch = None
 
     def update(self, x):
@@ -77,11 +65,6 @@ class EarlyStopping:
                 "has been reached, but self.should_stop has not returned True yet."
             )
         self.strategy.print_to_console(self.condition_reached_at_epoch)
-        # print(
-        #     f"Early stopping condition reached after epoch {self.stopped_after_epoch} with tol = {self.tol}.\n"
-        #     f"Tracked value over last {self.patience+1} epochs: {self.recent_vals}.\n"
-        #     f"Final changes prior to early stopping: {torch.diff(self.recent_vals, n=1)}."
-        # )
 
 
 class StoppingStrategy(ABC):
@@ -181,75 +164,6 @@ class NoImprovementStopping(StoppingStrategy):
         self.counter = 0
         self.recent_vals.fill_(torch.nan)
     
-# class EarlyStopping:
-#     """ 
-#     """
-#     def __init__(
-#         self, 
-#         metric_name: str,
-#         patience: int,
-#         mode : str,
-#         tol: float = 1e-4,
-#         min_epochs_before_stopping: int = 1,
-#         verbose=True,
-#         disabled=False
-#     ):
-#         """ 
-#         verbose is not used in any internal methods. Rather since this is an
-#         auxiliary class meant to function in a training environment, that
-#         environment can access the verbose attribute to know whether or not
-#         to print to console. 
-#         """
-#         if mode not in ['min', 'max']: 
-#             raise ValueError(
-#                 f"Unrecognized value {mode} for `mode`. Must be one of ['min', 'max']."
-#             )
-#         validation_utils.validate_nonneg_float(tol)
-#         self.metric_name = metric_name
-#         self.patience = patience
-#         self.mode = mode
-#         self.tol = tol
-#         self.min_epochs_before_stopping = min_epochs_before_stopping
-#         self.verbose = verbose
-#         self.disabled = disabled
-
-#         self.recent_vals = torch.full((self.patience + 1,), torch.nan)
-#         self.counter = 0
-#         self.stopped_after_epoch = None
-
-#     def update(self, x):
-#         """ 
-#         """
-#         self.recent_vals = self.recent_vals.roll(-1)
-#         self.recent_vals[-1] = tensor_utils.tensor_to_cpu_python_scalar(x)
-
-#     def should_stop(self, epoch_idx):
-#         """ 
-#         """
-#         if self.disabled or epoch_idx + 1 < self.min_epochs_before_stopping: 
-#             return False
-
-#         diffs = torch.diff(self.recent_vals, n=1)
-#         if (
-#             (self.mode == 'min' and (diffs > self.tol).all())
-#             or (self.mode == 'max' and (diffs < -self.tol).all())
-#         ):
-#             self.stopped_after_epoch = epoch_idx
-#             return True
-        
-#         return False
-        
-#     def print_to_console(self):
-#         if self.stopped_after_epoch is None:
-#             raise RuntimeError(
-#                 "Attempting to print to console that early stopping condition " 
-#                 "has been reached, but self.should_stop has not returned True yet."
-#             )
-#         print(
-#             f"Early stopping condition reached after epoch {self.stopped_after_epoch} with tol = {self.tol}.\n"
-#             f"Tracked value over last {self.patience+1} epochs: {self.recent_vals}.\n"
-#             f"Final changes prior to early stopping: {torch.diff(self.recent_vals, n=1)}."
-#         )
         
 class MetricTracker:
     """ 
@@ -383,9 +297,6 @@ class MetricTracker:
 def set_requires_grad(
     model: torch.nn.Module, 
     cfg: RequiresGradConfig,
-    # mode: Literal['inclusion', 'exclusion'],
-    # requires_grad: bool,
-    # verbose=True
 ):
     """ 
     """

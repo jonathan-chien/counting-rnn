@@ -32,23 +32,10 @@ class Logger:
         self.verbose_epoch = verbose_epoch
         self.print_flush_epoch = print_flush_epoch
         self.print_flush_batch = print_flush_batch
-    
-    # def log_batch(self, *, epoch: int, batch: int, verbose=False, **kwargs):
-    #     entry = {'epoch_idx': epoch, 'batch_idx': batch}
-    #     kwargs = {key : tensor_utils.tensor_to_cpu_python_scalar(val) for key, val in kwargs.items()}
-    #     entry.update(kwargs)
-    #     self.batch_logs.append(entry)
-    #     if verbose:
-    #         for key, value in kwargs.items():
-    #             print(
-    #                 f"{key} for epoch {epoch}, batch {batch}: {value}.", 
-    #                 flush=self.print_flush_batch
-    #             )
 
     def log_batch(self, *, epoch_idx: int, batch_idx: int, suppress_print=False, **kwargs):
         entry = {key : tensor_utils.tensor_to_cpu_python_scalar(val) for key, val in kwargs.items()}
         self.batch_logs[(epoch_idx, batch_idx)] = entry
-        # self.batch_logs.append(entry)
         if self.verbose_batch and not suppress_print:
             for key, value in entry.items():
                 print(
@@ -56,17 +43,6 @@ class Logger:
                     flush=self.print_flush_batch
                 )
 
-    # def log_epoch(self, *, epoch: int, verbose=True, **kwargs):
-    #     entry = {'epoch_idx' : epoch}
-    #     kwargs = {key : tensor_utils.tensor_to_cpu_python_scalar(val) for key, val in kwargs.items()}
-    #     entry.update(kwargs)
-    #     self.epoch_logs.append(entry)
-    #     if verbose:
-    #         for key, value in kwargs.items():
-    #             print(
-    #                 f"{key} for epoch {epoch}: {value}.", 
-    #                 flush=self.print_flush_epoch
-    #             )
     def log_epoch(self, *, epoch_idx: int, suppress_print=False, **kwargs):
         entry = {key : tensor_utils.tensor_to_cpu_python_scalar(val) for key, val in kwargs.items()}
         self.epoch_logs[epoch_idx] = entry
@@ -77,25 +53,6 @@ class Logger:
                     flush=self.print_flush_epoch
                 )
 
-    # def get_batch(self, epoch_idx: int, batch_idx: int):
-    #     """ 
-    #     """
-    #     try:
-    #         return copy.deepcopy(self.batch_logs[(epoch_idx, batch_idx)])
-    #     except KeyError:
-    #         raise IndexError(
-    #             f"No entry found for epoch {epoch_idx}, batch {batch_idx}."
-    #         )
-
-    # def get_epoch(self, epoch_idx: int):
-    #     """ 
-    #     """
-    #     try:
-    #         return copy.deepcopy(self.epoch_logs[epoch_idx])
-    #     except KeyError:
-    #         raise IndexError(
-    #             f"No entry found for epoch {epoch_idx}."
-    #         )
     def get_entry(self, level: str, epoch_idx: int, batch_idx: Optional[int] = None):
         """ 
         """
@@ -149,25 +106,6 @@ class Logger:
             )
         
         return torch.tensor(values)
-        
-
-    # def get_logged_values(self, key: str, level: str):
-    #     """ 
-    #     Retrieve all logged values so far, at either the batch or epoch level.
-    #     Will raise KeyError if any entries are missing the requested key.
-    #     """
-    #     if level not in ['batch', 'epoch']:
-    #         raise ValueError(
-    #             f"Unrecognized value {level} for `level`. Must be 'batch' or 'epoch'."
-    #         )
-    #     source = self.epoch_logs if level == 'epoch' else self.batch_logs
-    #     try:
-    #         values = [entry[key] for entry in source.values()]
-    #     except KeyError:
-    #         raise KeyError(
-    #             f"The key '{key}' is missing from one or more {level} entries."
-    #         )
-    #     return torch.tensor(values)
     
     def compute_weighted_sum(self, key: str, level: str, weights: torch.Tensor, epoch_idx: Optional[int] = None):
         """ 

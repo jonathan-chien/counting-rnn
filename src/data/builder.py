@@ -33,17 +33,6 @@ def build_hypercube_sequences(sequences_cfg: SequencesConfig) -> Sequences:
         seq_order=sequences_cfg.seq_order
     )
 
-# def get_tokens(sequences, device):
-#     return sequences.transform(
-#         torch.cat(
-#             (
-#                 sequences.special_tokens['count']['token'].unsqueeze(0), 
-#                 sequences.special_tokens['eos']['token'].unsqueeze(0)
-#             ), 
-#             dim=0
-#         )
-#     ).to(device)
-
 def get_autoregressive_tokens(sequences):
     return sequences.transform.apply_deterministic_transform(
         torch.cat(
@@ -54,43 +43,6 @@ def get_autoregressive_tokens(sequences):
             dim=0
         )
     )
-
-# def build_split_sequences(sequences_cfg_base, reproducibility_cfg, split_names, split_sizes, seed_ind):
-
-#     lengths = [len(item) for item in [split_names, split_sizes, seed_ind]]
-#     if len(set(lengths)) != 1:
-#         raise ValueError(
-#             "All input arguments must be of the same length but got: "
-#             f"len(split_sizes)={len(split_sizes)}, "
-#             f"len(split_names)={len(split_names)}, "
-#             f"len(seed_ind)={len(seed_ind)}."
-#         )
-    
-#     sequences_cfgs = [copy.deepcopy(sequences_cfg_base) for _ in range(lengths[0])]
-    
-#     splits = zip(sequences_cfgs, split_sizes, split_names, seed_ind)
-#     sequences = {}
-#     for (s_cfg, size, name, seed_idx) in splits:
-#         s_cfg.num_seq = size
-#         apply_reproducibility_settings(reproducibility_cfg, name, seed_idx)
-#         sequences[name] = build_hypercube_sequences(s_cfg)
-    
-#     return sequences
-
-# def build_split_sequences(sequences_cfg_base, reproducibility_cfg, split_cfgs):
-#     """ 
-#     """
-#     sequences_cfgs = [copy.deepcopy(sequences_cfg_base) for _ in range(len(split_cfgs))]
-    
-#     sequences = {}
-#     for spl_cfg, seq_cfg in zip(split_cfgs, sequences_cfgs):
-#         seq_cfg.num_seq = spl_cfg.split_size
-#         name = spl_cfg.split_name
-#         seed_idx = spl_cfg.seed_idx
-#         apply_reproducibility_settings(reproducibility_cfg, name, seed_idx)
-#         sequences[name] = build_hypercube_sequences(seq_cfg)
-    
-#     return sequences
 
 def build_split_sequences(
     data_cfg: DataConfig, 

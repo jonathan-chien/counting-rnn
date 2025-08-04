@@ -27,22 +27,6 @@ def make_dir(*path_parts: Union[str, Path], chdir=False, parents=True, exist_ok=
 
 def make_filename(*file_ind, joiner='_'):
     return joiner.join(file_ind)
-
-# def make_file_dir_and_id(
-#         base_dir, 
-#         sub_dir_1, 
-#         sub_dir_2, 
-#         file_ind, 
-#         file_joiner='_', 
-#         chdir=False
-#     ):
-#     """ 
-#     Utility for creating directory and filename for the 
-#     configs/base_dir/sub_dir_1/sub_dir_2/id1_id2_...idn.json format.
-#     """
-#     dir = make_dir(base_dir, sub_dir_1, sub_dir_2, chdir=chdir) 
-#     filename = '_'.join(file_ind)
-#     return dir, filename
     
 def save_to_json(x, filepath, indent=2):
     filepath = Path(filepath)
