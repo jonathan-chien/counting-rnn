@@ -27,7 +27,7 @@ def pca(data, num_comps=None, corr=False):
     pcs : torch.Tensor
         Of shape (M, P). Matrix whose columns are principal components, or
         scores.
-    eigenvalues : torch.Tensor 
+    lambdas : torch.Tensor 
         Of shape (P,). Eigenvalues of retained components.
     loadings : torch.Tensor
         Of shape (M, P). Columns are retained right eigenvectors of data
@@ -46,26 +46,32 @@ def pca(data, num_comps=None, corr=False):
 
     u, s, vh = torch.linalg.svd(data_, full_matrices=False)
     pcs = u * s
-    eigenvalues = s**2 / (data.shape[0] - 1)
-    eigenspectrum = eigenvalues.clone()
+    lambdas = s**2 / (data.shape[0] - 1)
+    eigenspectrum = lambdas.clone()
     v = vh.T
-    loadings = v * torch.sqrt(eigenvalues)
+    loadings = v * torch.sqrt(lambdas)
 
     if num_comps is None:
-        return pcs, eigenvalues, loadings, v, eigenspectrum
+        return {
+            'eigenspectrum': eigenspectrum,
+            'lambdas': lambdas, 
+            'v': v,
+            'pcs': pcs, 
+            'loadings': loadings, 
+        }
     elif isinstance(num_comps, int):
         if not (num_comps > 0 and num_comps <= data.shape[1]):
             raise ValueError(
                 f"`num_comps` must be an integer between 1 and {data.shape[1]} "
                 f"but got {num_comps}."
             )
-        return (
-            pcs[:, :num_comps], 
-            eigenvalues[:num_comps], 
-            loadings[:, :num_comps], 
-            v[:, :num_comps],
-            eigenspectrum
-        )
+        return {
+            'eigenspectrum': eigenspectrum,
+            'lambdas': lambdas[:num_comps], 
+            'v': v[:, :num_comps],
+            'pcs': pcs[:, :num_comps], 
+            'loadings': loadings[:, :num_comps], 
+        }
     else:
         raise TypeError(
             "Expected the string 'all' or an int for `num_comps`, but got type " 

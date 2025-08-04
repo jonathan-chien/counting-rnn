@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, Tuple
 
 import torch
 
@@ -14,7 +14,7 @@ class HypercubeConfig(config_utils.ArgsConfig):
     coords: Union[torch.Tensor, config_utils.TensorConfig]
     inclusion_set: Optional[Union[torch.Tensor, config_utils.TensorConfig]] = None
     encoding: Union[torch.Tensor, config_utils.TensorConfig] = torch.tensor([0, 1], dtype=torch.int8)
-    
+    vertices_pmfs: Optional[Tuple[torch.Tensor]] = None
 
 @dataclass
 class SeqLengths:

@@ -58,18 +58,16 @@ def make_sampler(distr, device=None):
     
     return sampler
 
-# def recursive(x, *functions):
-#     """ 
-#     functions can be defined functions or lambda functions.
-#     """
-#     if isinstance(x, dict):
-#         return {k : recursive(v, *functions) for k, v in x.items()}
-#     elif isinstance(x, (list, tuple)):
-#         return type(x)(recursive(v, *functions) for v in x)
-#     else:
-#         for func in functions: 
-#             x = func(x)
-#         return x
+def single_parity_arange(n, parity: str, inclusive: bool = True):
+    x = torch.arange(n + inclusive)
+    if parity == 'odd':
+        return x[x % 2 != 0]
+    elif parity == 'even':
+        return x[x % 2 == 0]
+    else:
+        raise ValueError(
+            f"Unrecognized value '{parity}' for `parity`. Must be 'even' or 'odd'. "
+        )
     
 def move_to_device(device):
     """ 

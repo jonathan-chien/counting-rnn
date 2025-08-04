@@ -57,7 +57,7 @@ class CallableConfig(FactoryConfig):
     locked: bool = False
     # warn_if_locked: bool = True
     # raise_exception_if_locked: bool = False
-    if_recover_while_locked: Literal['print', 'warn', 'raise_exception', 'silent'] = 'warn'
+    if_recover_while_locked: Literal['print', 'warn', 'raise_exception', 'silent'] = 'print'
 
     @classmethod
     def from_callable(
@@ -70,7 +70,7 @@ class CallableConfig(FactoryConfig):
         locked: bool = False, 
         # warn_if_locked: bool =True, 
         # raise_exception_if_locked: bool =False
-        if_recover_while_locked: str = 'warn'
+        if_recover_while_locked: str = 'print'
     ):
         """ 
         """
@@ -208,7 +208,7 @@ class TensorConfig(CallableConfig):
         locked=False,
         # warn_if_locked=True,
         # raise_exception_if_locked=False
-        if_recover_while_locked: str = 'warn'
+        if_recover_while_locked: str = 'print'
         ):
         """ 
         Convenience method to instantiate a TensorConfig object from a tensor.

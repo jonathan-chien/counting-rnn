@@ -32,7 +32,6 @@ def get_filepath_from_ref(config_kind, ref, file_ext):
     """
     return f'configs/{config_kind}/{ref}{file_ext}'
 
-    
 def run_and_save_training_from_filepath(
     model_cfg_filepath, 
     data_train_cfg_filepath, 
@@ -115,10 +114,10 @@ def run_and_save_training_from_filepath(
     training_cfg_dict['recovered'] = serialization_utils.recursive_recover(training_cfg_dict['base']) 
 
     # --------------------- Register used (base) configs -------------------- #
-    serialization_utils.serialize(data_train_cfg_dict['base'], dirs['config'] / 'data_train.json')
-    serialization_utils.serialize(model_cfg_dict['base'], dirs['config'] / 'model.json')
-    serialization_utils.serialize(training_cfg_dict['base'], dirs['config'] / 'training.json')
-    serialization_utils.serialize(reproducibility_cfg_dict['base'], dirs['config'] / 'reproducibility.json')
+    serialization_utils.serialize(data_train_cfg_dict['base'], dirs['configs'] / 'data_train.json')
+    serialization_utils.serialize(model_cfg_dict['base'], dirs['configs'] / 'model.json')
+    serialization_utils.serialize(training_cfg_dict['base'], dirs['configs'] / 'training.json')
+    serialization_utils.serialize(reproducibility_cfg_dict['base'], dirs['configs'] / 'reproducibility.json')
 
     # ------------------ Manually recover deferred items -------------------- #
     # Fill in model parameters (optimizers instantiated here).
@@ -382,10 +381,10 @@ def run_and_save_testing_from_filepath(
     )
 
     # -------------------- Register used (base) configs --------------------- #
-    serialization_utils.serialize(model_cfg_dict['base'], dirs['config'] / 'model.json')
-    serialization_utils.serialize(data_test_cfg_dict['base'], dirs['config'] / 'data_test.json')
-    serialization_utils.serialize(testing_cfg_dict['base'], dirs['config'] / 'testing.json')
-    serialization_utils.serialize(reproducibility_cfg_dict['base'], dirs['config'] / 'reproducibility.json')
+    serialization_utils.serialize(model_cfg_dict['base'], dirs['configs'] / 'model.json')
+    serialization_utils.serialize(data_test_cfg_dict['base'], dirs['configs'] / 'data_test.json')
+    serialization_utils.serialize(testing_cfg_dict['base'], dirs['configs'] / 'testing.json')
+    serialization_utils.serialize(reproducibility_cfg_dict['base'], dirs['configs'] / 'reproducibility.json')
 
     # TODO: Save logger.
     if logger_test is not None:
