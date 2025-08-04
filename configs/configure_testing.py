@@ -3,7 +3,7 @@ import torch
 from data.sequences import Sequences
 # from engine.config import DataLoaderConfig, EvalFnConfig, LoggerConfig, LossTermConfig, TestingConfig
 from engine.config import EvalFnConfig, TestingConfig
-from engine.driver import run_testing_from_filepath
+from engine.driver import run_and_save_testing_from_filepath
 # from engine.loss import LossTerm, spectral_entropy, wrapped_cross_entropy_loss
 from engine import utils as engine_utils
 from general_utils.config import CallableConfig, TorchDeviceConfig
@@ -15,7 +15,7 @@ from general_utils import ml as ml_utils
 def main():
     # --------------------------- Set directory ----------------------------- #
     base_dir = 'configs/testing'
-    sub_dir_1 = 'demo'
+    sub_dir_1 = 'aaaa'
     sub_dir_2 = '0001'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = fileio_utils.make_filename('0000')
@@ -70,7 +70,7 @@ def main():
         kind='class',
         recovery_mode='call',
         locked=True,
-        if_recover_while_locked='warn'
+        if_recover_while_locked='print'
     )
 
     dataloader = CallableConfig.from_callable(
@@ -88,7 +88,7 @@ def main():
         kind='class',
         recovery_mode='call',
         locked=True,
-        if_recover_while_locked='warn'
+        if_recover_while_locked='print'
     )
 
     device = CallableConfig.from_callable(
@@ -110,7 +110,7 @@ def main():
         switch_label='switch_label___',
         loss_terms=[loss_term_1],
         logger=logger,
-        log_outputs=True,
+        log_outputs=False,
         criteria={
             'accuracy' : CallableConfig.from_callable(
                 engine_utils.compute_accuracy,
@@ -137,7 +137,7 @@ def main():
     serialization_utils.serialize(testing_cfg, testing_cfg_filepath)
 
     # -------------------- Test deserialization/execution ------------------- #
-    run_testing_from_filepath(
+    run_and_save_testing_from_filepath(
         model_cfg_filepath='configs/models/demo/0001/0000.json',
         # model_filepath='experiments/__00/0000/output/seed00/models/0_best.pt',
         data_test_cfg_filepath='configs/datasets/demo/0000/0005.json',

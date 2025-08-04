@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import torch
 
 from data import builder as data_builder 
@@ -7,54 +9,16 @@ from data import utils as data_utils
 from general_utils.config import CallableConfig, TensorConfig
 from general_utils import fileio as fileio_utils
 from general_utils import serialization as serialization_utils
+from general_utils import tensor as tensor_utils
 
 
 def main():
     # --------------------------- Set directory ----------------------------- #
     base_dir = 'configs/datasets'
-    sub_dir_1 = 'demo'
+    sub_dir_1 = 'aaab'
     sub_dir_2 = '0000'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
-    filename = fileio_utils.make_filename('0007')
-
-    # ---------------------- Reproducibility settings ----------------------- #
-    # SEED_KINDS = ['recovery', 'train', 'val', 'test']
-    # seed_lists, _, entropy = reproducibility_utils.generate_seed_sequence(
-    #     num_children_per_level=[50, len(SEED_KINDS)], entropy=None, dtype='uint32', return_as='int'
-    # )
-
-    # reproducibility_cfg = ReproducibilityConfig(
-    #     entropy=entropy,
-    #     seed_cfg_list=[
-    #         {
-    #             split: SeedConfig(torch_seed=seed, cuda_seed=seed)
-    #             for split, seed in zip(SEED_KINDS, repeat)
-    #         }
-    #         for repeat in seed_lists
-    #     ],
-    #     torch_determinism_cfg_dict={
-    #         'recovery' : TorchDeterminismConfig(
-    #             use_deterministic_algos=False,
-    #             cudnn_deterministic=False,
-    #             cudnn_benchmark=True
-    #         ),
-    #         'train' : TorchDeterminismConfig(
-    #             use_deterministic_algos=False,
-    #             cudnn_deterministic=False,
-    #             cudnn_benchmark=True
-    #         ),
-    #         'val' : TorchDeterminismConfig(
-    #             use_deterministic_algos=False,
-    #             cudnn_deterministic=False,
-    #             cudnn_benchmark=True
-    #         ),
-    #         'test' : TorchDeterminismConfig(
-    #             use_deterministic_algos=False,
-    #             cudnn_deterministic=False,
-    #             cudnn_benchmark=True
-    #         )
-    #     }
-    # )
+    filename = fileio_utils.make_filename('0019')
 
     # ----------------------- Build auxiliary objects ----------------------- #
     hypercube_args_cfg = HypercubeConfig(
@@ -64,24 +28,39 @@ def main():
         ),
         inclusion_set=TensorConfig.from_tensor(
             torch.tensor(
-                [[0, 1], [1, 0], [1, 1]],
-                dtype=torch.int8
+                [[0, 1], [1, 0], [1, 1]], dtype=torch.int8
             )
         ),
         encoding=TensorConfig.from_tensor(
             torch.tensor([0, 1], dtype=torch.int8)
+        ),
+        vertices_pmfs=(
+            TensorConfig.from_tensor(
+                torch.tensor([1., 0., 0.], dtype=torch.float32)
+            ),
+            TensorConfig.from_tensor(
+                torch.tensor([1.], dtype=torch.float32)
+            )
         )
     )
 
     seq_lengths = SeqLengths(
         lengths={
             'pos' : {
-                'support' : TensorConfig.from_tensor(torch.arange(7)),
-                'pmf' : TensorConfig.from_tensor(data_utils.uniform_pmf(7))
+                'support' : TensorConfig.from_tensor(
+                    torch.arange(19)
+                ),
+                'pmf' : TensorConfig.from_tensor(
+                    data_utils.uniform_pmf(len(torch.arange(19)))
+                )
             },
             'neg' : {
-                'support' : TensorConfig.from_tensor(torch.arange(3)),
-                'pmf' : TensorConfig.from_tensor(data_utils.uniform_pmf(3))
+                'support' : TensorConfig.from_tensor(
+                    torch.arange(19)
+                ),
+                'pmf' : TensorConfig.from_tensor(
+                    data_utils.uniform_pmf(len(torch.arange(19)))
+                )
             }
         }
     )
@@ -100,23 +79,27 @@ def main():
         )
     )
 
-    # --------------------------- Sequences config -------------------------- #
-    sequences_cfg = SequencesConfig(
-        num_seq='num_seq___',
-        seq_order='permute',
-        seq_lengths=seq_lengths,
-        elem=CallableConfig.from_callable(
+    elem=CallableConfig.from_callable(
             Hypercube, 
             hypercube_args_cfg, 
             kind='class', 
             recovery_mode='call'
-        ),
-        embedder=CallableConfig.from_callable(
+        )
+    
+    embedder=CallableConfig.from_callable(
             Embedder,
             embedder_cfg,
             kind='class',
             recovery_mode='call'
         )
+
+    # --------------------------- Sequences config -------------------------- #
+    sequences_cfg = SequencesConfig(
+        num_seq='num_seq___',
+        seq_order='permute',
+        seq_lengths=seq_lengths,
+        elem=elem,
+        embedder=embedder
     )
 
     # ---------------------------- Split sizes ------------------------------ #
@@ -139,12 +122,6 @@ def main():
 
 
     # -------------------- Test deserialization/execution ------------------- #
-    # # Load in seed config.
-    # seed_idx = 0
-    # reproducibility_cfg = serialization_utils.deserialize(
-    #     filepath=
-    # )
-
     # Attempt to build dataset from serialized file.
     data_builder.build_sequences_from_filepath(
         data_cfg_filepath, build=['train', 'val'], 

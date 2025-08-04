@@ -2,7 +2,7 @@ from pathlib import Path
 import torch
 
 from data.sequences import Sequences
-from engine.driver import run_training_from_filepath
+from engine.driver import run_and_save_training_from_filepath
 # from engine.utils import Logger, compute_accuracy
 from engine import utils as engine_utils
 # from engine.train import EarlyStopping, MetricTracker
@@ -24,7 +24,7 @@ def main():
     sub_dir_1 = 'aaaa'
     sub_dir_2 = '0001'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
-    filename = fileio_utils.make_filename('0000')
+    filename = fileio_utils.make_filename('0002')
 
     # ----------------------------------------------------------------------- #
     REQUIRES_GRAD_REGISTRY = {
@@ -85,7 +85,7 @@ def main():
                 kind='class',
                 recovery_mode='call',
                 locked=True,
-                if_recover_while_locked='warn'
+                if_recover_while_locked='print'
             ),
             mode='train'
         ),
@@ -115,7 +115,7 @@ def main():
                 kind='class',
                 recovery_mode='call',
                 locked=True,
-                if_recover_while_locked='warn'
+                if_recover_while_locked='print'
             ),
             mode='train'
         ),
@@ -123,19 +123,45 @@ def main():
         recovery_mode='call'
     )
 
+
     early_stopping = CallableConfig.from_callable(
         ml_utils.training.EarlyStopping,
         ml_utils.config.EarlyStoppingConfig(
             metric_name='cross_entropy_loss',
-            patience=4,
-            mode='min',
-            min_epochs_before_stopping=20,
+            strategy=CallableConfig.from_callable(
+                ml_utils.training.NoImprovementStopping,
+                ml_utils.config.NoImprovementStoppingConfig(
+                    patience=8,
+                    mode='min',
+                    tol=1e-5,
+                ),
+                kind='class',
+                recovery_mode='call'
+            ),
+            # patience=4,
+            # tol=1e-5,
+            # mode='min',
+            min_epochs_before_stopping=25,
             verbose=True,
             disabled=False
         ),
         kind='class',
         recovery_mode='call'
     )
+    # early_stopping = CallableConfig.from_callable(
+    #     ml_utils.training.EarlyStopping,
+    #     ml_utils.config.EarlyStoppingConfig(
+    #         metric_name='cross_entropy_loss',
+    #         patience=4,
+    #         tol=1e-5,
+    #         mode='min',
+    #         min_epochs_before_stopping=20,
+    #         verbose=True,
+    #         disabled=False
+    #     ),
+    #     kind='class',
+    #     recovery_mode='call'
+    # )
 
     metric_tracker = CallableConfig.from_callable(
         ml_utils.training.MetricTracker,
@@ -148,7 +174,7 @@ def main():
         locked=True,
         kind='class',
         recovery_mode='call',
-        if_recover_while_locked='warn'
+        if_recover_while_locked='print'
     )
 
     logger_train = CallableConfig.from_callable(
@@ -164,7 +190,7 @@ def main():
         kind='class',
         recovery_mode='call',
         locked=True,
-        if_recover_while_locked='warn'
+        if_recover_while_locked='print'
     )
 
     dataloader_train = CallableConfig.from_callable(
@@ -182,7 +208,7 @@ def main():
         kind='class',
         recovery_mode='call',
         locked=True,
-        if_recover_while_locked='warn'
+        if_recover_while_locked='print'
     )
 
     # Validation.
@@ -199,7 +225,7 @@ def main():
         kind='class',
         recovery_mode='call',
         locked=True,
-        if_recover_while_locked='warn'
+        if_recover_while_locked='print'
     )
 
     dataloader_val = CallableConfig.from_callable(
@@ -217,7 +243,7 @@ def main():
         kind='class',
         recovery_mode='call',
         locked=True,
-        if_recover_while_locked='warn'
+        if_recover_while_locked='print'
     )
 
     device = CallableConfig.from_callable(
@@ -274,7 +300,7 @@ def main():
         compute_mean_for=['cross_entropy_loss', 'accuracy'],
         metric_tracker=metric_tracker,
         early_stopping=early_stopping,
-        num_epochs=150,
+        num_epochs=1000,
         device=device,
         deterministic=True
     )
@@ -298,7 +324,7 @@ def main():
     for file in model_dir.glob('*_best.pt'):
         file.unlink()
 
-    _ = run_training_from_filepath(
+    _ = run_and_save_training_from_filepath(
         model_cfg_filepath='configs/models/demo/0001/0000.json',
         data_train_cfg_filepath='configs/datasets/demo/0000/0005.json',
         training_cfg_filepath=training_cfg_filepath,

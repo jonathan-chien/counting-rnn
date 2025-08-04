@@ -11,10 +11,10 @@ from general_utils import fileio as fileio_utils
 if __name__ == '__main__':
     # ---------------------------- Set directory ---------------------------- #
     base_dir = 'configs/models'
-    sub_dir_1 = 'demo'
+    sub_dir_1 = 'aaaa'
     sub_dir_2 = '0001'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
-    filename = fileio_utils.make_filename('0001')
+    filename = fileio_utils.make_filename('0003')
 
     # ----------------------- Configure input network ----------------------- #
     input_network = CallableConfig.from_callable(
@@ -42,7 +42,7 @@ if __name__ == '__main__':
             torch.nn.GRU,
             GRUConfig(
                 input_size=rnn_input_size,
-                hidden_size=20,
+                hidden_size=1,
                 num_layers=1,
                 bias=True,
                 batch_first=True,
@@ -73,7 +73,7 @@ if __name__ == '__main__':
     readout_network = CallableConfig.from_callable(
         FCN,
         FCNConfig(
-            layer_sizes=[rnn.args_cfg.hidden_size, 80, 2],
+            layer_sizes=[rnn.args_cfg.hidden_size, 20, 2],
             nonlinearities=[
                 CallableConfig.from_callable(torch.nn.GELU, GELUConfig(), kind='class', recovery_mode='call'), 
                 CallableConfig.from_callable(torch.nn.Identity, IdentityConfig(), kind='class', recovery_mode='call')
