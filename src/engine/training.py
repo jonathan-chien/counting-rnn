@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from itertools import chain
 
 import torch
@@ -6,6 +7,19 @@ from . import eval, utils
 from general_utils import recursion as recursion_utils
 from general_utils import tensor as tensor_utils
 
+
+@contextmanager
+def temporarily_eval(model):
+    """ 
+    Temporarily place model in eval mode for evaluation on validation set during training.
+    """
+    was_training = model.training
+    model.eval()
+    try:
+        yield
+    finally:
+        if was_training:
+            model.train()
 
 def train(
     model, 
@@ -94,6 +108,8 @@ def train(
                 for loss_term in loss_terms
             }
             for loss_term in loss_terms: 
+                # if not model.training or not model.rnn.training:
+                #     a = 1
                 loss_term.step()
             # losses = {}
             # for loss_term in loss_terms:
@@ -149,7 +165,9 @@ def train(
             logger_train.log_epoch(epoch_idx=i_epoch, **epoch_log)
 
         # Validate model on validation set after each epoch.
-        logger_val = eval.evaluate(model, **evaluation)
+        with temporarily_eval(model):
+            logger_val = eval.evaluate(model, **evaluation)
+
         if len(logger_val.epoch_logs) != 1:
             raise RuntimeError(
                 "There should be only one \"epoch\" consisting of passing all " 

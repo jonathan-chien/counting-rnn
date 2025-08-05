@@ -447,7 +447,7 @@ class AutoRNN(nn.Module):
         for i_step in range(1, max_resp_len):
             # Prepare for current iteration. Input token has already been predicted.
             current_input = generated['tokens'][:, i_step-1, :].unsqueeze(1)
-            h_0 = generated['hidden'][:, i_step-1, :].unsqueeze(0)
+            h_0 = generated['hidden'][:, i_step-1, :].unsqueeze(0).contiguous()
             
             # Forward pass on current timestep.
             current_logits, _, h_n = self.forward(
