@@ -50,11 +50,11 @@ def process_batch_eval(
     max_switch_idx = torch.max(switch_ind) 
     batch_demo_phase = batch_full_seq[:, :max_switch_idx+1, :]
     
-    # Lengths must be on CPU.
+    # Input lengths must be on CPU for sequence packing.
     demo_lengths = switch_ind + 1 # Up to and including switch token
     resp_lengths = lengths - switch_ind - 1 # From first count token to EOS, inclusive
     demo_lengths = demo_lengths.to('cpu')
-    resp_lengths = resp_lengths.to('cpu')
+    # resp_lengths = resp_lengths.to('cpu')
 
     generated, on_input, joined = model.generate(
         batch_demo_phase, 
@@ -90,6 +90,49 @@ def process_batch_eval(
 
     return outputs
 
+def get_true_resp_labels_aligned(switch_ind, resp_lengths, labels):
+    """ 
+    """
+    # Validate.
+    tensor_utils.validate_tensor(switch_ind, dim=1)
+    tensor_utils.validate_tensor(resp_lengths, dim=1)
+    tensor_utils.validate_tensor(labels, dim=2)
+    if len(switch_ind) != len(resp_lengths):
+        raise ValueError(
+            "Lengths of `switch_ind` and `resp_lengths` must match, but got "
+            f"{len(switch_ind)} and {len(resp_lengths)}, respectively."
+        )
+    
+    if len(switch_ind) != labels.shape[0]:
+        raise ValueError(
+            "Lengths of switch_ind and resp_lengths must equal first dimension " \
+            f"size of labels, but got {len(switch_ind)} and {len(resp_lengths)} "
+            f"for the former, respectively, and {labels.shape[0]} for the latter."
+        )
+
+    # Get indices of start and stop of true response portion of labels. Note
+    # that many neg tokens on seq k can result in a large switch index S but
+    # short response length (so k's labels are not max overall length); if max
+    # resp length R comes from seq j, it may be that S + R >= L, for L as the
+    # second dim size of labels, L. Thus, need to clip stop indices to L.
+    
+    # label_length = labels.shape[1]
+    # resp_start_col_ind = switch_ind + 1
+    # resp_stop_col_ind = torch.minimum(
+    #     switch_ind + 1 + max_resp_length, torch.tensor(label_length)
+    # )
+
+    # Get mask and use it to zero out indices greater than labels second dim size.
+    max_resp_length = torch.max(resp_lengths)
+    arange = torch.arange(max_resp_length, device=switch_ind.device)[None, :] 
+    mask = arange < resp_lengths[:, None]
+    resp_col_ind = (switch_ind[:, None] + 1 + arange) * mask
+    
+    # Get response portion of labels. Excess indices will now point to first 
+    # element of each row, which we will zero out.
+    true_resp_labels_aligned = torch.gather(labels, dim=1, index=resp_col_ind)
+    return true_resp_labels_aligned * mask
+
 def evaluate_outputs(
     output, 
     model, 
@@ -121,16 +164,60 @@ def evaluate_outputs(
         for loss_term in loss_terms
     }
 
-    # Need to get response portions of ground truth but left-aligned
-    # at first count token after switch token.
-    resp_start_col_ind = switch_ind + 1
-    resp_stop_col_ind = switch_ind + 1 + torch.max(resp_lengths)
-    resp_col_ind = torch.stack([
-        torch.arange(start, stop, device=labels.device) 
-        for start, stop in zip(resp_start_col_ind, resp_stop_col_ind)    
-    ])
-    true_resp_labels_aligned = torch.gather(
-        labels, dim=1, index=resp_col_ind
+    # # Need to get response portions of ground truth but left-aligned
+    # # at first count token after switch token.
+    # resp_start_col_ind = switch_ind + 1
+    # resp_stop_col_ind = switch_ind + 1 + torch.max(resp_lengths)
+
+    # # The sequence with the longest generated response might not be the
+    # # one with the highest switch index. E.g. seq j has 20 count tokens and 
+    # # switch index of 30, and seq k has only 18 count tokens but switch index of
+    # # 33 because of many negative class tokens. If we take 20 tokens from switch
+    # # index 33, we could index past the second dim size of labels. Thus, need to
+    # # create augmented labels for indexing.
+    # overshoot = resp_stop_col_ind.max()-labels.shape[1]
+    # if overshoot < 0:
+    #     raise RuntimeError(
+    #         "Unexpected runtime condition: max value of resp_stop_col_ind "
+    #         f"({resp_stop_col_ind.max()}) is less than second dim size of labels "
+    #         f"({labels.shape[1]}). This should not occur."
+    #     )
+    # labels_augmented = torch.cat(
+    #     (labels, torch.zeros(labels.shape[0], overshoot, dtype=torch.int64, device=labels.device)),
+    #     dim=1
+    # )
+
+    # # max_col = labels.shape[1]
+    # # print(f"max col: {max_col}")
+    # # # Before stacking
+    # # for i, (start, stop) in enumerate(zip(resp_start_col_ind, resp_stop_col_ind)):
+    # #     if start.item() < 0 or stop.item() > max_col:
+    # #         print(f"Invalid index range in sample {i}: [{start.item()}, {stop.item()}) vs max_col={max_col}")
+    # # switch_ind_cpu = switch_ind.cpu()
+    # # labels_cpu = labels.cpu()
+    # # resp_start_col_ind_cpu = resp_start_col_ind.cpu()
+    # # resp_stop_col_ind_cpu = resp_stop_col_ind.cpu()
+    # # resp_lengths_cpu = resp_lengths.cpu()
+    # # generated_resp_masks_cpu = generated['resp_masks'].cpu()
+
+
+    # resp_col_ind = torch.stack([
+    #     torch.arange(start, stop, device=labels.device) 
+    #     for start, stop in zip(resp_start_col_ind, resp_stop_col_ind)    
+    # ])
+
+    # # resp_col_ind_cpu = resp_col_ind.cpu()
+    # try: # For debugging
+    #     true_resp_labels_aligned = torch.gather(
+    #         labels_augmented, dim=1, index=resp_col_ind
+    #     )
+    # except:
+    #     a = 1
+
+    # Need to get response portions of ground truth but left-aligned at first 
+    # count token after switch token.
+    true_resp_labels_aligned = get_true_resp_labels_aligned(
+        switch_ind=switch_ind, resp_lengths=resp_lengths, labels=labels
     )
 
     performance = {

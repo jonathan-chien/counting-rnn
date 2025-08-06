@@ -98,7 +98,6 @@ def train(
 
             # Shift masks forward by one since prediction is of next token.
             shifted_masks = torch.roll(masks, shifts=-1, dims=1)
-            # shifted_masks = masks.roll(-1, dims=1)
 
             # Compute losses.
             losses = {
@@ -108,15 +107,7 @@ def train(
                 for loss_term in loss_terms
             }
             for loss_term in loss_terms: 
-                # if not model.training or not model.rnn.training:
-                #     a = 1
                 loss_term.step()
-            # losses = {}
-            # for loss_term in loss_terms:
-            #     losses[loss_term.name] = loss_term.compute_loss(
-            #         logits[shifted_masks], labels[masks], model
-            #     )
-            #     loss_term.step()
 
             # Compute performance metrics.
             if criteria is not None:
