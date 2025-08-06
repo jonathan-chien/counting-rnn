@@ -15,10 +15,10 @@ from general_utils import tensor as tensor_utils
 def main():
     # --------------------------- Set directory ----------------------------- #
     base_dir = 'configs/datasets'
-    sub_dir_1 = 'aaab'
-    sub_dir_2 = '0000'
+    sub_dir_1 = 'aaaa'
+    sub_dir_2 = '8002'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
-    filename = fileio_utils.make_filename('0019')
+    filename = fileio_utils.make_filename('0020')
 
     # ----------------------- Build auxiliary objects ----------------------- #
     hypercube_args_cfg = HypercubeConfig(
@@ -36,7 +36,7 @@ def main():
         ),
         vertices_pmfs=(
             TensorConfig.from_tensor(
-                torch.tensor([1., 0., 0.], dtype=torch.float32)
+                data_utils.uniform_pmf(3)
             ),
             TensorConfig.from_tensor(
                 torch.tensor([1.], dtype=torch.float32)
@@ -48,18 +48,18 @@ def main():
         lengths={
             'pos' : {
                 'support' : TensorConfig.from_tensor(
-                    torch.arange(19)
+                    tensor_utils.single_parity_arange(20, 'even')
                 ),
                 'pmf' : TensorConfig.from_tensor(
-                    data_utils.uniform_pmf(len(torch.arange(19)))
+                    data_utils.uniform_pmf(len(tensor_utils.single_parity_arange(20, 'even')))
                 )
             },
             'neg' : {
                 'support' : TensorConfig.from_tensor(
-                    torch.arange(19)
+                    torch.arange(10)
                 ),
                 'pmf' : TensorConfig.from_tensor(
-                    data_utils.uniform_pmf(len(torch.arange(19)))
+                    data_utils.uniform_pmf(10)
                 )
             }
         }
@@ -125,7 +125,7 @@ def main():
     # Attempt to build dataset from serialized file.
     data_builder.build_sequences_from_filepath(
         data_cfg_filepath, build=['train', 'val'], 
-        reproducibility_cfg_filepath='configs/reproducibility/aa/0000.json',
+        reproducibility_cfg_filepath='configs/reproducibility/aaaa/0000/0000.json',
         seed_idx=0, 
         print_to_console=True, 
         save_path=None

@@ -140,12 +140,12 @@ def main():
     run_and_save_testing_from_filepath(
         model_cfg_filepath='configs/models/demo/0001/0000.json',
         # model_filepath='experiments/__00/0000/output/seed00/models/0_best.pt',
-        data_test_cfg_filepath='configs/datasets/demo/0000/0005.json',
+        data_test_cfg_filepath='configs/datasets/demo/0000/0000.json',
         testing_cfg_filepath=testing_cfg_filepath,
-        reproducibility_cfg_filepath='configs/reproducibility/aa/0000.json',
+        reproducibility_cfg_filepath='configs/reproducibility/aaaa/0000/0000.json',
         seed_idx=0,
         exp_dir='experiments/demo/0000/',
-        train_run_id='demo_0001_0000_demo_0000_0005_demo_0001_0000_aa_0000',
+        train_run_id='demo_0001_0000_demo_0000_0000_demo_0001_0000_aa_0000',
         model_suffix='_best.pt',
         weights_only=False
     )

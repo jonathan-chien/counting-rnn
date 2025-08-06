@@ -1,3 +1,6 @@
+import os
+os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+
 from pathlib import Path
 
 from datetime import datetime
@@ -13,7 +16,7 @@ run_args = dict(
     training_cfg_ref_list=['aaaa/0001/0000'],
     data_test_cfg_ref_list=['aaaa/0000/9999', 'aaaa/0000/9998'],
     testing_cfg_ref_list=['aaaa/0001/0000'],
-    reproducibility_cfg_ref_list=['aa/0000'],
+    reproducibility_cfg_ref_list=['aaaa/0000/0000'],
     seed_idx_list=[0, 1],
     exp_group_id='aaaa',
     exp_id='0000',

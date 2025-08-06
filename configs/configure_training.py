@@ -24,7 +24,7 @@ def main():
     sub_dir_1 = 'aaaa'
     sub_dir_2 = '0001'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
-    filename = fileio_utils.make_filename('0002')
+    filename = fileio_utils.make_filename('0000')
 
     # ----------------------------------------------------------------------- #
     REQUIRES_GRAD_REGISTRY = {
@@ -250,7 +250,7 @@ def main():
         torch.device,
         TorchDeviceConfig(
             device=(
-                'cuda' if torch.cuda.is_available() 
+                'cuda:0' if torch.cuda.is_available() 
                 else 'mps:0' if torch.backends.mps.is_available() 
                 else 'cpu'
             )
@@ -300,7 +300,7 @@ def main():
         compute_mean_for=['cross_entropy_loss', 'accuracy'],
         metric_tracker=metric_tracker,
         early_stopping=early_stopping,
-        num_epochs=1000,
+        num_epochs=300,
         device=device,
         deterministic=True
     )
@@ -326,9 +326,9 @@ def main():
 
     _ = run_and_save_training_from_filepath(
         model_cfg_filepath='configs/models/demo/0001/0000.json',
-        data_train_cfg_filepath='configs/datasets/demo/0000/0005.json',
+        data_train_cfg_filepath='configs/datasets/demo/0000/0000.json',
         training_cfg_filepath=training_cfg_filepath,
-        reproducibility_cfg_filepath='configs/reproducibility/aa/0000.json',
+        reproducibility_cfg_filepath='configs/reproducibility/aaaa/0000/0000.json',
         exp_dir='experiments/demo/0000/',
         seed_idx=0,
         test_mode=True,

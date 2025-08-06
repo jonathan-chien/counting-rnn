@@ -14,14 +14,14 @@ if __name__ == '__main__':
     sub_dir_1 = 'aaaa'
     sub_dir_2 = '0001'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
-    filename = fileio_utils.make_filename('0003')
+    filename = fileio_utils.make_filename('0000')
 
     # ----------------------- Configure input network ----------------------- #
     input_network = CallableConfig.from_callable(
         FCN, 
         FCNConfig(
-            # layer_sizes=['embedding_dim___', 10],
-            layer_sizes=None,
+            layer_sizes=['embedding_dim___', 10],
+            # layer_sizes=None,
             nonlinearities=[CallableConfig.from_callable(torch.nn.ReLU, ReLUConfig(), kind='class', recovery_mode='call')],
             dropouts=[None]
         ),
@@ -52,7 +52,7 @@ if __name__ == '__main__':
             recovery_mode='call'
         )
     elif rnn_type == 'rnn':
-        rnn = CallableConfig(
+        rnn = CallableConfig.from_callable(
             torch.nn.RNN,
             ElmanConfig(
                 input_size=rnn_input_size,
@@ -104,8 +104,8 @@ if __name__ == '__main__':
     seed_idx = 0
     model_builder.build_model_from_filepath(
         model_cfg_filepath=model_cfg_filepath, 
-        data_cfg_filepath='configs/datasets/demo/0000/0005.json', 
-        reproducibility_cfg_filepath='configs/reproducibility/aa/0000.json',
+        data_cfg_filepath='configs/datasets/demo/0000/0000.json', 
+        reproducibility_cfg_filepath='configs/reproducibility/aaaa/0000/0000.json',
         seed_idx=seed_idx, 
         device=device,
         test_pass=True

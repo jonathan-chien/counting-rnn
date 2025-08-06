@@ -7,8 +7,9 @@ from general_utils import serialization as serialization_utils
 def main():
     # ---------------------------- Set directory ---------------------------- #
     base_dir = 'configs/reproducibility'
-    sub_dir = 'aa'
-    output_dir = fileio_utils.make_dir(base_dir, sub_dir)
+    sub_dir_1 = 'aaaa'
+    sub_dir_2 = '0000'
+    output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = fileio_utils.make_filename('0000')
 
     # ----------------------- Reproducibility settings ---------------------- #
