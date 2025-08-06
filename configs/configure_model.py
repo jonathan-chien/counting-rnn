@@ -11,7 +11,7 @@ from general_utils import fileio as fileio_utils
 if __name__ == '__main__':
     # ---------------------------- Set directory ---------------------------- #
     base_dir = 'configs/models'
-    sub_dir_1 = 'aaaa'
+    sub_dir_1 = 'demo'
     sub_dir_2 = '0001'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = fileio_utils.make_filename('0000')
@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     # ---------------------------- Test instantiation --------------------------- #
     device = torch.device(
-        'cuda' if torch.cuda.is_available() 
+        'cuda:0' if torch.cuda.is_available() 
         else 'mps:0' if torch.backends.mps.is_available() 
         else 'cpu'
     )

@@ -15,7 +15,7 @@ from general_utils import ml as ml_utils
 def main():
     # --------------------------- Set directory ----------------------------- #
     base_dir = 'configs/testing'
-    sub_dir_1 = 'aaaa'
+    sub_dir_1 = 'demo'
     sub_dir_2 = '0001'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = fileio_utils.make_filename('0000')
@@ -94,14 +94,16 @@ def main():
     device = CallableConfig.from_callable(
         torch.device,
         TorchDeviceConfig(
-            device=(
-                'cuda' if torch.cuda.is_available() 
-                else 'mps:0' if torch.backends.mps.is_available() 
-                else 'cpu'
-            )
+            # device=(
+            #     'cuda' if torch.cuda.is_available() 
+            #     else 'mps:0' if torch.backends.mps.is_available() 
+            #     else 'cpu'
+            # )
+            device='gpu__'  
         ),
         kind='class',
         recovery_mode='call',
+        locked=True
     )
 
     # Args for the eval.evaluate function called in the test.test function.
@@ -145,7 +147,7 @@ def main():
         reproducibility_cfg_filepath='configs/reproducibility/aaaa/0000/0000.json',
         seed_idx=0,
         exp_dir='experiments/demo/0000/',
-        train_run_id='demo_0001_0000_demo_0000_0000_demo_0001_0000_aa_0000',
+        train_run_id='demo_0001_0000_demo_0000_0000_demo_0001_0000_aaaa_0000_0000',
         model_suffix='_best.pt',
         weights_only=False
     )

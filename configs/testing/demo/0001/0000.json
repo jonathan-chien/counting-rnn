@@ -96,13 +96,13 @@
     "device": {
       "path": "torch.device",
       "args_cfg": {
-        "device": "cuda",
+        "device": "gpu__",
         "__path__": "general_utils.config.TorchDeviceConfig",
         "__kind__": "dataclass"
       },
       "kind": "class",
       "recovery_mode": "call",
-      "locked": false,
+      "locked": true,
       "if_recover_while_locked": "print",
       "__path__": "general_utils.config.CallableConfig",
       "__kind__": "dataclass"

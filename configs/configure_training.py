@@ -21,7 +21,7 @@ from general_utils import ml as ml_utils
 def main():
     # --------------------------- Set directory ----------------------------- #
     base_dir = 'configs/training'
-    sub_dir_1 = 'aaaa'
+    sub_dir_1 = 'demo'
     sub_dir_2 = '0001'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = fileio_utils.make_filename('0000')
@@ -249,14 +249,16 @@ def main():
     device = CallableConfig.from_callable(
         torch.device,
         TorchDeviceConfig(
-            device=(
-                'cuda:0' if torch.cuda.is_available() 
-                else 'mps:0' if torch.backends.mps.is_available() 
-                else 'cpu'
-            )
+            # device=(
+            #     'cuda:0' if torch.cuda.is_available() 
+            #     else 'mps:0' if torch.backends.mps.is_available() 
+            #     else 'cpu'
+            # )
+            device='gpu__'
         ),
         kind='class',
         recovery_mode='call',
+        locked=True
     )
 
     # Args for the eval.evaluate function called in the train.train function.
@@ -300,7 +302,7 @@ def main():
         compute_mean_for=['cross_entropy_loss', 'accuracy'],
         metric_tracker=metric_tracker,
         early_stopping=early_stopping,
-        num_epochs=300,
+        num_epochs=2,
         device=device,
         deterministic=True
     )

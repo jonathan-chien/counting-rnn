@@ -27,6 +27,13 @@ def get_filepath_from_ref(config_kind, ref, file_ext):
     """
     return f'configs/{config_kind}/{ref}{file_ext}'
 
+def get_device_name(device_str):
+    return (
+        'cuda:0' if device_str == 'gpu__' and torch.cuda.is_available() 
+        else 'mps:0' if device_str == 'gpu__' and torch.backends.mps.is_available() 
+        else device_str
+    )
+
 def run_and_save_training_from_filepath(
     model_cfg_filepath, 
     data_train_cfg_filepath, 
@@ -45,7 +52,7 @@ def run_and_save_training_from_filepath(
     data_train_id = get_id_from_filepath(data_train_cfg_filepath, depth=3)
     model_id = get_id_from_filepath(model_cfg_filepath, depth=3)
     training_id = get_id_from_filepath(training_cfg_filepath, depth=3)
-    reproducibility_id = get_id_from_filepath(reproducibility_cfg_filepath, depth=2)
+    reproducibility_id = get_id_from_filepath(reproducibility_cfg_filepath, depth=3)
     train_run_id = '_'.join([model_id, data_train_id, training_id, reproducibility_id]) + train_run_id_suffix
 
     dirs = {}
@@ -127,6 +134,19 @@ def run_and_save_training_from_filepath(
     training_cfg_dict['recovered'].train_fn_cfg.evaluation['dataloader'] \
         = training_cfg_dict['recovered'].train_fn_cfg.evaluation['dataloader'].manually_recover(
             dataset = sequences['val']
+        )
+    
+    # Set device. String placeholder 'gpu__' will be replaced with actual device name.
+    device = get_device_name(
+        device_str=training_cfg_dict['recovered'].train_fn_cfg.device.args_cfg.device
+    )
+    training_cfg_dict['recovered'].train_fn_cfg.device \
+        = training_cfg_dict['recovered'].train_fn_cfg.device.manually_recover(
+            device=device
+        )
+    training_cfg_dict['recovered'].train_fn_cfg.evaluation['device'] \
+        = training_cfg_dict['recovered'].train_fn_cfg.evaluation['device'].manually_recover(
+            device=device
         )
     
     # Add checkpoint_dir to MetricTracker and instantiate.
@@ -265,6 +285,15 @@ def run_testing_from_filepath(
             else testing_cfg_dict['recovered'].eval_fn_cfg.dataloader.args_cfg.batch_size
         )
     
+    # Set device. String placeholder 'gpu__' will be replaced with actual device name.
+    device = get_device_name(
+        device_str=testing_cfg_dict['recovered'].eval_fn_cfg.device.args_cfg.device
+    )
+    testing_cfg_dict['recovered'].eval_fn_cfg.device \
+        = testing_cfg_dict['recovered'].eval_fn_cfg.device.manually_recover(
+            device=device
+        )
+    
     # Build and add logger save directory for test logger.
     # log_dir = run_dir + f"output/seed{seed_idx:02d}/"
     testing_cfg_dict['recovered'].eval_fn_cfg.logger \
@@ -336,7 +365,7 @@ def run_and_save_testing_from_filepath(
     # Build test run ID.
     data_test_id = get_id_from_filepath(data_test_cfg_filepath, depth=3)
     testing_id = get_id_from_filepath(testing_cfg_filepath, depth=3)
-    reproducibility_id = get_id_from_filepath(reproducibility_cfg_filepath, depth=2)
+    reproducibility_id = get_id_from_filepath(reproducibility_cfg_filepath, depth=3)
     test_run_id = '_'.join([train_run_id, data_test_id, testing_id, reproducibility_id]) + test_run_id_suffix
     # test_run_id = f'{train_run_id}_{data_test_id}_{testing_id}'
     # test_run_id = train_run_id + '_' + test_run_id 
