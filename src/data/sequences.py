@@ -305,7 +305,7 @@ class Sequences(Dataset):
         self.within_class_labels = {
             class_ : [
                 get_row_label(seq, self.elem_distr[class_]['support'])
-                if self.seq_lens[class_][i_seq] > 0 else torch.tensor([])
+                if self.seq_lens[class_][i_seq] > 0 else torch.tensor([], dtype=torch.int64)
                 for i_seq, seq in enumerate(self.seq_elems[class_])
             ]
             for class_ in [class_1, class_2]

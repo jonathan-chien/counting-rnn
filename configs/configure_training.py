@@ -21,10 +21,10 @@ from general_utils import ml as ml_utils
 def main():
     # --------------------------- Set directory ----------------------------- #
     base_dir = 'configs/training'
-    sub_dir_1 = 'aaaa'
+    sub_dir_1 = 'demo'
     sub_dir_2 = '0001'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
-    filename = fileio_utils.make_filename('0002')
+    filename = fileio_utils.make_filename('0000')
 
     # ----------------------------------------------------------------------- #
     REQUIRES_GRAD_REGISTRY = {
@@ -300,7 +300,7 @@ def main():
         compute_mean_for=['cross_entropy_loss', 'accuracy'],
         metric_tracker=metric_tracker,
         early_stopping=early_stopping,
-        num_epochs=1000,
+        num_epochs=2,
         device=device,
         deterministic=True
     )
