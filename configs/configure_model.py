@@ -42,7 +42,7 @@ if __name__ == '__main__':
             torch.nn.GRU,
             GRUConfig(
                 input_size=rnn_input_size,
-                hidden_size=1,
+                hidden_size=20,
                 num_layers=1,
                 bias=True,
                 batch_first=True,
