@@ -39,7 +39,7 @@
     "path": "torch.nn.modules.rnn.GRU",
     "args_cfg": {
       "input_size": 10,
-      "hidden_size": 1,
+      "hidden_size": 20,
       "num_layers": 1,
       "bias": true,
       "batch_first": true,
