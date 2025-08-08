@@ -59,7 +59,7 @@
     "path": "models.networks.FCN",
     "args_cfg": {
       "layer_sizes": [
-        1,
+        20,
         20,
         2
       ],
