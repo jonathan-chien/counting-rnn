@@ -585,7 +585,7 @@ def run(
                                     reproducibility_cfg_filepath=reproducibility_cfg_filepath, # Use same config as for training
                                     seed_idx=seed_idx,
                                     exp_dir=exp_dir,
-                                    train_run_id=training_run['train_run_id'], # train_run_id from most recent iteration
+                                    train_run_id=training_run['train_run_id'], # train_run_id from most recent iteration. This is the only output of the run_and_save_training_from_filepath function that is currently used
                                     test_run_id_suffix=run_id_suffix,
                                     model_suffix=model_suffix,
                                     weights_only=weights_only
