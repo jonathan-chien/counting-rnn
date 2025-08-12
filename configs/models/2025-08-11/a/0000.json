@@ -2,10 +2,7 @@
   "input_network": {
     "path": "models.networks.FCN",
     "args_cfg": {
-      "layer_sizes": [
-        "embedding_dim___",
-        10
-      ],
+      "layer_sizes": null,
       "nonlinearities": [
         {
           "path": "torch.nn.modules.activation.ReLU",
@@ -38,7 +35,7 @@
   "rnn": {
     "path": "torch.nn.modules.rnn.GRU",
     "args_cfg": {
-      "input_size": 10,
+      "input_size": "embedding_dim___",
       "hidden_size": 20,
       "num_layers": 1,
       "bias": true,

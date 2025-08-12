@@ -1,3 +1,5 @@
+from datetime import date
+
 import torch
 
 from models import builder as model_builder
@@ -11,8 +13,9 @@ from general_utils import fileio as fileio_utils
 if __name__ == '__main__':
     # ---------------------------- Set directory ---------------------------- #
     base_dir = 'configs/models'
-    sub_dir_1 = 'demo'
-    sub_dir_2 = '0001'
+    # sub_dir_1 = 'demo'
+    sub_dir_1 = str(date.today())
+    sub_dir_2 = 'a'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = fileio_utils.make_filename('0000')
 
@@ -20,8 +23,8 @@ if __name__ == '__main__':
     input_network = CallableConfig.from_callable(
         FCN, 
         FCNConfig(
-            layer_sizes=['embedding_dim___', 10],
-            # layer_sizes=None,
+            # layer_sizes=['embedding_dim___', 10],
+            layer_sizes=None,
             nonlinearities=[CallableConfig.from_callable(torch.nn.ReLU, ReLUConfig(), kind='class', recovery_mode='call')],
             dropouts=[None]
         ),
@@ -104,8 +107,8 @@ if __name__ == '__main__':
     seed_idx = 0
     model_builder.build_model_from_filepath(
         model_cfg_filepath=model_cfg_filepath, 
-        data_cfg_filepath='configs/datasets/demo/0000/0000.json', 
-        reproducibility_cfg_filepath='configs/reproducibility/aaaa/0000/0000.json',
+        data_cfg_filepath='configs/datasets/0000-00-00/a/0000.json', 
+        reproducibility_cfg_filepath='configs/reproducibility/0000-00-00/a/0000.json',
         seed_idx=seed_idx, 
         device=device,
         test_pass=True

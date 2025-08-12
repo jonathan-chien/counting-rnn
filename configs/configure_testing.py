@@ -1,3 +1,5 @@
+from datetime import date
+
 import torch
 
 from data.sequences import Sequences
@@ -15,8 +17,8 @@ from general_utils import ml as ml_utils
 def main():
     # --------------------------- Set directory ----------------------------- #
     base_dir = 'configs/testing'
-    sub_dir_1 = 'demo'
-    sub_dir_2 = '0001'
+    sub_dir_1 = str(date.today())
+    sub_dir_2 = 'a'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = fileio_utils.make_filename('0000')
 
@@ -140,17 +142,19 @@ def main():
 
     # -------------------- Test deserialization/execution ------------------- #
     run_and_save_testing_from_filepath(
-        model_cfg_filepath='configs/models/demo/0001/0000.json',
+        model_cfg_filepath='configs/models/0000-00-00/a/0000.json',
         # model_filepath='experiments/__00/0000/output/seed00/models/0_best.pt',
-        data_test_cfg_filepath='configs/datasets/demo/0000/0000.json',
+        data_test_cfg_filepath='configs/datasets/0000-00-00/a/0000.json',
         testing_cfg_filepath=testing_cfg_filepath,
-        reproducibility_cfg_filepath='configs/reproducibility/aaaa/0000/0000.json',
+        reproducibility_cfg_filepath='configs/reproducibility/0000-00-00/a/0000.json',
         seed_idx=0,
-        exp_dir='experiments/demo/0000/',
-        train_run_id='demo_0001_0000_demo_0000_0000_demo_0001_0000_aaaa_0000_0000',
+        exp_dir='experiments/0000-00-00/0000/',
+        train_run_id='md00000000a0000_dr00000000a0000_tr00000000a0000_re00000000a0000',
         model_suffix='_best.pt',
         weights_only=False
     )
+
+
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 import torch
 
@@ -15,10 +15,11 @@ from general_utils import tensor as tensor_utils
 def main():
     # --------------------------- Set directory ----------------------------- #
     base_dir = 'configs/datasets'
-    sub_dir_1 = 'aaaa'
-    sub_dir_2 = '8002'
+    # sub_dir_1 = 'aaaa'
+    sub_dir_1 = str(date.today())
+    sub_dir_2 = 'a'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
-    filename = fileio_utils.make_filename('0020')
+    filename = fileio_utils.make_filename('0000')
 
     # ----------------------- Build auxiliary objects ----------------------- #
     hypercube_args_cfg = HypercubeConfig(
@@ -56,10 +57,10 @@ def main():
             },
             'neg' : {
                 'support' : TensorConfig.from_tensor(
-                    torch.arange(10)
+                    tensor_utils.single_parity_arange(20, 'even')
                 ),
                 'pmf' : TensorConfig.from_tensor(
-                    data_utils.uniform_pmf(10)
+                    data_utils.uniform_pmf(len(tensor_utils.single_parity_arange(20, 'even')))
                 )
             }
         }
@@ -120,12 +121,12 @@ def main():
     data_cfg_filepath = output_dir / (filename + '.json')
     _ = serialization_utils.serialize(data_cfg, data_cfg_filepath)
 
-
     # -------------------- Test deserialization/execution ------------------- #
     # Attempt to build dataset from serialized file.
     data_builder.build_sequences_from_filepath(
-        data_cfg_filepath, build=['train', 'val'], 
-        reproducibility_cfg_filepath='configs/reproducibility/aaaa/0000/0000.json',
+        data_cfg_filepath, 
+        build=['train', 'val'], 
+        reproducibility_cfg_filepath='configs/reproducibility/2025-08-11/a/0000.json',
         seed_idx=0, 
         print_to_console=True, 
         save_path=None

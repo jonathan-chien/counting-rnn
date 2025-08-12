@@ -14,10 +14,14 @@ from general_utils import validation as validation_utils
 from general_utils import ml as ml_utils
 
 
-def get_id_from_filepath(filepath: str, depth: int, joiner: str ='_'):
+# def get_id_from_filepath(filepath: str, depth: int, joiner: str ='_'):
+#     path = Path(filepath)
+#     parts = [path.stem] + [p.name for p in path.parents[:depth-1]]
+#     return joiner.join(reversed(parts))
+def get_id_from_filepath(filepath: str, depth: int, joiner: str ='', prefix='', suffix=''):
     path = Path(filepath)
     parts = [path.stem] + [p.name for p in path.parents[:depth-1]]
-    return joiner.join(reversed(parts))
+    return prefix + joiner.join(reversed(parts)).replace('-', '') + suffix
 
 def get_filepath_from_ref(config_kind, ref, file_ext):
     """ 
@@ -49,10 +53,10 @@ def run_and_save_training_from_filepath(
 
     # ------------------------- Build directories --------------------------- #
     # Get train run ID from config names.
-    data_train_id = get_id_from_filepath(data_train_cfg_filepath, depth=3)
-    model_id = get_id_from_filepath(model_cfg_filepath, depth=3)
-    training_id = get_id_from_filepath(training_cfg_filepath, depth=3)
-    reproducibility_id = get_id_from_filepath(reproducibility_cfg_filepath, depth=3)
+    model_id = get_id_from_filepath(model_cfg_filepath, depth=3, prefix='md')
+    data_train_id = get_id_from_filepath(data_train_cfg_filepath, depth=3, prefix='dr')
+    training_id = get_id_from_filepath(training_cfg_filepath, depth=3, prefix='tr')
+    reproducibility_id = get_id_from_filepath(reproducibility_cfg_filepath, depth=3, prefix='re')
     train_run_id = '_'.join([model_id, data_train_id, training_id, reproducibility_id]) + train_run_id_suffix
 
     dirs = {}
@@ -434,7 +438,7 @@ def run(
     testing_cfg_ref_list,
     reproducibility_cfg_ref_list,
     seed_idx_list,
-    exp_group_id,
+    exp_date,
     exp_id,
     exp_dir_with_seed_exist_ok=False, # Can be set to True for curriculum learning, else leave False to help prevent overwriting.
     run_id_suffix='',
@@ -443,7 +447,7 @@ def run(
     weights_only=False
 ):
     # Build experiment directory.
-    exp_dir = fileio_utils.make_dir('experiments', exp_group_id, exp_id)
+    exp_dir = fileio_utils.make_dir('experiments', exp_date, exp_id)
 
     # Validate pretrained_model_filepath_list.
     if pretrained_model_filepath_list is not None:

@@ -1,3 +1,5 @@
+from datetime import date
+
 from general_utils.ml import reproducibility as reproducibility_utils
 from general_utils.ml.config import ReproducibilityConfig, SeedConfig, TorchDeterminismConfig
 from general_utils import fileio as fileio_utils
@@ -7,8 +9,9 @@ from general_utils import serialization as serialization_utils
 def main():
     # ---------------------------- Set directory ---------------------------- #
     base_dir = 'configs/reproducibility'
-    sub_dir_1 = 'aaaa'
-    sub_dir_2 = '0000'
+    sub_dir_1 = str(date.today())
+    sub_dir_1 = 'demo'
+    sub_dir_2 = 'a'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = fileio_utils.make_filename('0000')
 

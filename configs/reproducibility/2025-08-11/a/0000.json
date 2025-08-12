@@ -1,2602 +1,2602 @@
 {
-  "entropy": 281300714608089011132928324815289034008,
+  "entropy": 114194644608387829916293734494334960903,
   "seed_cfg_list": [
     {
       "recovery": {
-        "torch_seed": 3740375199,
-        "cuda_seed": 3740375199,
+        "torch_seed": 1509324553,
+        "cuda_seed": 1509324553,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2372513738,
-        "cuda_seed": 2372513738,
+        "torch_seed": 1913417777,
+        "cuda_seed": 1913417777,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 3074819402,
-        "cuda_seed": 3074819402,
+        "torch_seed": 668559491,
+        "cuda_seed": 668559491,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 4259506918,
-        "cuda_seed": 4259506918,
+        "torch_seed": 2173553512,
+        "cuda_seed": 2173553512,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1703065181,
-        "cuda_seed": 1703065181,
+        "torch_seed": 359210179,
+        "cuda_seed": 359210179,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 645773663,
-        "cuda_seed": 645773663,
+        "torch_seed": 3548041518,
+        "cuda_seed": 3548041518,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2906389356,
-        "cuda_seed": 2906389356,
+        "torch_seed": 3836664993,
+        "cuda_seed": 3836664993,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1828668030,
-        "cuda_seed": 1828668030,
+        "torch_seed": 3049397278,
+        "cuda_seed": 3049397278,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2605181605,
-        "cuda_seed": 2605181605,
+        "torch_seed": 2277448569,
+        "cuda_seed": 2277448569,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2660161682,
-        "cuda_seed": 2660161682,
+        "torch_seed": 3466713128,
+        "cuda_seed": 3466713128,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 3964665112,
-        "cuda_seed": 3964665112,
+        "torch_seed": 856346543,
+        "cuda_seed": 856346543,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 3622060384,
-        "cuda_seed": 3622060384,
+        "torch_seed": 2287380798,
+        "cuda_seed": 2287380798,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1085680471,
-        "cuda_seed": 1085680471,
+        "torch_seed": 2229455281,
+        "cuda_seed": 2229455281,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3005040614,
-        "cuda_seed": 3005040614,
+        "torch_seed": 1311164491,
+        "cuda_seed": 1311164491,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 186375765,
-        "cuda_seed": 186375765,
+        "torch_seed": 3777334125,
+        "cuda_seed": 3777334125,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2539258992,
-        "cuda_seed": 2539258992,
+        "torch_seed": 989979140,
+        "cuda_seed": 989979140,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3996800231,
-        "cuda_seed": 3996800231,
+        "torch_seed": 3224197390,
+        "cuda_seed": 3224197390,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2498169784,
-        "cuda_seed": 2498169784,
+        "torch_seed": 3272639913,
+        "cuda_seed": 3272639913,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 4078550641,
-        "cuda_seed": 4078550641,
+        "torch_seed": 3745685366,
+        "cuda_seed": 3745685366,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 3649636574,
-        "cuda_seed": 3649636574,
+        "torch_seed": 1599914925,
+        "cuda_seed": 1599914925,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2070966534,
-        "cuda_seed": 2070966534,
+        "torch_seed": 1086884504,
+        "cuda_seed": 1086884504,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2540696811,
-        "cuda_seed": 2540696811,
+        "torch_seed": 1747597808,
+        "cuda_seed": 1747597808,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 4253026043,
-        "cuda_seed": 4253026043,
+        "torch_seed": 3572931339,
+        "cuda_seed": 3572931339,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1339969218,
-        "cuda_seed": 1339969218,
+        "torch_seed": 3599663356,
+        "cuda_seed": 3599663356,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3211599264,
-        "cuda_seed": 3211599264,
+        "torch_seed": 1360791740,
+        "cuda_seed": 1360791740,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2872532088,
-        "cuda_seed": 2872532088,
+        "torch_seed": 3602016728,
+        "cuda_seed": 3602016728,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2339407032,
-        "cuda_seed": 2339407032,
+        "torch_seed": 1362730350,
+        "cuda_seed": 1362730350,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 714710289,
-        "cuda_seed": 714710289,
+        "torch_seed": 1984557611,
+        "cuda_seed": 1984557611,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3482222142,
-        "cuda_seed": 3482222142,
+        "torch_seed": 1554338272,
+        "cuda_seed": 1554338272,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2630689431,
-        "cuda_seed": 2630689431,
+        "torch_seed": 961877282,
+        "cuda_seed": 961877282,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 4018399542,
-        "cuda_seed": 4018399542,
+        "torch_seed": 3933758330,
+        "cuda_seed": 3933758330,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2016041944,
-        "cuda_seed": 2016041944,
+        "torch_seed": 3943927340,
+        "cuda_seed": 3943927340,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2638959732,
-        "cuda_seed": 2638959732,
+        "torch_seed": 848990449,
+        "cuda_seed": 848990449,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3263496952,
-        "cuda_seed": 3263496952,
+        "torch_seed": 2758318133,
+        "cuda_seed": 2758318133,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 3863828949,
-        "cuda_seed": 3863828949,
+        "torch_seed": 2832435445,
+        "cuda_seed": 2832435445,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1119083622,
-        "cuda_seed": 1119083622,
+        "torch_seed": 2623201871,
+        "cuda_seed": 2623201871,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1044173195,
-        "cuda_seed": 1044173195,
+        "torch_seed": 2840261912,
+        "cuda_seed": 2840261912,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2425161224,
-        "cuda_seed": 2425161224,
+        "torch_seed": 3105309467,
+        "cuda_seed": 3105309467,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2878438017,
-        "cuda_seed": 2878438017,
+        "torch_seed": 524327849,
+        "cuda_seed": 524327849,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 4249299338,
-        "cuda_seed": 4249299338,
+        "torch_seed": 3237395458,
+        "cuda_seed": 3237395458,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3353541184,
-        "cuda_seed": 3353541184,
+        "torch_seed": 1083765789,
+        "cuda_seed": 1083765789,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3692677345,
-        "cuda_seed": 3692677345,
+        "torch_seed": 2429565531,
+        "cuda_seed": 2429565531,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 182358441,
-        "cuda_seed": 182358441,
+        "torch_seed": 1775643376,
+        "cuda_seed": 1775643376,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1580241776,
-        "cuda_seed": 1580241776,
+        "torch_seed": 1421804876,
+        "cuda_seed": 1421804876,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 632063501,
-        "cuda_seed": 632063501,
+        "torch_seed": 2851996026,
+        "cuda_seed": 2851996026,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3782967664,
-        "cuda_seed": 3782967664,
+        "torch_seed": 1628766050,
+        "cuda_seed": 1628766050,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 4204553120,
-        "cuda_seed": 4204553120,
+        "torch_seed": 1689016997,
+        "cuda_seed": 1689016997,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2592782910,
-        "cuda_seed": 2592782910,
+        "torch_seed": 1520188818,
+        "cuda_seed": 1520188818,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2592430064,
-        "cuda_seed": 2592430064,
+        "torch_seed": 2775590647,
+        "cuda_seed": 2775590647,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 1808809811,
-        "cuda_seed": 1808809811,
+        "torch_seed": 76761158,
+        "cuda_seed": 76761158,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 819597356,
-        "cuda_seed": 819597356,
+        "torch_seed": 1535968077,
+        "cuda_seed": 1535968077,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 103086799,
-        "cuda_seed": 103086799,
+        "torch_seed": 2484547818,
+        "cuda_seed": 2484547818,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1626666351,
-        "cuda_seed": 1626666351,
+        "torch_seed": 3618230449,
+        "cuda_seed": 3618230449,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3851777188,
-        "cuda_seed": 3851777188,
+        "torch_seed": 1079529217,
+        "cuda_seed": 1079529217,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 3796987133,
-        "cuda_seed": 3796987133,
+        "torch_seed": 3222801638,
+        "cuda_seed": 3222801638,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 909903461,
-        "cuda_seed": 909903461,
+        "torch_seed": 1859235211,
+        "cuda_seed": 1859235211,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2111895354,
-        "cuda_seed": 2111895354,
+        "torch_seed": 4214011430,
+        "cuda_seed": 4214011430,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3502060888,
-        "cuda_seed": 3502060888,
+        "torch_seed": 837296376,
+        "cuda_seed": 837296376,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1283433422,
-        "cuda_seed": 1283433422,
+        "torch_seed": 2160618151,
+        "cuda_seed": 2160618151,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2010811950,
-        "cuda_seed": 2010811950,
+        "torch_seed": 620317985,
+        "cuda_seed": 620317985,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3189253090,
-        "cuda_seed": 3189253090,
+        "torch_seed": 1527553985,
+        "cuda_seed": 1527553985,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 1133483919,
-        "cuda_seed": 1133483919,
+        "torch_seed": 2979712213,
+        "cuda_seed": 2979712213,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2508579098,
-        "cuda_seed": 2508579098,
+        "torch_seed": 1684678562,
+        "cuda_seed": 1684678562,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1869728153,
-        "cuda_seed": 1869728153,
+        "torch_seed": 3927201443,
+        "cuda_seed": 3927201443,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2317183321,
-        "cuda_seed": 2317183321,
+        "torch_seed": 1283697604,
+        "cuda_seed": 1283697604,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3554423361,
-        "cuda_seed": 3554423361,
+        "torch_seed": 4033898281,
+        "cuda_seed": 4033898281,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 202270991,
-        "cuda_seed": 202270991,
+        "torch_seed": 2393800300,
+        "cuda_seed": 2393800300,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 3710387210,
-        "cuda_seed": 3710387210,
+        "torch_seed": 484124650,
+        "cuda_seed": 484124650,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1600668043,
-        "cuda_seed": 1600668043,
+        "torch_seed": 1050936977,
+        "cuda_seed": 1050936977,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3960735145,
-        "cuda_seed": 3960735145,
+        "torch_seed": 3669865057,
+        "cuda_seed": 3669865057,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2218379873,
-        "cuda_seed": 2218379873,
+        "torch_seed": 3461018219,
+        "cuda_seed": 3461018219,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 719556982,
-        "cuda_seed": 719556982,
+        "torch_seed": 3353155058,
+        "cuda_seed": 3353155058,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2128555607,
-        "cuda_seed": 2128555607,
+        "torch_seed": 2424902978,
+        "cuda_seed": 2424902978,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3100266568,
-        "cuda_seed": 3100266568,
+        "torch_seed": 3447250693,
+        "cuda_seed": 3447250693,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 3232259887,
-        "cuda_seed": 3232259887,
+        "torch_seed": 862935871,
+        "cuda_seed": 862935871,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 3773808677,
-        "cuda_seed": 3773808677,
+        "torch_seed": 251023011,
+        "cuda_seed": 251023011,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3673816240,
-        "cuda_seed": 3673816240,
+        "torch_seed": 3133738988,
+        "cuda_seed": 3133738988,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 61534553,
-        "cuda_seed": 61534553,
+        "torch_seed": 233277524,
+        "cuda_seed": 233277524,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 3094432703,
-        "cuda_seed": 3094432703,
+        "torch_seed": 3061117986,
+        "cuda_seed": 3061117986,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 3476158467,
-        "cuda_seed": 3476158467,
+        "torch_seed": 2912144216,
+        "cuda_seed": 2912144216,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3381555928,
-        "cuda_seed": 3381555928,
+        "torch_seed": 929626230,
+        "cuda_seed": 929626230,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 266033026,
-        "cuda_seed": 266033026,
+        "torch_seed": 2823688098,
+        "cuda_seed": 2823688098,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2566515036,
-        "cuda_seed": 2566515036,
+        "torch_seed": 890191366,
+        "cuda_seed": 890191366,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 120046031,
-        "cuda_seed": 120046031,
+        "torch_seed": 3238326235,
+        "cuda_seed": 3238326235,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2307541035,
-        "cuda_seed": 2307541035,
+        "torch_seed": 2640347910,
+        "cuda_seed": 2640347910,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 584941782,
-        "cuda_seed": 584941782,
+        "torch_seed": 2728226381,
+        "cuda_seed": 2728226381,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 531743981,
-        "cuda_seed": 531743981,
+        "torch_seed": 1665531408,
+        "cuda_seed": 1665531408,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1882018041,
-        "cuda_seed": 1882018041,
+        "torch_seed": 364061884,
+        "cuda_seed": 364061884,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1605820601,
-        "cuda_seed": 1605820601,
+        "torch_seed": 2141311284,
+        "cuda_seed": 2141311284,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2779420691,
-        "cuda_seed": 2779420691,
+        "torch_seed": 30797842,
+        "cuda_seed": 30797842,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1376181636,
-        "cuda_seed": 1376181636,
+        "torch_seed": 2757541414,
+        "cuda_seed": 2757541414,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 4129030781,
-        "cuda_seed": 4129030781,
+        "torch_seed": 2009403322,
+        "cuda_seed": 2009403322,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 499369051,
-        "cuda_seed": 499369051,
+        "torch_seed": 2263575633,
+        "cuda_seed": 2263575633,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 1154985977,
-        "cuda_seed": 1154985977,
+        "torch_seed": 3923770095,
+        "cuda_seed": 3923770095,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 3775731966,
-        "cuda_seed": 3775731966,
+        "torch_seed": 3668022030,
+        "cuda_seed": 3668022030,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 3813362349,
-        "cuda_seed": 3813362349,
+        "torch_seed": 1312097940,
+        "cuda_seed": 1312097940,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 861879271,
-        "cuda_seed": 861879271,
+        "torch_seed": 86481574,
+        "cuda_seed": 86481574,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 454425371,
-        "cuda_seed": 454425371,
+        "torch_seed": 883834133,
+        "cuda_seed": 883834133,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 4009740826,
-        "cuda_seed": 4009740826,
+        "torch_seed": 3570114949,
+        "cuda_seed": 3570114949,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 3198763183,
-        "cuda_seed": 3198763183,
+        "torch_seed": 3186766001,
+        "cuda_seed": 3186766001,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3189282231,
-        "cuda_seed": 3189282231,
+        "torch_seed": 1888542333,
+        "cuda_seed": 1888542333,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2173341287,
-        "cuda_seed": 2173341287,
+        "torch_seed": 3576340853,
+        "cuda_seed": 3576340853,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 580200767,
-        "cuda_seed": 580200767,
+        "torch_seed": 1379195796,
+        "cuda_seed": 1379195796,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2010039808,
-        "cuda_seed": 2010039808,
+        "torch_seed": 1504872805,
+        "cuda_seed": 1504872805,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1776994484,
-        "cuda_seed": 1776994484,
+        "torch_seed": 1185834800,
+        "cuda_seed": 1185834800,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 1148994256,
-        "cuda_seed": 1148994256,
+        "torch_seed": 711389806,
+        "cuda_seed": 711389806,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 739926483,
-        "cuda_seed": 739926483,
+        "torch_seed": 3033000746,
+        "cuda_seed": 3033000746,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 4280237643,
-        "cuda_seed": 4280237643,
+        "torch_seed": 2060950631,
+        "cuda_seed": 2060950631,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2376682853,
-        "cuda_seed": 2376682853,
+        "torch_seed": 2595587151,
+        "cuda_seed": 2595587151,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 553561252,
-        "cuda_seed": 553561252,
+        "torch_seed": 1634684739,
+        "cuda_seed": 1634684739,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2131822912,
-        "cuda_seed": 2131822912,
+        "torch_seed": 2822780199,
+        "cuda_seed": 2822780199,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2629825092,
-        "cuda_seed": 2629825092,
+        "torch_seed": 2033296933,
+        "cuda_seed": 2033296933,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1574745055,
-        "cuda_seed": 1574745055,
+        "torch_seed": 865807201,
+        "cuda_seed": 865807201,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 161677367,
-        "cuda_seed": 161677367,
+        "torch_seed": 767785143,
+        "cuda_seed": 767785143,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 908030160,
-        "cuda_seed": 908030160,
+        "torch_seed": 2094304443,
+        "cuda_seed": 2094304443,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 314655348,
-        "cuda_seed": 314655348,
+        "torch_seed": 3910400063,
+        "cuda_seed": 3910400063,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3660576876,
-        "cuda_seed": 3660576876,
+        "torch_seed": 1855082880,
+        "cuda_seed": 1855082880,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3380532727,
-        "cuda_seed": 3380532727,
+        "torch_seed": 4013673955,
+        "cuda_seed": 4013673955,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2817034526,
-        "cuda_seed": 2817034526,
+        "torch_seed": 1240312466,
+        "cuda_seed": 1240312466,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 728274370,
-        "cuda_seed": 728274370,
+        "torch_seed": 1408778472,
+        "cuda_seed": 1408778472,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 930907616,
-        "cuda_seed": 930907616,
+        "torch_seed": 1186888278,
+        "cuda_seed": 1186888278,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2089588334,
-        "cuda_seed": 2089588334,
+        "torch_seed": 161728981,
+        "cuda_seed": 161728981,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2949572727,
-        "cuda_seed": 2949572727,
+        "torch_seed": 2550520150,
+        "cuda_seed": 2550520150,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2530012495,
-        "cuda_seed": 2530012495,
+        "torch_seed": 1874526180,
+        "cuda_seed": 1874526180,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2374618989,
-        "cuda_seed": 2374618989,
+        "torch_seed": 1682335224,
+        "cuda_seed": 1682335224,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3190935079,
-        "cuda_seed": 3190935079,
+        "torch_seed": 2558391420,
+        "cuda_seed": 2558391420,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2338953938,
-        "cuda_seed": 2338953938,
+        "torch_seed": 4028176804,
+        "cuda_seed": 4028176804,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2251090898,
-        "cuda_seed": 2251090898,
+        "torch_seed": 2974772687,
+        "cuda_seed": 2974772687,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 883200792,
-        "cuda_seed": 883200792,
+        "torch_seed": 1042869104,
+        "cuda_seed": 1042869104,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 1098177395,
-        "cuda_seed": 1098177395,
+        "torch_seed": 1953627735,
+        "cuda_seed": 1953627735,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 137751558,
-        "cuda_seed": 137751558,
+        "torch_seed": 566895913,
+        "cuda_seed": 566895913,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2719929784,
-        "cuda_seed": 2719929784,
+        "torch_seed": 116797720,
+        "cuda_seed": 116797720,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1922020080,
-        "cuda_seed": 1922020080,
+        "torch_seed": 2413764305,
+        "cuda_seed": 2413764305,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 1434966687,
-        "cuda_seed": 1434966687,
+        "torch_seed": 1365545876,
+        "cuda_seed": 1365545876,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1213574959,
-        "cuda_seed": 1213574959,
+        "torch_seed": 312437698,
+        "cuda_seed": 312437698,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 628470956,
-        "cuda_seed": 628470956,
+        "torch_seed": 3227115553,
+        "cuda_seed": 3227115553,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2968468427,
-        "cuda_seed": 2968468427,
+        "torch_seed": 1616381144,
+        "cuda_seed": 1616381144,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3488125886,
-        "cuda_seed": 3488125886,
+        "torch_seed": 3958565948,
+        "cuda_seed": 3958565948,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 3363179181,
-        "cuda_seed": 3363179181,
+        "torch_seed": 4125026395,
+        "cuda_seed": 4125026395,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 945395831,
-        "cuda_seed": 945395831,
+        "torch_seed": 1307408235,
+        "cuda_seed": 1307408235,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2432702973,
-        "cuda_seed": 2432702973,
+        "torch_seed": 1524374828,
+        "cuda_seed": 1524374828,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3009001030,
-        "cuda_seed": 3009001030,
+        "torch_seed": 1872226877,
+        "cuda_seed": 1872226877,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 3550349414,
-        "cuda_seed": 3550349414,
+        "torch_seed": 664506782,
+        "cuda_seed": 664506782,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2497639654,
-        "cuda_seed": 2497639654,
+        "torch_seed": 2012324922,
+        "cuda_seed": 2012324922,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2732872709,
-        "cuda_seed": 2732872709,
+        "torch_seed": 912807917,
+        "cuda_seed": 912807917,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3534954600,
-        "cuda_seed": 3534954600,
+        "torch_seed": 1867464696,
+        "cuda_seed": 1867464696,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 3337592907,
-        "cuda_seed": 3337592907,
+        "torch_seed": 2270319138,
+        "cuda_seed": 2270319138,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1289107141,
-        "cuda_seed": 1289107141,
+        "torch_seed": 1835125310,
+        "cuda_seed": 1835125310,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3919760498,
-        "cuda_seed": 3919760498,
+        "torch_seed": 2948381842,
+        "cuda_seed": 2948381842,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 4170193578,
-        "cuda_seed": 4170193578,
+        "torch_seed": 3656642520,
+        "cuda_seed": 3656642520,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1507674330,
-        "cuda_seed": 1507674330,
+        "torch_seed": 1699979912,
+        "cuda_seed": 1699979912,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1170600151,
-        "cuda_seed": 1170600151,
+        "torch_seed": 849237034,
+        "cuda_seed": 849237034,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 99873335,
-        "cuda_seed": 99873335,
+        "torch_seed": 957004521,
+        "cuda_seed": 957004521,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2002628288,
-        "cuda_seed": 2002628288,
+        "torch_seed": 390548835,
+        "cuda_seed": 390548835,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2987340742,
-        "cuda_seed": 2987340742,
+        "torch_seed": 3514711256,
+        "cuda_seed": 3514711256,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2183734083,
-        "cuda_seed": 2183734083,
+        "torch_seed": 3187017571,
+        "cuda_seed": 3187017571,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 4123138523,
-        "cuda_seed": 4123138523,
+        "torch_seed": 3127805994,
+        "cuda_seed": 3127805994,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3581854601,
-        "cuda_seed": 3581854601,
+        "torch_seed": 3238839262,
+        "cuda_seed": 3238839262,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1706595162,
-        "cuda_seed": 1706595162,
+        "torch_seed": 2235435223,
+        "cuda_seed": 2235435223,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 106176971,
-        "cuda_seed": 106176971,
+        "torch_seed": 926482483,
+        "cuda_seed": 926482483,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2405485725,
-        "cuda_seed": 2405485725,
+        "torch_seed": 75459261,
+        "cuda_seed": 75459261,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2247968054,
-        "cuda_seed": 2247968054,
+        "torch_seed": 2216166960,
+        "cuda_seed": 2216166960,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 843301133,
-        "cuda_seed": 843301133,
+        "torch_seed": 3598152856,
+        "cuda_seed": 3598152856,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 3747918887,
-        "cuda_seed": 3747918887,
+        "torch_seed": 419619330,
+        "cuda_seed": 419619330,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1282823134,
-        "cuda_seed": 1282823134,
+        "torch_seed": 2140886795,
+        "cuda_seed": 2140886795,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3978673223,
-        "cuda_seed": 3978673223,
+        "torch_seed": 859193916,
+        "cuda_seed": 859193916,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1161776546,
-        "cuda_seed": 1161776546,
+        "torch_seed": 3206916632,
+        "cuda_seed": 3206916632,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 3875488677,
-        "cuda_seed": 3875488677,
+        "torch_seed": 1387961224,
+        "cuda_seed": 1387961224,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1349619649,
-        "cuda_seed": 1349619649,
+        "torch_seed": 4270069903,
+        "cuda_seed": 4270069903,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 1664712511,
-        "cuda_seed": 1664712511,
+        "torch_seed": 4115842391,
+        "cuda_seed": 4115842391,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2025960298,
-        "cuda_seed": 2025960298,
+        "torch_seed": 3276368807,
+        "cuda_seed": 3276368807,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 984257444,
-        "cuda_seed": 984257444,
+        "torch_seed": 1374982585,
+        "cuda_seed": 1374982585,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 540491498,
-        "cuda_seed": 540491498,
+        "torch_seed": 747637757,
+        "cuda_seed": 747637757,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 1784803659,
-        "cuda_seed": 1784803659,
+        "torch_seed": 3366326025,
+        "cuda_seed": 3366326025,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1846830972,
-        "cuda_seed": 1846830972,
+        "torch_seed": 1703031976,
+        "cuda_seed": 1703031976,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 4125663571,
-        "cuda_seed": 4125663571,
+        "torch_seed": 1407553026,
+        "cuda_seed": 1407553026,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2288230423,
-        "cuda_seed": 2288230423,
+        "torch_seed": 807477707,
+        "cuda_seed": 807477707,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3463356387,
-        "cuda_seed": 3463356387,
+        "torch_seed": 374452110,
+        "cuda_seed": 374452110,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 742904006,
-        "cuda_seed": 742904006,
+        "torch_seed": 3726297717,
+        "cuda_seed": 3726297717,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2599807207,
-        "cuda_seed": 2599807207,
+        "torch_seed": 2641776810,
+        "cuda_seed": 2641776810,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3417593884,
-        "cuda_seed": 3417593884,
+        "torch_seed": 2542211776,
+        "cuda_seed": 2542211776,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2917366260,
-        "cuda_seed": 2917366260,
+        "torch_seed": 432041429,
+        "cuda_seed": 432041429,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 212872275,
-        "cuda_seed": 212872275,
+        "torch_seed": 3020115731,
+        "cuda_seed": 3020115731,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1333089763,
-        "cuda_seed": 1333089763,
+        "torch_seed": 3172974034,
+        "cuda_seed": 3172974034,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3218550951,
-        "cuda_seed": 3218550951,
+        "torch_seed": 426476646,
+        "cuda_seed": 426476646,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3049920780,
-        "cuda_seed": 3049920780,
+        "torch_seed": 4286306484,
+        "cuda_seed": 4286306484,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1995504493,
-        "cuda_seed": 1995504493,
+        "torch_seed": 1471262347,
+        "cuda_seed": 1471262347,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 3388337995,
-        "cuda_seed": 3388337995,
+        "torch_seed": 2318273264,
+        "cuda_seed": 2318273264,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2717996502,
-        "cuda_seed": 2717996502,
+        "torch_seed": 752355188,
+        "cuda_seed": 752355188,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 898769579,
-        "cuda_seed": 898769579,
+        "torch_seed": 3229327525,
+        "cuda_seed": 3229327525,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 735459988,
-        "cuda_seed": 735459988,
+        "torch_seed": 140161633,
+        "cuda_seed": 140161633,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2232985785,
-        "cuda_seed": 2232985785,
+        "torch_seed": 709093514,
+        "cuda_seed": 709093514,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1079863295,
-        "cuda_seed": 1079863295,
+        "torch_seed": 2502144908,
+        "cuda_seed": 2502144908,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2469939812,
-        "cuda_seed": 2469939812,
+        "torch_seed": 2542823149,
+        "cuda_seed": 2542823149,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 939392676,
-        "cuda_seed": 939392676,
+        "torch_seed": 2377710312,
+        "cuda_seed": 2377710312,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1827649188,
-        "cuda_seed": 1827649188,
+        "torch_seed": 878873271,
+        "cuda_seed": 878873271,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3033852619,
-        "cuda_seed": 3033852619,
+        "torch_seed": 3000468660,
+        "cuda_seed": 3000468660,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 784536586,
-        "cuda_seed": 784536586,
+        "torch_seed": 431066015,
+        "cuda_seed": 431066015,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1122892209,
-        "cuda_seed": 1122892209,
+        "torch_seed": 2050558813,
+        "cuda_seed": 2050558813,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2796319613,
-        "cuda_seed": 2796319613,
+        "torch_seed": 2471564512,
+        "cuda_seed": 2471564512,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2146517583,
-        "cuda_seed": 2146517583,
+        "torch_seed": 745709674,
+        "cuda_seed": 745709674,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 4240718636,
-        "cuda_seed": 4240718636,
+        "torch_seed": 1078921385,
+        "cuda_seed": 1078921385,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 3618356872,
-        "cuda_seed": 3618356872,
+        "torch_seed": 719597593,
+        "cuda_seed": 719597593,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1522571664,
-        "cuda_seed": 1522571664,
+        "torch_seed": 3673894613,
+        "cuda_seed": 3673894613,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1868835192,
-        "cuda_seed": 1868835192,
+        "torch_seed": 1183424687,
+        "cuda_seed": 1183424687,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3490592379,
-        "cuda_seed": 3490592379,
+        "torch_seed": 2797121120,
+        "cuda_seed": 2797121120,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 3655091045,
-        "cuda_seed": 3655091045,
+        "torch_seed": 1290544191,
+        "cuda_seed": 1290544191,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2206184725,
-        "cuda_seed": 2206184725,
+        "torch_seed": 3439968521,
+        "cuda_seed": 3439968521,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2657828316,
-        "cuda_seed": 2657828316,
+        "torch_seed": 3795338890,
+        "cuda_seed": 3795338890,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3643073665,
-        "cuda_seed": 3643073665,
+        "torch_seed": 3006714161,
+        "cuda_seed": 3006714161,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2051849548,
-        "cuda_seed": 2051849548,
+        "torch_seed": 3540267771,
+        "cuda_seed": 3540267771,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 405047833,
-        "cuda_seed": 405047833,
+        "torch_seed": 1305004760,
+        "cuda_seed": 1305004760,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2635741880,
-        "cuda_seed": 2635741880,
+        "torch_seed": 1853602780,
+        "cuda_seed": 1853602780,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2124944192,
-        "cuda_seed": 2124944192,
+        "torch_seed": 3862977653,
+        "cuda_seed": 3862977653,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1271486318,
-        "cuda_seed": 1271486318,
+        "torch_seed": 4290083335,
+        "cuda_seed": 4290083335,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 4128851737,
-        "cuda_seed": 4128851737,
+        "torch_seed": 1871179089,
+        "cuda_seed": 1871179089,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3109811169,
-        "cuda_seed": 3109811169,
+        "torch_seed": 266390436,
+        "cuda_seed": 266390436,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 775225225,
-        "cuda_seed": 775225225,
+        "torch_seed": 4036862679,
+        "cuda_seed": 4036862679,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 3825606151,
-        "cuda_seed": 3825606151,
+        "torch_seed": 208292459,
+        "cuda_seed": 208292459,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2974802627,
-        "cuda_seed": 2974802627,
+        "torch_seed": 2326279594,
+        "cuda_seed": 2326279594,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2644467537,
-        "cuda_seed": 2644467537,
+        "torch_seed": 832495057,
+        "cuda_seed": 832495057,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 921112318,
-        "cuda_seed": 921112318,
+        "torch_seed": 175564540,
+        "cuda_seed": 175564540,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 948056239,
-        "cuda_seed": 948056239,
+        "torch_seed": 3533533061,
+        "cuda_seed": 3533533061,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 3045367356,
-        "cuda_seed": 3045367356,
+        "torch_seed": 587908703,
+        "cuda_seed": 587908703,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 197958529,
-        "cuda_seed": 197958529,
+        "torch_seed": 1137097445,
+        "cuda_seed": 1137097445,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3719476393,
-        "cuda_seed": 3719476393,
+        "torch_seed": 62221132,
+        "cuda_seed": 62221132,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 401279957,
-        "cuda_seed": 401279957,
+        "torch_seed": 861489517,
+        "cuda_seed": 861489517,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1706377606,
-        "cuda_seed": 1706377606,
+        "torch_seed": 4234494013,
+        "cuda_seed": 4234494013,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 4279551118,
-        "cuda_seed": 4279551118,
+        "torch_seed": 3492112183,
+        "cuda_seed": 3492112183,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 164993753,
-        "cuda_seed": 164993753,
+        "torch_seed": 3372596953,
+        "cuda_seed": 3372596953,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2156540269,
-        "cuda_seed": 2156540269,
+        "torch_seed": 1049457562,
+        "cuda_seed": 1049457562,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2719155079,
-        "cuda_seed": 2719155079,
+        "torch_seed": 1368663488,
+        "cuda_seed": 1368663488,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3129941983,
-        "cuda_seed": 3129941983,
+        "torch_seed": 711221295,
+        "cuda_seed": 711221295,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3914249220,
-        "cuda_seed": 3914249220,
+        "torch_seed": 2440277917,
+        "cuda_seed": 2440277917,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1243135671,
-        "cuda_seed": 1243135671,
+        "torch_seed": 3962140025,
+        "cuda_seed": 3962140025,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1673480397,
-        "cuda_seed": 1673480397,
+        "torch_seed": 3925998092,
+        "cuda_seed": 3925998092,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 4281573788,
-        "cuda_seed": 4281573788,
+        "torch_seed": 3898180121,
+        "cuda_seed": 3898180121,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3750803901,
-        "cuda_seed": 3750803901,
+        "torch_seed": 2285983862,
+        "cuda_seed": 2285983862,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 3791516183,
-        "cuda_seed": 3791516183,
+        "torch_seed": 2149297312,
+        "cuda_seed": 2149297312,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 523741369,
-        "cuda_seed": 523741369,
+        "torch_seed": 1837924682,
+        "cuda_seed": 1837924682,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 4075682705,
-        "cuda_seed": 4075682705,
+        "torch_seed": 3110746366,
+        "cuda_seed": 3110746366,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 4016887590,
-        "cuda_seed": 4016887590,
+        "torch_seed": 1217234535,
+        "cuda_seed": 1217234535,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 204419150,
-        "cuda_seed": 204419150,
+        "torch_seed": 112362355,
+        "cuda_seed": 112362355,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 3505007336,
-        "cuda_seed": 3505007336,
+        "torch_seed": 1538870123,
+        "cuda_seed": 1538870123,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2118172825,
-        "cuda_seed": 2118172825,
+        "torch_seed": 757446840,
+        "cuda_seed": 757446840,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 1107152227,
-        "cuda_seed": 1107152227,
+        "torch_seed": 3115008804,
+        "cuda_seed": 3115008804,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 3704219509,
-        "cuda_seed": 3704219509,
+        "torch_seed": 1246689516,
+        "cuda_seed": 1246689516,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 3306908772,
-        "cuda_seed": 3306908772,
+        "torch_seed": 2651860327,
+        "cuda_seed": 2651860327,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1945229443,
-        "cuda_seed": 1945229443,
+        "torch_seed": 2618141235,
+        "cuda_seed": 2618141235,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3588535432,
-        "cuda_seed": 3588535432,
+        "torch_seed": 962552723,
+        "cuda_seed": 962552723,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 9158924,
-        "cuda_seed": 9158924,
+        "torch_seed": 751082677,
+        "cuda_seed": 751082677,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 444958001,
-        "cuda_seed": 444958001,
+        "torch_seed": 2866225891,
+        "cuda_seed": 2866225891,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3872564366,
-        "cuda_seed": 3872564366,
+        "torch_seed": 857020829,
+        "cuda_seed": 857020829,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 360144057,
-        "cuda_seed": 360144057,
+        "torch_seed": 856058868,
+        "cuda_seed": 856058868,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2188510771,
-        "cuda_seed": 2188510771,
+        "torch_seed": 1252658911,
+        "cuda_seed": 1252658911,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 3371347764,
-        "cuda_seed": 3371347764,
+        "torch_seed": 1109183222,
+        "cuda_seed": 1109183222,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 379973853,
-        "cuda_seed": 379973853,
+        "torch_seed": 4087473467,
+        "cuda_seed": 4087473467,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2381861630,
-        "cuda_seed": 2381861630,
+        "torch_seed": 2958132568,
+        "cuda_seed": 2958132568,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2186970151,
-        "cuda_seed": 2186970151,
+        "torch_seed": 8342075,
+        "cuda_seed": 8342075,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 4183153691,
-        "cuda_seed": 4183153691,
+        "torch_seed": 1992842912,
+        "cuda_seed": 1992842912,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1479595910,
-        "cuda_seed": 1479595910,
+        "torch_seed": 1059549469,
+        "cuda_seed": 1059549469,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 847159866,
-        "cuda_seed": 847159866,
+        "torch_seed": 3638188298,
+        "cuda_seed": 3638188298,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 768589588,
-        "cuda_seed": 768589588,
+        "torch_seed": 3070411909,
+        "cuda_seed": 3070411909,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 484366370,
-        "cuda_seed": 484366370,
+        "torch_seed": 1168163601,
+        "cuda_seed": 1168163601,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3730525659,
-        "cuda_seed": 3730525659,
+        "torch_seed": 3351628258,
+        "cuda_seed": 3351628258,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 511890444,
-        "cuda_seed": 511890444,
+        "torch_seed": 1111035020,
+        "cuda_seed": 1111035020,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2699174745,
-        "cuda_seed": 2699174745,
+        "torch_seed": 2528981685,
+        "cuda_seed": 2528981685,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 958791904,
-        "cuda_seed": 958791904,
+        "torch_seed": 799169487,
+        "cuda_seed": 799169487,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2065210754,
-        "cuda_seed": 2065210754,
+        "torch_seed": 2329291445,
+        "cuda_seed": 2329291445,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2210418464,
-        "cuda_seed": 2210418464,
+        "torch_seed": 1212803156,
+        "cuda_seed": 1212803156,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 3035267431,
-        "cuda_seed": 3035267431,
+        "torch_seed": 4262367272,
+        "cuda_seed": 4262367272,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1978922016,
-        "cuda_seed": 1978922016,
+        "torch_seed": 3699976131,
+        "cuda_seed": 3699976131,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1735981247,
-        "cuda_seed": 1735981247,
+        "torch_seed": 3113253258,
+        "cuda_seed": 3113253258,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 190405285,
-        "cuda_seed": 190405285,
+        "torch_seed": 1063389442,
+        "cuda_seed": 1063389442,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 815672748,
-        "cuda_seed": 815672748,
+        "torch_seed": 2038967613,
+        "cuda_seed": 2038967613,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2739917554,
-        "cuda_seed": 2739917554,
+        "torch_seed": 1238912667,
+        "cuda_seed": 1238912667,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1556224607,
-        "cuda_seed": 1556224607,
+        "torch_seed": 825365405,
+        "cuda_seed": 825365405,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 1253478685,
-        "cuda_seed": 1253478685,
+        "torch_seed": 1716718382,
+        "cuda_seed": 1716718382,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1288232070,
-        "cuda_seed": 1288232070,
+        "torch_seed": 3616732738,
+        "cuda_seed": 3616732738,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 917056362,
-        "cuda_seed": 917056362,
+        "torch_seed": 4105046907,
+        "cuda_seed": 4105046907,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3531023870,
-        "cuda_seed": 3531023870,
+        "torch_seed": 175452148,
+        "cuda_seed": 175452148,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 929671758,
-        "cuda_seed": 929671758,
+        "torch_seed": 479877453,
+        "cuda_seed": 479877453,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1088855850,
-        "cuda_seed": 1088855850,
+        "torch_seed": 3689604598,
+        "cuda_seed": 3689604598,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2234623093,
-        "cuda_seed": 2234623093,
+        "torch_seed": 144337989,
+        "cuda_seed": 144337989,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1097007649,
-        "cuda_seed": 1097007649,
+        "torch_seed": 3487008179,
+        "cuda_seed": 3487008179,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2098064121,
-        "cuda_seed": 2098064121,
+        "torch_seed": 1886812000,
+        "cuda_seed": 1886812000,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2275096866,
-        "cuda_seed": 2275096866,
+        "torch_seed": 4064192343,
+        "cuda_seed": 4064192343,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2088888973,
-        "cuda_seed": 2088888973,
+        "torch_seed": 345661556,
+        "cuda_seed": 345661556,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3096936590,
-        "cuda_seed": 3096936590,
+        "torch_seed": 3449137206,
+        "cuda_seed": 3449137206,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3795919970,
-        "cuda_seed": 3795919970,
+        "torch_seed": 3057740007,
+        "cuda_seed": 3057740007,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 863730973,
-        "cuda_seed": 863730973,
+        "torch_seed": 2820251393,
+        "cuda_seed": 2820251393,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1781768936,
-        "cuda_seed": 1781768936,
+        "torch_seed": 763379285,
+        "cuda_seed": 763379285,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 370588689,
-        "cuda_seed": 370588689,
+        "torch_seed": 1500828882,
+        "cuda_seed": 1500828882,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3146467322,
-        "cuda_seed": 3146467322,
+        "torch_seed": 174886908,
+        "cuda_seed": 174886908,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2429884913,
-        "cuda_seed": 2429884913,
+        "torch_seed": 2771474106,
+        "cuda_seed": 2771474106,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1896778638,
-        "cuda_seed": 1896778638,
+        "torch_seed": 3198879091,
+        "cuda_seed": 3198879091,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1618406673,
-        "cuda_seed": 1618406673,
+        "torch_seed": 2340190533,
+        "cuda_seed": 2340190533,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 735287874,
-        "cuda_seed": 735287874,
+        "torch_seed": 2721387602,
+        "cuda_seed": 2721387602,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2268893864,
-        "cuda_seed": 2268893864,
+        "torch_seed": 1775665626,
+        "cuda_seed": 1775665626,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 949000032,
-        "cuda_seed": 949000032,
+        "torch_seed": 1682015774,
+        "cuda_seed": 1682015774,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 30424130,
-        "cuda_seed": 30424130,
+        "torch_seed": 1038697453,
+        "cuda_seed": 1038697453,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2806647090,
-        "cuda_seed": 2806647090,
+        "torch_seed": 2504625684,
+        "cuda_seed": 2504625684,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 142864476,
-        "cuda_seed": 142864476,
+        "torch_seed": 3855829594,
+        "cuda_seed": 3855829594,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 775177796,
-        "cuda_seed": 775177796,
+        "torch_seed": 193633428,
+        "cuda_seed": 193633428,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2362131148,
-        "cuda_seed": 2362131148,
+        "torch_seed": 3175118694,
+        "cuda_seed": 3175118694,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3056730563,
-        "cuda_seed": 3056730563,
+        "torch_seed": 4118710438,
+        "cuda_seed": 4118710438,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1634319475,
-        "cuda_seed": 1634319475,
+        "torch_seed": 1145805592,
+        "cuda_seed": 1145805592,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2465825047,
-        "cuda_seed": 2465825047,
+        "torch_seed": 692138817,
+        "cuda_seed": 692138817,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2205484815,
-        "cuda_seed": 2205484815,
+        "torch_seed": 3409828795,
+        "cuda_seed": 3409828795,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3383038218,
-        "cuda_seed": 3383038218,
+        "torch_seed": 3663307041,
+        "cuda_seed": 3663307041,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2418831411,
-        "cuda_seed": 2418831411,
+        "torch_seed": 1194439554,
+        "cuda_seed": 1194439554,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 3851924315,
-        "cuda_seed": 3851924315,
+        "torch_seed": 248321069,
+        "cuda_seed": 248321069,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1673688934,
-        "cuda_seed": 1673688934,
+        "torch_seed": 411936979,
+        "cuda_seed": 411936979,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 1619420045,
-        "cuda_seed": 1619420045,
+        "torch_seed": 4011938701,
+        "cuda_seed": 4011938701,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 3928784450,
-        "cuda_seed": 3928784450,
+        "torch_seed": 3612392289,
+        "cuda_seed": 3612392289,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2158087915,
-        "cuda_seed": 2158087915,
+        "torch_seed": 1755469910,
+        "cuda_seed": 1755469910,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3669470431,
-        "cuda_seed": 3669470431,
+        "torch_seed": 1849791898,
+        "cuda_seed": 1849791898,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 372653448,
-        "cuda_seed": 372653448,
+        "torch_seed": 2626966485,
+        "cuda_seed": 2626966485,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2775242761,
-        "cuda_seed": 2775242761,
+        "torch_seed": 179181266,
+        "cuda_seed": 179181266,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2516997024,
-        "cuda_seed": 2516997024,
+        "torch_seed": 3035790571,
+        "cuda_seed": 3035790571,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 4284273438,
-        "cuda_seed": 4284273438,
+        "torch_seed": 163041779,
+        "cuda_seed": 163041779,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 452119358,
-        "cuda_seed": 452119358,
+        "torch_seed": 511258067,
+        "cuda_seed": 511258067,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2299752404,
-        "cuda_seed": 2299752404,
+        "torch_seed": 1827491948,
+        "cuda_seed": 1827491948,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 3929129941,
-        "cuda_seed": 3929129941,
+        "torch_seed": 1019319930,
+        "cuda_seed": 1019319930,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 1582895251,
-        "cuda_seed": 1582895251,
+        "torch_seed": 933304341,
+        "cuda_seed": 933304341,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 4101241415,
-        "cuda_seed": 4101241415,
+        "torch_seed": 2365698435,
+        "cuda_seed": 2365698435,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2871156365,
-        "cuda_seed": 2871156365,
+        "torch_seed": 2368794441,
+        "cuda_seed": 2368794441,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 930791686,
-        "cuda_seed": 930791686,
+        "torch_seed": 1800819356,
+        "cuda_seed": 1800819356,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2483082782,
-        "cuda_seed": 2483082782,
+        "torch_seed": 951258573,
+        "cuda_seed": 951258573,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3028322544,
-        "cuda_seed": 3028322544,
+        "torch_seed": 1895830284,
+        "cuda_seed": 1895830284,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 3505310995,
-        "cuda_seed": 3505310995,
+        "torch_seed": 3670408902,
+        "cuda_seed": 3670408902,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 295015837,
-        "cuda_seed": 295015837,
+        "torch_seed": 36227980,
+        "cuda_seed": 36227980,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2274356730,
-        "cuda_seed": 2274356730,
+        "torch_seed": 373916864,
+        "cuda_seed": 373916864,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 137439702,
-        "cuda_seed": 137439702,
+        "torch_seed": 3976395997,
+        "cuda_seed": 3976395997,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1230842119,
-        "cuda_seed": 1230842119,
+        "torch_seed": 822146162,
+        "cuda_seed": 822146162,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 255194490,
-        "cuda_seed": 255194490,
+        "torch_seed": 227706725,
+        "cuda_seed": 227706725,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3278571973,
-        "cuda_seed": 3278571973,
+        "torch_seed": 414247877,
+        "cuda_seed": 414247877,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 898061878,
-        "cuda_seed": 898061878,
+        "torch_seed": 3523371877,
+        "cuda_seed": 3523371877,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1339164463,
-        "cuda_seed": 1339164463,
+        "torch_seed": 2524076992,
+        "cuda_seed": 2524076992,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1580708471,
-        "cuda_seed": 1580708471,
+        "torch_seed": 2697996038,
+        "cuda_seed": 2697996038,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3765081986,
-        "cuda_seed": 3765081986,
+        "torch_seed": 623884097,
+        "cuda_seed": 623884097,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3049987849,
-        "cuda_seed": 3049987849,
+        "torch_seed": 120642060,
+        "cuda_seed": 120642060,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1491073744,
-        "cuda_seed": 1491073744,
+        "torch_seed": 881549584,
+        "cuda_seed": 881549584,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1858243879,
-        "cuda_seed": 1858243879,
+        "torch_seed": 2765893800,
+        "cuda_seed": 2765893800,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 644987564,
-        "cuda_seed": 644987564,
+        "torch_seed": 3872085978,
+        "cuda_seed": 3872085978,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 1639174488,
-        "cuda_seed": 1639174488,
+        "torch_seed": 1513501581,
+        "cuda_seed": 1513501581,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1427157694,
-        "cuda_seed": 1427157694,
+        "torch_seed": 2629687683,
+        "cuda_seed": 2629687683,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1436242104,
-        "cuda_seed": 1436242104,
+        "torch_seed": 3344411725,
+        "cuda_seed": 3344411725,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 80021026,
-        "cuda_seed": 80021026,
+        "torch_seed": 60015173,
+        "cuda_seed": 60015173,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 671117897,
-        "cuda_seed": 671117897,
+        "torch_seed": 739872897,
+        "cuda_seed": 739872897,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 569529248,
-        "cuda_seed": 569529248,
+        "torch_seed": 412892761,
+        "cuda_seed": 412892761,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2745316723,
-        "cuda_seed": 2745316723,
+        "torch_seed": 2614089119,
+        "cuda_seed": 2614089119,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 4077554291,
-        "cuda_seed": 4077554291,
+        "torch_seed": 3044536237,
+        "cuda_seed": 3044536237,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2200350257,
-        "cuda_seed": 2200350257,
+        "torch_seed": 2483180309,
+        "cuda_seed": 2483180309,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 4273226600,
-        "cuda_seed": 4273226600,
+        "torch_seed": 2499251312,
+        "cuda_seed": 2499251312,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1649008470,
-        "cuda_seed": 1649008470,
+        "torch_seed": 3703542923,
+        "cuda_seed": 3703542923,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 109066152,
-        "cuda_seed": 109066152,
+        "torch_seed": 99390204,
+        "cuda_seed": 99390204,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 500501619,
-        "cuda_seed": 500501619,
+        "torch_seed": 2241468857,
+        "cuda_seed": 2241468857,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1862392370,
-        "cuda_seed": 1862392370,
+        "torch_seed": 9247130,
+        "cuda_seed": 9247130,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1504023195,
-        "cuda_seed": 1504023195,
+        "torch_seed": 3264734981,
+        "cuda_seed": 3264734981,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3514416468,
-        "cuda_seed": 3514416468,
+        "torch_seed": 1952446752,
+        "cuda_seed": 1952446752,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3575168523,
-        "cuda_seed": 3575168523,
+        "torch_seed": 1856134475,
+        "cuda_seed": 1856134475,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 3225769611,
-        "cuda_seed": 3225769611,
+        "torch_seed": 2905660546,
+        "cuda_seed": 2905660546,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1881942014,
-        "cuda_seed": 1881942014,
+        "torch_seed": 2678600062,
+        "cuda_seed": 2678600062,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 4210244872,
-        "cuda_seed": 4210244872,
+        "torch_seed": 1857169707,
+        "cuda_seed": 1857169707,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 74555513,
-        "cuda_seed": 74555513,
+        "torch_seed": 3817554968,
+        "cuda_seed": 3817554968,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2583963619,
-        "cuda_seed": 2583963619,
+        "torch_seed": 1593813195,
+        "cuda_seed": 1593813195,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 3944037420,
-        "cuda_seed": 3944037420,
+        "torch_seed": 2478146201,
+        "cuda_seed": 2478146201,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3625657606,
-        "cuda_seed": 3625657606,
+        "torch_seed": 2201235786,
+        "cuda_seed": 2201235786,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 3060528968,
-        "cuda_seed": 3060528968,
+        "torch_seed": 3684685971,
+        "cuda_seed": 3684685971,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 178821910,
-        "cuda_seed": 178821910,
+        "torch_seed": 3419880454,
+        "cuda_seed": 3419880454,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 898109139,
-        "cuda_seed": 898109139,
+        "torch_seed": 408774905,
+        "cuda_seed": 408774905,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3877618989,
-        "cuda_seed": 3877618989,
+        "torch_seed": 1572606365,
+        "cuda_seed": 1572606365,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 910935884,
-        "cuda_seed": 910935884,
+        "torch_seed": 1125057140,
+        "cuda_seed": 1125057140,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 224175595,
-        "cuda_seed": 224175595,
+        "torch_seed": 17823385,
+        "cuda_seed": 17823385,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1117478767,
-        "cuda_seed": 1117478767,
+        "torch_seed": 1529283572,
+        "cuda_seed": 1529283572,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3713912201,
-        "cuda_seed": 3713912201,
+        "torch_seed": 590324391,
+        "cuda_seed": 590324391,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 4248322174,
-        "cuda_seed": 4248322174,
+        "torch_seed": 3843823618,
+        "cuda_seed": 3843823618,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 153230779,
-        "cuda_seed": 153230779,
+        "torch_seed": 2102352620,
+        "cuda_seed": 2102352620,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 1678516882,
-        "cuda_seed": 1678516882,
+        "torch_seed": 4198592439,
+        "cuda_seed": 4198592439,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 196076597,
-        "cuda_seed": 196076597,
+        "torch_seed": 2081956153,
+        "cuda_seed": 2081956153,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 441316089,
-        "cuda_seed": 441316089,
+        "torch_seed": 1958651918,
+        "cuda_seed": 1958651918,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 359186217,
-        "cuda_seed": 359186217,
+        "torch_seed": 541056169,
+        "cuda_seed": 541056169,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 715473257,
-        "cuda_seed": 715473257,
+        "torch_seed": 315958534,
+        "cuda_seed": 315958534,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 2393385225,
-        "cuda_seed": 2393385225,
+        "torch_seed": 1772556409,
+        "cuda_seed": 1772556409,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 1293571460,
-        "cuda_seed": 1293571460,
+        "torch_seed": 1391462037,
+        "cuda_seed": 1391462037,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2561297814,
-        "cuda_seed": 2561297814,
+        "torch_seed": 1005568054,
+        "cuda_seed": 1005568054,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 4062620713,
-        "cuda_seed": 4062620713,
+        "torch_seed": 2430824711,
+        "cuda_seed": 2430824711,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 623525941,
-        "cuda_seed": 623525941,
+        "torch_seed": 1694785708,
+        "cuda_seed": 1694785708,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 2046675920,
-        "cuda_seed": 2046675920,
+        "torch_seed": 2348676667,
+        "cuda_seed": 2348676667,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 1315753676,
-        "cuda_seed": 1315753676,
+        "torch_seed": 801696763,
+        "cuda_seed": 801696763,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 2616130379,
-        "cuda_seed": 2616130379,
+        "torch_seed": 2154997452,
+        "cuda_seed": 2154997452,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3266099814,
-        "cuda_seed": 3266099814,
+        "torch_seed": 1298941170,
+        "cuda_seed": 1298941170,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 4265787766,
-        "cuda_seed": 4265787766,
+        "torch_seed": 1015087853,
+        "cuda_seed": 1015087853,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 2627116135,
-        "cuda_seed": 2627116135,
+        "torch_seed": 484844911,
+        "cuda_seed": 484844911,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 704314502,
-        "cuda_seed": 704314502,
+        "torch_seed": 2752625925,
+        "cuda_seed": 2752625925,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
     },
     {
       "recovery": {
-        "torch_seed": 3210914562,
-        "cuda_seed": 3210914562,
+        "torch_seed": 1471898358,
+        "cuda_seed": 1471898358,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "train": {
-        "torch_seed": 45428635,
-        "cuda_seed": 45428635,
+        "torch_seed": 3182886317,
+        "cuda_seed": 3182886317,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "val": {
-        "torch_seed": 127660542,
-        "cuda_seed": 127660542,
+        "torch_seed": 1624866871,
+        "cuda_seed": 1624866871,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       },
       "test": {
-        "torch_seed": 3873953176,
-        "cuda_seed": 3873953176,
+        "torch_seed": 1570180852,
+        "cuda_seed": 1570180852,
         "__path__": "general_utils.config.SeedConfig",
         "__kind__": "dataclass"
       }
@@ -2605,29 +2605,29 @@
   "torch_determinism_cfg_dict": {
     "recovery": {
       "use_deterministic_algos": false,
-      "cudnn_deterministic": true,
-      "cudnn_benchmark": false,
+      "cudnn_deterministic": false,
+      "cudnn_benchmark": true,
       "__path__": "general_utils.ml.config.TorchDeterminismConfig",
       "__kind__": "dataclass"
     },
     "train": {
       "use_deterministic_algos": false,
-      "cudnn_deterministic": true,
-      "cudnn_benchmark": false,
+      "cudnn_deterministic": false,
+      "cudnn_benchmark": true,
       "__path__": "general_utils.ml.config.TorchDeterminismConfig",
       "__kind__": "dataclass"
     },
     "val": {
       "use_deterministic_algos": false,
-      "cudnn_deterministic": true,
-      "cudnn_benchmark": false,
+      "cudnn_deterministic": false,
+      "cudnn_benchmark": true,
       "__path__": "general_utils.ml.config.TorchDeterminismConfig",
       "__kind__": "dataclass"
     },
     "test": {
       "use_deterministic_algos": false,
-      "cudnn_deterministic": true,
-      "cudnn_benchmark": false,
+      "cudnn_deterministic": false,
+      "cudnn_benchmark": true,
       "__path__": "general_utils.ml.config.TorchDeterminismConfig",
       "__kind__": "dataclass"
     }

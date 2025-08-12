@@ -1,4 +1,7 @@
+from datetime import date
 from pathlib import Path
+import sys
+
 import torch
 
 from data.sequences import Sequences
@@ -21,8 +24,9 @@ from general_utils import ml as ml_utils
 def main():
     # --------------------------- Set directory ----------------------------- #
     base_dir = 'configs/training'
-    sub_dir_1 = 'demo'
-    sub_dir_2 = '0001'
+    sub_dir_1 = str(date.today())
+    sub_dir_1 = '0000-00-00'
+    sub_dir_2 = 'a'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = fileio_utils.make_filename('0000')
 
@@ -322,20 +326,19 @@ def main():
     # -------------------- Test deserialization/execution ------------------- #
     # First delete, any file with suffix best, as a different epoch being best
     # will cause an error during the test part of configure_testing.py.
-    model_dir = Path('experiments/demo/0000/output/seed00/models/')
+    model_dir = Path('experiments/0000-00-00/0000/output/seed00/models/')
     for file in model_dir.glob('*_best.pt'):
         file.unlink()
 
     _ = run_and_save_training_from_filepath(
-        model_cfg_filepath='configs/models/demo/0001/0000.json',
-        data_train_cfg_filepath='configs/datasets/demo/0000/0000.json',
+        model_cfg_filepath='configs/models/0000-00-00/a/0000.json',
+        data_train_cfg_filepath='configs/datasets/0000-00-00/a/0000.json',
         training_cfg_filepath=training_cfg_filepath,
-        reproducibility_cfg_filepath='configs/reproducibility/aaaa/0000/0000.json',
-        exp_dir='experiments/demo/0000/',
+        reproducibility_cfg_filepath='configs/reproducibility/0000-00-00/a/0000.json',
+        exp_dir='experiments/0000-00-00/0000/',
         seed_idx=0,
         test_mode=True,
     )
-
 
 if __name__ == '__main__':
     main()
