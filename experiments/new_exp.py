@@ -185,7 +185,8 @@ def make_experiments(
                 f"Experiment IDs were requested in {date_dir} in the range {nd_str(exp_id_start, 4)} "
                 f"to {nd_str(exp_id_start + num_exps - 1, 4)}, but the following IDs already exist: "
                 f"{', '.join(map(lambda x: nd_str(x, 4), sorted(conflicts)))}. Please choose a different "
-                "starting ID or number of experiments."
+                "starting ID or number of experiments. Next guaranteed safe start ID "
+                f"for arbitrary number of experiments: {max(existing_ids) + 1}."
             )
     if seed_idx_list is None:
         seed_idx_list = [0]

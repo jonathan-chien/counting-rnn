@@ -1,5 +1,6 @@
 import copy
 from pathlib import Path
+import re
 from typing import List, Optional
 
 import torch
@@ -14,29 +15,116 @@ from general_utils import validation as validation_utils
 from general_utils import ml as ml_utils
 
 
-# def get_id_from_filepath(filepath: str, depth: int, joiner: str ='_'):
-#     path = Path(filepath)
-#     parts = [path.stem] + [p.name for p in path.parents[:depth-1]]
-#     return joiner.join(reversed(parts))
+_GPU_PREFIX = re.compile(r'^gpu__:(\d+)$')
+
 def get_id_from_filepath(filepath: str, depth: int, joiner: str ='', prefix='', suffix=''):
+    """ 
+    Get an ID from a filepath by taking the stem of the file and joining it with
+    the names of its parent directories up to a specified depth. The ID is
+    prefixed and suffixed with the provided strings.
+    
+    Parameters:
+    -----------
+    filepath : str
+        The path to the file.
+    depth : int
+        The number of items (including both stem and parents) to include in the ID.
+    joiner : str, optional
+        The string to join the parts of the ID. Default is '' (no separator).
+    prefix : str, optional
+        A string to prepend to the ID. Default is '' (no prefix).
+    suffix : str, optional
+        A string to append to the ID. Default is '' (no suffix).
+    
+    Returns:
+    --------
+    id : str
+        The constructed ID.
+    """
     path = Path(filepath)
     parts = [path.stem] + [p.name for p in path.parents[:depth-1]]
     return prefix + joiner.join(reversed(parts)).replace('-', '') + suffix
 
 def get_filepath_from_ref(config_kind, ref, file_ext):
     """ 
-    Take in config ref like abcd/1234/0000 for config_kind 'datasets' and file
-    extension '.json', and return path to config file
-    configs/datasets/abcd/1234/0000.json.
+    Get a filepath from a config kind and reference name.
+    
+    Parameters:
+    -----------
+    config_kind : str
+        The kind of config (e.g., 'datasets', 'models', etc.).
+    ref : str
+        The reference for the config (e.g. '2025-08-11/a/0000')
+    file_ext : str
+        The file extension to append to the filepath.
+
+    Returns:
+    --------
+    filepath : str
+        The constructed filepath.
+    
+    Example:
+    --------
+    >>> get_filepath_from_ref('datasets', '2025-08-11/a/0000', '.json')
+    'configs/datasets/2025-08-11/a/0000.json'
     """
     return f'configs/{config_kind}/{ref}{file_ext}'
 
 def get_device_name(device_str):
-    return (
-        'cuda:0' if device_str == 'gpu__' and torch.cuda.is_available() 
-        else 'mps:0' if device_str == 'gpu__' and torch.backends.mps.is_available() 
-        else device_str
-    )
+    """ 
+    Get device name based on the provided device string.
+
+    Parameters:
+    -----------
+    device_str : str
+        The device string, which can be 'gpu__' for the default GPU, 
+        'gpu__:<device_idx>' for a specific GPU index, or any other string 
+        representing a device.  
+    
+    Returns:    
+    --------
+    device_name : str
+        The name of the device to be used in PyTorch, such as 'cuda:0', 'mps:0', or 'cpu'.
+    """
+    # Check for valid GPU placeholder and retrieve device index.
+    validation_utils.validate_str(device_str)
+    if device_str == 'gpu__': 
+        # Default to index 0 if no index specified.
+        device_idx = 0
+    else:
+        # Check for 'gpu__:<device_idx>' format.
+        m = _GPU_PREFIX.fullmatch(device_str)
+        if not m:
+            # Raise exception if string looks like malformed version of 'gpu__:<device_idx>'.
+            if device_str.startswith('gpu__'):
+                raise ValueError(
+                    f"Invalid device string '{device_str}'. Expected format "
+                    f"'gpu__:<device_idx>' but got '{device_str}'."
+                )
+            return device_str # Pass through
+        device_idx = int(m.group(1))
+
+    # `device_str` matches valid format. Check for CUDA first.
+    if torch.cuda.is_available():
+        if device_idx < 0 or device_idx > torch.cuda.device_count() - 1:
+            raise ValueError(
+                f"Invalid device index {device_idx} for CUDA. "
+                f"Available CUDA devices: {torch.cuda.device_count()}"
+            )
+        return f'cuda:{device_idx}'
+    
+    # Check for MPS next.
+    mps_backend = getattr(torch.backends, 'mps', None)
+    if mps_backend and mps_backend.is_available():
+        if device_idx != 0:
+            raise ValueError(
+                f"Invalid device index {device_idx} for MPS. "
+                "MPS only supports a single device (index 0)."
+            )
+        return 'mps:0' 
+    
+    # Fallback to CPU.
+    return 'cpu'  
 
 def run_and_save_training_from_filepath(
     model_cfg_filepath, 
@@ -65,28 +153,17 @@ def run_and_save_training_from_filepath(
     dirs['train_run'] = fileio_utils.make_dir(
          exp_dir, f'seed{seed_idx:02d}', 'train', train_run_id, exist_ok=False
     )
-    # train_run_dir = fileio_utils.make_dir(
-    #      exp_dir, f'seed{seed_idx:02d}', 'train', train_run_id, exist_ok=False
-    # )
-    # train_run_dir = f'{exp_dir}seed{seed_idx:02d}/train/{train_run_id}/'
-    # exp_dir + f'seed{seed_idx:02d}/train/' + train_run_id + '/'
     
-    # TODO: Create dirs dict and store all the dir paths inside; then return this in the final dict.
     # Passed to metric tracker constructor.
     dirs['checkpoint'] = fileio_utils.make_dir(dirs['train_run'], 'output', 'models')
-    # checkpoint_dir = fileio_utils.make_dir(dirs['train_run'], 'output', 'models')
-    # checkpoint_dir = train_run_dir + 'output/models/'
 
     # Passed to Logger constructor and location where MetricTracker and
     # EarlyStopping objects will be manually saved.
     dirs['logs'] = fileio_utils.make_dir(dirs['train_run'], 'output', 'logs')
-    # log_dir = fileio_utils.make_dir(dirs['train_run'], 'output', 'logs')
-    # output_dir = train_run_dir + f'output/'
-
+    
     # Used to manually save configs below after they are loaded in.
     dirs['configs'] = fileio_utils.make_dir(dirs['train_run'], 'configs')
-    # config_dir = fileio_utils.make_dir(dirs['train_run'], 'config')
-
+    
     # -------------------------- Build dataset ------------------------------ #    
     # Build training, validation, and test splits. Embedding dim needed for 
     # model instantiation below.
@@ -362,8 +439,6 @@ def run_and_save_testing_from_filepath(
     # ---------------------- Build all directories/paths -------------------- #
     # Build path to models (this is based solely on training params) if not provided.
     if model_filepath is None:
-        # models_dir = fileio_utils.get_dir(exp_dir, f'seed{seed_idx:02d}', 'train', train_run_id, 'output', 'models')
-        # model_filepath = fileio_utils.get_filepath_with_suffix(models_dir, model_suffix)
         model_filepath = get_model_filepath(exp_dir, seed_idx, train_run_id, model_suffix)
     
     # Build test run ID.
@@ -371,8 +446,6 @@ def run_and_save_testing_from_filepath(
     testing_id = get_id_from_filepath(testing_cfg_filepath, depth=3)
     reproducibility_id = get_id_from_filepath(reproducibility_cfg_filepath, depth=3)
     test_run_id = '_'.join([train_run_id, data_test_id, testing_id, reproducibility_id]) + test_run_id_suffix
-    # test_run_id = f'{train_run_id}_{data_test_id}_{testing_id}'
-    # test_run_id = train_run_id + '_' + test_run_id 
 
     dirs = {}
 
@@ -380,11 +453,9 @@ def run_and_save_testing_from_filepath(
     dirs['test_run'] = fileio_utils.make_dir(
         exp_dir, f'seed{seed_idx:02d}', 'test', test_run_id, exist_ok=False
     )
-    # test_run_dir = exp_dir + f'seed{seed_idx:02d}/test/' + test_run_id + '/'
 
     # Build directory to pass to Logger constructor.
     dirs['logs'] = fileio_utils.make_dir(dirs['test_run'], 'output', 'logs')
-    # output_dir = test_run_dir + 'output/'
 
     # Directory where used base configs will be saved directly.
     dirs['configs'] = fileio_utils.make_dir(dirs['test_run'], 'configs')
@@ -484,10 +555,6 @@ def run(
                         model_cfg_filepath = get_filepath_from_ref('models', model_cfg_ref, '.json')
                         training_cfg_filepath = get_filepath_from_ref('training', training_cfg_ref, '.json')
                         reproducibility_cfg_filepath = get_filepath_from_ref('reproducibility', reproducibility_cfg_ref, '.json')
-                        # data_train_cfg_filepath = f'configs/datasets/{data_train_cfg_ref}.json'
-                        # model_cfg_filepath = f'configs/models/{model_cfg_ref}.json'
-                        # training_cfg_filepath = f'configs/training/{training_cfg_ref}.json'
-
 
                         training_run = run_and_save_training_from_filepath(
                             data_train_cfg_filepath=data_train_cfg_filepath,
@@ -502,19 +569,6 @@ def run(
                         )
                         training[training_run['train_run_id']] = training_run
 
-                        # # Build train run id and check against the one returned above.
-                        # train_run_id = '_'.join(
-                        #     get_id_from_filepath(get_filepath_from_ref(ref, ))
-                        #     for ref in [data_train_cfg_ref, model_cfg_ref, training_cfg_ref]
-                        # )
-                        # # f'{data_train_cfg_ref}_{model_cfg_ref}_{training_cfg_ref}'
-                        # if train_run_id != training['train_run_id']:
-                        #     raise RuntimeError(
-                        #         f"The train_run_id '{train_run_id}' constructed from "
-                        #         "the input lists of config files does not match the " 
-                        #         f"train_run_id '{training['train_run_id']}' constructed, "
-                        #         "used, and returned by the run_and_save_training_from_filepath function."
-                        #     )
                         
                         for data_test_cfg_ref in data_test_cfg_ref_list:
                             for testing_cfg_ref in testing_cfg_ref_list:
@@ -522,9 +576,7 @@ def run(
                                 # Get config filepaths.
                                 data_test_cfg_filepath = get_filepath_from_ref('datasets', data_test_cfg_ref, '.json')
                                 testing_cfg_filepath = get_filepath_from_ref('testing', testing_cfg_ref, '.json')
-                                # data_test_cfg_filepath = f'configs/datasets/{data_test_cfg_ref}'
-                                # testing_cfg_filepath = f'configs/testing/{testing_cfg_ref}'
-
+                                
                                 testing_run = run_and_save_testing_from_filepath(
                                     data_test_cfg_filepath=data_test_cfg_filepath,
                                     model_cfg_filepath=model_cfg_filepath,
@@ -551,7 +603,7 @@ def run_curriculum(
     testing_cfg_ref_list: List[str],
     reproducibility_cfg_ref_list: List[str],
     seed_idx_list,
-    exp_group_id,
+    exp_date,
     exp_id,
     model_suffix='_best.pt',
     weights_only=False
@@ -577,9 +629,6 @@ def run_curriculum(
         expected_description="a string"
     )
     if pretrained_model_filepath_list is not None:
-        # pretrained_model_filepath_list = [
-        #     None for _ in range(len(model_cfg_ref_list))
-        # ]
         validation_utils.validate_iterable_contents(
             pretrained_model_filepath_list, 
             validation_utils.is_str,
@@ -643,7 +692,7 @@ def run_curriculum(
                 testing_cfg_ref_list=[testing_cfg_ref],
                 reproducibility_cfg_ref_list=reproducibility_cfg_ref_list, # Iterated over within run for each stage
                 seed_idx_list=[seed_idx],
-                exp_group_id=exp_group_id,
+                exp_date=exp_date,
                 exp_id=exp_id,
                 exp_dir_with_seed_exist_ok=True,
                 run_id_suffix=f'_c{i_stage:02d}', # append _c00, _c01, etc. for easier tracking of stages of learning

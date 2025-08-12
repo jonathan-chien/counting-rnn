@@ -12,13 +12,13 @@ class EvalFnConfig(ArgsConfig):
     the 'evaluation' field of TrainConfig.
     """
     loss_terms: List[CallableConfig]
-    logger: Optional[CallableConfig]
+    logger: Optional[CallableConfig] = None
     dataloader: CallableConfig
     switch_label: Any # Needs to be torch tensor, but could probably be int too
     log_outputs: bool
     criteria: Dict[str, CallableConfig]
-    compute_mean_for: Optional[List[str]]
-    h_0: Optional[Union[Callable, TensorConfig]]
+    compute_mean_for: Optional[List[str]] = None
+    h_0: Optional[Union[Callable, TensorConfig]] = None
     deterministic: bool
     device: str
     move_results_to_cpu: bool
@@ -32,12 +32,12 @@ class TrainFnConfig(ArgsConfig):
     loss_terms: List[CallableConfig]
     evaluation: EvalFnConfig
     # save_validation_logger: bool
-    h_0: Optional[Union[Callable, TensorConfig]]
-    logger_train: Optional[CallableConfig]
+    h_0: Optional[Union[Callable, TensorConfig]] = None
+    logger_train: Optional[CallableConfig] = None
     criteria: Dict[str, CallableConfig]
-    compute_mean_for: Optional[List[str]]
-    metric_tracker: Optional[CallableConfig]
-    early_stopping: Optional[CallableConfig]
+    compute_mean_for: Optional[List[str]] = None
+    metric_tracker: Optional[CallableConfig] = None
+    early_stopping: Optional[CallableConfig] = None
     num_epochs: int
     device: str
     deterministic: bool
@@ -46,8 +46,8 @@ class TrainFnConfig(ArgsConfig):
 @dataclass
 class TrainingConfig(ContainerConfig):
     train_fn_cfg: TrainFnConfig
-    train_split_seed_idx: 0
-    val_split_seed_idx: 0
+    train_split_seed_idx: int = 0
+    val_split_seed_idx: int = 0
     requires_grad_cfg: RequiresGradConfig
     
 
