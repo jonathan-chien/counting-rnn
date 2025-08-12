@@ -50,7 +50,7 @@ def validate_nonneg_int(x):
     
 def validate_float(x):
     if not is_float(x):
-        return ValueError(error_message("a float", x))
+        return TypeError(error_message("a float", x))
     
 def validate_pos_float(x):
     if not is_pos_float(x):
@@ -62,15 +62,15 @@ def validate_nonneg_float(x):
     
 def validate_str(x):
     if not is_str(x):
-        raise ValueError(error_message("a string", x))
+        raise TypeError(error_message("a string", x))
     
 def validate_pathlib_path(x):
     if not is_pathlib_path(x):
-        raise ValueError(error_message("an object of type pathlib.Path", x))
+        raise TypeError(error_message("an object of type pathlib.Path", x))
     
 def validate_pathlib_path_or_str(x):
     if not (is_pathlib_path(x) or is_str(x)):
-        raise ValueError(error_message("an object of type pathlib.Path, or a str", x))
+        raise TypeError(error_message("an object of type pathlib.Path, or a str", x))
 
 def validate_iterable(x):
     """ 
