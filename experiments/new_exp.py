@@ -13,58 +13,58 @@ from general_utils import validation as validation_utils
 
 RUN_PY_TEMPLATES = {
     'standard': Template(textwrap.dedent(
-        '''\
-        import os
+'''\
+import os
 
-        from pathlib import Path
+from pathlib import Path
 
-        from engine.driver import run
-        from general_utils import metadata as metadata_utils
+from engine.driver import run
+from general_utils import metadata as metadata_utils
 
 
-        # ----------------------------- Set run args -------------------------------- #
-        run_args = dict(
-            data_train_cfg_ref_list=[],
-            model_cfg_ref_list=[],
-            pretrained_model_filepath_list=None,
-            training_cfg_ref_list=[],
-            data_test_cfg_ref_list=[],
-            testing_cfg_ref_list=[],
-            reproducibility_cfg_ref_list=[],
-            seed_idx_list=$seed_idx_list,
-            exp_date=$exp_date,
-            exp_id=$exp_id,
-            run_id_suffix=$run_id_suffix,
-            model_suffix=$model_suffix,
-            weights_only=$weights_only
-        )
-    
-        # ------------------------ Collect and save metadata ------------------------ #
-        exp_dir = Path(__file__).resolve().parent
-        metadata_utils.collect_and_save_metadata(
-            additional_info={'run_args': run_args, 'exp_dir': str(exp_dir)},
-            filepath=exp_dir / 'metadata.json',
-            enforce_clean_git_tree=False,
-            overwrite=False
-        )
-        metadata_utils.create_textfile(
-            """$readme_contents""",
-            filepath=exp_dir / 'README.md',
-            dedent=True,
-            overwrite=False,
-        )
+# ----------------------------- Set run args -------------------------------- #
+run_args = dict(
+    data_train_cfg_ref_list=[],
+    model_cfg_ref_list=[],
+    pretrained_model_filepath_list=None,
+    training_cfg_ref_list=[],
+    data_test_cfg_ref_list=[],
+    testing_cfg_ref_list=[],
+    reproducibility_cfg_ref_list=[],
+    seed_idx_list=$seed_idx_list,
+    exp_date=$exp_date,
+    exp_id=$exp_id,
+    run_id_suffix=$run_id_suffix,
+    model_suffix=$model_suffix,
+    weights_only=$weights_only
+)
 
-        # --------------------------------- Run ------------------------------------- #
-        training, testing, returned_exp_dir = run(**run_args)
+# ------------------------ Collect and save metadata ------------------------ #
+exp_dir = Path(__file__).resolve().parent
+metadata_utils.collect_and_save_metadata(
+    additional_info={'run_args': run_args, 'exp_dir': str(exp_dir)},
+    filepath=exp_dir / 'metadata.json',
+    enforce_clean_git_tree=$enforce_clean_git_tree,
+    overwrite=$overwrite_metadata
+)
+metadata_utils.create_textfile(
+    """$readme_contents""",
+    filepath=exp_dir / 'README.md',
+    dedent=True,
+    overwrite=$overwrite_metadata,
+)
 
-        # Verify that experimental results were logged in the same directory as this script.
-        if str(exp_dir) != str(returned_exp_dir):
-            raise RuntimeError(
-                "Mismatch between intended and actual location of experimental results.\n"
-                f"- Expected: {exp_dir} (location of this script)\n"
-                f"- Received: {returned_exp_dir} (returned by the run/run_curriculum function)\n\n"
-            )
-        '''
+# --------------------------------- Run ------------------------------------- #
+training, testing, returned_exp_dir = run(**run_args)
+
+# Verify that experimental results were logged in the same directory as this script.
+if str(exp_dir) != str(returned_exp_dir):
+    raise RuntimeError(
+        "Mismatch between intended and actual location of experimental results.\\n"
+        f"- Expected: {exp_dir} (location of this script)\\n"
+        f"- Received: {returned_exp_dir} (returned by the run/run_curriculum function)\\n\\n"
+    )
+'''
     ))
 }
 
@@ -125,7 +125,9 @@ def make_experiments(
     run_id_suffix: str = '',
     model_suffix: str = '_best.pt',
     weights_only: bool = False,
-    readme_contents: str = ''
+    readme_contents: str = '',
+    enforce_clean_git_tree: bool = True,
+    overwrite_metadata: bool = False
 ):
     """ 
     Create a series of experiment directories with a run.py file in each.
@@ -152,6 +154,14 @@ def make_experiments(
             Suffix for the model file in the run.py file. Defaults to '_best.pt'.
         weights_only : bool
             Whether to save only the weights of the model. Defaults to False.
+        readme_contents : str
+            Contents to write in the README.md file in each experiment directory, 
+            or '@path/to/file.md' to load from a file. If a literal '@' is desired 
+            at the start of the README, write '@@' to escape. Defaults to ''.
+        enforce_clean_git_tree : bool
+            Whether to enforce a clean git tree when collecting metadata. Defaults to True.
+        overwrite_metadata : bool
+            Whether to overwrite existing metadata files. Defaults to False.
 
     Returns:
     --------
@@ -201,7 +211,9 @@ def make_experiments(
                 run_id_suffix=repr(run_id_suffix),
                 model_suffix=repr(model_suffix),
                 weights_only=str(bool(weights_only)),
-                readme_contents=readme_contents.replace('$', '$$')
+                readme_contents=readme_contents.replace('$', '$$'),
+                enforce_clean_git_tree=str(bool(enforce_clean_git_tree)),
+                overwrite_metadata=str(bool(overwrite_metadata))
             ))
         make_file_executable(run_py)
 
