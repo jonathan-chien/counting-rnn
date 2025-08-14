@@ -32,7 +32,8 @@ def main():
 
     # ----------------------------------------------------------------------- #
     REQUIRES_GRAD_REGISTRY = {
-        'no_input_network_freeze_except_for_rnn_input': ml_utils.config.RequiresGradConfig(
+        'freeze_all_except_for_rnn_input': ml_utils.config.RequiresGradConfig(
+            description="Freeze everything except for RNN input layer",
             networks={
                 'input_network': [],
                 'rnn': ['ih'],
@@ -42,7 +43,8 @@ def main():
             requires_grad=False,
             verbose=True
         ),
-        'with_input_network_freeze_except_for_input_layer': ml_utils.config.RequiresGradConfig(
+        'freeze_all_except_for_input_network_input_layer': ml_utils.config.RequiresGradConfig(
+            description="Freeze everything except for input network input layer",
             networks={
                 'input_network': ['0.weight', '0.bias'],
                 'rnn': [],
@@ -53,6 +55,7 @@ def main():
             verbose=True
         ),
         'none': ml_utils.config.RequiresGradConfig(
+            description="No parameters are frozen",
             networks={
                 'input_network': [],
                 'rnn': [],

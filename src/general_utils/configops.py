@@ -3,28 +3,15 @@ import ast
 import copy
 from dataclasses import is_dataclass
 
+from general_utils import validation as validation_utils
 
 def traverse_dotted_path(root, dotted_path: str):
 
+    validation_utils.validate_str(dotted_path)
     if dotted_path == '':
         raise ValueError("Empty dotted path.")
     
     dotted_path_parts = dotted_path.split('.')
-
-    # # Validate.
-    
-    # if '' in dotted_path_parts:
-    #     raise ValueError(
-    #         f"'' detected in dotted path: '{dotted_path}'. Check for double dot typos, e.g. 'a..b.c'."
-    #     )
-    # if any(part.strip() != part for part in dotted_path_parts):
-    #     raise ValueError(
-    #         f"Empty space detected in one of the path parts: {dotted_path}."
-    #     )
-    # if any(part is None for part in dotted_path_parts):
-    #     raise ValueError(
-    #         f"None "
-    #     )
 
     branch = root 
     for i_part, part in enumerate(dotted_path_parts):
@@ -39,27 +26,72 @@ def traverse_dotted_path(root, dotted_path: str):
                 f"Empty space detected in for {part} at position {i_part} in " 
                 f"dotted_path: '{dotted_path}'."
             )
-        if part is None:
+        if branch is None:
+            # Raise exception if None encountered on a non-leaf node.
             raise ValueError(
-                f"None value encounted for {part} at position {i_part} in " 
-                f"dotted_path: '{dotted_path}'."
+                "None value encounted for branch when attempting to access with " 
+                f"{part} at position {i_part} in dotted_path: '{dotted_path}'."
             )
 
         if is_dataclass(branch):
             branch = getattr(branch, part)
         elif isinstance(branch, dict):
             branch = branch[part]
+        elif isinstance(branch, (list, tuple)):
+            # try:
+            #     idx = int(part)
+            #     validation_utils.validate_nonneg_int(idx)
+            # except ValueError:
+            #     raise ValueError(
+            #         "Expected a str representation of a non-negative integer at "
+            #         f"position {i_part} in dotted path: '{dotted_path}', but got {part}."
+            #     )
+            # branch = branch[part]
+            if part == '*':
+                # Wildcard, traverse for all items in iterable.
+                remainder = '.'.join(dotted_path_parts[i_part+1:])
+                if remainder == '':
+                    # If no more parts, return the whole iterable.
+                    return list(branch) if isinstance(branch, tuple) else branch
+                else:
+                    # Otherwise, recursively traverse the rest of the path.
+                    return [traverse_dotted_path(item, remainder) for item in branch]
+            else:
+                # If part is not wildcard, assume it is an index.
+                try:
+                    idx = int(part)
+                    validation_utils.validate_int(idx)
+                except (ValueError, TypeError):
+                    raise ValueError(
+                        "Expected a str representation of an int at position "
+                        f"{i_part} in dotted path: '{dotted_path}', but got {part}."
+                    )
+                try:
+                    branch = branch[idx]
+                except IndexError:
+                    raise IndexError(
+                        f"Index {idx} out of bounds for branch at position {i_part} in "
+                        f"dotted path: '{dotted_path}'. Branch has length {len(branch)}."
+                    )
+                # try:
+                #     part = ast.literal_eval(part)
+                # except (ValueError, SyntaxError):
+                #     raise ValueError(
+                #         f"Expected a str representation of a list of non-negative integers at "
+                #         f"position {i_part} in dotted path: '{dotted_path}', but got {part}."   
+                #     )
+                # branch = [traverse_dotted_path(item, '.'.join(dotted_path_parts[i_part+1:])) for item in branch[part]]
         else:
             incorrect = 'root' if i_part == 0 else f'branch {i_part-1}'
             raise RuntimeError(
                 "Unexpected condition reached during attempted traversal of " 
                 f"root object according to dotted path: '{dotted_path}'. " 
-                "Expected a dataclass or dict instance for root and all branches "
+                "Expected a dataclass, dict, or iterable for root and all branches "
                 f"but got type {type(branch)} for {incorrect}. This resulted in "
                 f"this exception being raised at position {i_part} in the dotted path."
             )
         
-        return branch
+    return branch
         
 
 def get_parser():

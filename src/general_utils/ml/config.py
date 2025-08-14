@@ -79,6 +79,7 @@ class MetricTrackerConfig(ArgsConfig):
 
 @dataclass
 class RequiresGradConfig(ArgsConfig):
+    description: Optional[str] = None
     networks: Dict[str, List[str]]
     mode: Literal['inclusion', 'exclusion']
     requires_grad: bool
