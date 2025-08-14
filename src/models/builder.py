@@ -1,7 +1,6 @@
 from .config import AutoRNNConfig
 from data import builder as data_builder
 from .networks import AutoRNN
-from general_utils import cli as cli_utils
 from general_utils import serialization as serialization_utils
 
 
