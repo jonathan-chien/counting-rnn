@@ -10,6 +10,7 @@ from engine.driver import run_and_save_testing_from_filepath
 from engine import utils as engine_utils
 from general_utils.config import CallableConfig, TorchDeviceConfig
 from general_utils import fileio as fileio_utils
+from general_utils import records as records_utils
 from general_utils import serialization as serialization_utils
 from general_utils import ml as ml_utils
 
@@ -154,7 +155,23 @@ def main():
         weights_only=False
     )
 
+    # --------------------------- Summarize config --------------------------- #
+    # Registry of items to extract from the config.
+    REGISTRY = {
+        'loss_terms': 'eval_fn_cfg.loss_terms.*.args_cfg.name',
+        'loss_weights': 'eval_fn_cfg.loss_terms.*.args_cfg.weight',
+        'batch_size': 'eval_fn_cfg.dataloader.args_cfg.batch_size',
+    }
 
+    # Deserialize and summarize config to .xlsx file.
+    records_utils.summarize_cfg_to_xlsx(
+        testing_cfg_filepath, 
+        config_kind='testing', 
+        config_id=str(testing_cfg_filepath).removeprefix('configs/datasets/').removesuffix('.json'),
+        dotted_path_registry=REGISTRY,
+        note='',
+        xlsx_filepath='configs/logs.xlsx'
+    )
 
 
 if __name__ == '__main__':

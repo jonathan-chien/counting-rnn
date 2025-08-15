@@ -14,7 +14,7 @@ from general_utils import tensor as tensor_utils
 
 
 def main():
-    # --------------------------- Set directory ----------------------------- #
+    # ---------------------------- Set directory ----------------------------- #
     base_dir = 'configs/datasets'
     # sub_dir_1 = 'aaaa'
     sub_dir_1 = str(date.today())
@@ -22,7 +22,7 @@ def main():
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = fileio_utils.make_filename('0000')
 
-    # ----------------------- Build auxiliary objects ----------------------- #
+    # ------------------------ Build auxiliary objects ----------------------- #
     hypercube_args_cfg = HypercubeConfig(
         num_dims=2,
         coords=TensorConfig.from_tensor(
@@ -95,7 +95,7 @@ def main():
             recovery_mode='call'
         )
 
-    # --------------------------- Sequences config -------------------------- #
+    # ---------------------------- Sequences config -------------------------- #
     sequences_cfg = SequencesConfig(
         num_seq='num_seq___',
         seq_order='permute',
@@ -104,14 +104,14 @@ def main():
         embedder=embedder
     )
 
-    # ---------------------------- Split sizes ------------------------------ #
+    # ----------------------------- Split sizes ------------------------------ #
     split_cfg = SplitConfig(
         train=1000,
         val=500,
         test=500
     )
 
-    # ----------------------------- Serialize ------------------------------- #
+    # ------------------------------ Serialize ------------------------------- #
     # Attempt to serialize and reconstruct full cfg tree, and use reconstructed
     # version to build, to ensure future reproducibility.
     data_cfg = DataConfig(
@@ -122,7 +122,7 @@ def main():
     data_cfg_filepath = output_dir / (filename + '.json')
     _ = serialization_utils.serialize(data_cfg, data_cfg_filepath)
 
-    # -------------------- Test deserialization/execution ------------------- #
+    # -------------------- Test deserialization/execution -------------------- #
     # Attempt to build dataset from serialized file.
     data_builder.build_sequences_from_filepath(
         data_cfg_filepath, 
@@ -133,11 +133,28 @@ def main():
         save_path=None
     )
 
+    # --------------------------- Summarize config --------------------------- #
+    # Registry of items to extract from the config.
+    REGISTRY = {
+        'hypercube_dim': 'sequences_cfg.elem.args_cfg.num_dims',
+        'pos_vertices': 'sequences_cfg.elem.args_cfg.inclusion_set.args_cfg.data',
+        'pos_vertices_pmf': 'sequences_cfg.elem.args_cfg.vertices_pmfs.0.args_cfg.data',
+        'neg_vertices_pmf': 'sequences_cfg.elem.args_cfg.vertices_pmfs.1.args_cfg.data',
+        'pos_seq_lengths': 'sequences_cfg.seq_lengths.lengths.pos.support.args_cfg.data',
+        'pos_seq_lengths_pmf': 'sequences_cfg.seq_lengths.lengths.pos.pmf.args_cfg.data',
+        'neg_seq_lengths': 'sequences_cfg.seq_lengths.lengths.neg.support.args_cfg.data',
+        'neg_seq_lengths_pmf': 'sequences_cfg.seq_lengths.lengths.neg.pmf.args_cfg.data',
+        'train_size': 'split_cfg.train',
+        'val_size': 'split_cfg.val',
+        'test_size': 'split_cfg.test'
+    }
+
     # Deserialize and summarize config to .xlsx file.
     records_utils.summarize_cfg_to_xlsx(
         data_cfg_filepath, 
-        config_kind='dataset', 
-        config_id=str(data_cfg_filepath).strip('.json'),
+        config_kind='datasets', 
+        config_id=str(data_cfg_filepath).removeprefix('configs/datasets/').removesuffix('.json'),
+        dotted_path_registry=REGISTRY,
         note='',
         xlsx_filepath='configs/logs.xlsx'
     )

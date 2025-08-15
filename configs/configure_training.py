@@ -17,6 +17,7 @@ from engine import utils as engine_utils
 from engine.config import TrainFnConfig, TrainingConfig
 from general_utils.config import CallableConfig, TorchDeviceConfig
 from general_utils import fileio as fileio_utils
+from general_utils import records as records_utils
 from general_utils import serialization as serialization_utils
 from general_utils import ml as ml_utils
 
@@ -341,6 +342,31 @@ def main():
         exp_dir='experiments/0000-00-00/0000/',
         seed_idx=0,
         test_mode=True,
+    )
+
+    # --------------------------- Summarize config --------------------------- #
+    # Registry of items to extract from the config.
+    REGISTRY = {
+        'loss_terms': 'train_fn_cfg.loss_terms.*.args_cfg.name',
+        'loss_weights': 'train_fn_cfg.loss_terms.*.args_cfg.weight',
+        'optimizers': 'train_fn_cfg.loss_terms.*.args_cfg.optimizer.path',
+        'learning_rates': 'train_fn_cfg.loss_terms.*.args_cfg.optimizer.args_cfg.lr',
+        'train_batch_size': 'train_fn_cfg.dataloader.args_cfg.batch_size',
+        'val_batch_size': 'train_fn_cfg.evaluation.dataloader.args_cfg.batch_size',
+        'early_stopping_strategy': 'train_fn_cfg.early_stopping.args_cfg.strategy.path',
+        'early_stopping_patience': 'train_fn_cfg.early_stopping.args_cfg.strategy.args_cfg.patience',
+        'early_stopping_tol': 'train_fn_cfg.early_stopping.args_cfg.strategy.args_cfg.tol',
+        'num_epochs': 'train_fn_cfg.num_epochs',
+    }
+
+    # Deserialize and summarize config to .xlsx file.
+    records_utils.summarize_cfg_to_xlsx(
+        training_cfg_filepath, 
+        config_kind='training', 
+        config_id=str(training_cfg_filepath).removeprefix('configs/datasets/').removesuffix('.json'),
+        dotted_path_registry=REGISTRY,
+        note='',
+        xlsx_filepath='configs/logs.xlsx'
     )
 
 if __name__ == '__main__':

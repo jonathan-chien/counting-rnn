@@ -202,6 +202,34 @@
       },
       "move_results_to_cpu": true
     },
+    "criteria": {
+      "accuracy": {
+        "path": "engine.utils.compute_accuracy",
+        "args_cfg": null,
+        "kind": "function",
+        "recovery_mode": "get_callable",
+        "locked": false,
+        "if_recover_while_locked": "print",
+        "__path__": "general_utils.config.CallableConfig",
+        "__kind__": "dataclass"
+      }
+    },
+    "num_epochs": 2,
+    "device": {
+      "path": "torch.device",
+      "args_cfg": {
+        "device": "gpu__",
+        "__path__": "general_utils.config.TorchDeviceConfig",
+        "__kind__": "dataclass"
+      },
+      "kind": "class",
+      "recovery_mode": "call",
+      "locked": true,
+      "if_recover_while_locked": "print",
+      "__path__": "general_utils.config.CallableConfig",
+      "__kind__": "dataclass"
+    },
+    "deterministic": true,
     "h_0": null,
     "logger_train": {
       "path": "general_utils.ml.logging.Logger",
@@ -221,18 +249,6 @@
       "if_recover_while_locked": "print",
       "__path__": "general_utils.config.CallableConfig",
       "__kind__": "dataclass"
-    },
-    "criteria": {
-      "accuracy": {
-        "path": "engine.utils.compute_accuracy",
-        "args_cfg": null,
-        "kind": "function",
-        "recovery_mode": "get_callable",
-        "locked": false,
-        "if_recover_while_locked": "print",
-        "__path__": "general_utils.config.CallableConfig",
-        "__kind__": "dataclass"
-      }
     },
     "compute_mean_for": [
       "cross_entropy_loss",
@@ -288,27 +304,9 @@
       "__path__": "general_utils.config.CallableConfig",
       "__kind__": "dataclass"
     },
-    "num_epochs": 2,
-    "device": {
-      "path": "torch.device",
-      "args_cfg": {
-        "device": "gpu__",
-        "__path__": "general_utils.config.TorchDeviceConfig",
-        "__kind__": "dataclass"
-      },
-      "kind": "class",
-      "recovery_mode": "call",
-      "locked": true,
-      "if_recover_while_locked": "print",
-      "__path__": "general_utils.config.CallableConfig",
-      "__kind__": "dataclass"
-    },
-    "deterministic": true,
     "__path__": "engine.config.TrainFnConfig",
     "__kind__": "dataclass"
   },
-  "train_split_seed_idx": 0,
-  "val_split_seed_idx": 0,
   "requires_grad_cfg": {
     "networks": {
       "input_network": [],
@@ -318,9 +316,12 @@
     "mode": "inclusion",
     "requires_grad": true,
     "verbose": true,
+    "description": "No parameters are frozen",
     "__path__": "general_utils.ml.config.RequiresGradConfig",
     "__kind__": "dataclass"
   },
+  "train_split_seed_idx": 0,
+  "val_split_seed_idx": 0,
   "__path__": "engine.config.TrainingConfig",
   "__kind__": "dataclass"
 }

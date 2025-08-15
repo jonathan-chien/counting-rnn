@@ -1,0 +1,117 @@
+{
+  "eval_fn_cfg": {
+    "loss_terms": [
+      {
+        "path": "general_utils.ml.loss.LossTerm",
+        "args_cfg": {
+          "name": "cross_entropy",
+          "loss_fn": {
+            "path": "general_utils.ml.loss.wrapped_cross_entropy_loss",
+            "args_cfg": null,
+            "kind": "function",
+            "recovery_mode": "get_callable",
+            "locked": false,
+            "if_recover_while_locked": "print",
+            "__path__": "general_utils.config.CallableConfig",
+            "__kind__": "dataclass"
+          },
+          "mode": "eval",
+          "weight": 1.0,
+          "optimizer": null,
+          "__path__": "general_utils.ml.config.LossTermConfig",
+          "__kind__": "dataclass"
+        },
+        "kind": "class",
+        "recovery_mode": "call",
+        "locked": false,
+        "if_recover_while_locked": "print",
+        "__path__": "general_utils.config.CallableConfig",
+        "__kind__": "dataclass"
+      }
+    ],
+    "dataloader": {
+      "path": "torch.utils.data.dataloader.DataLoader",
+      "args_cfg": {
+        "collate_fn": {
+          "path": "data.sequences.Sequences.pad_collate_fn",
+          "args_cfg": null,
+          "kind": "static_method",
+          "recovery_mode": "get_callable",
+          "locked": false,
+          "if_recover_while_locked": "print",
+          "__path__": "general_utils.config.CallableConfig",
+          "__kind__": "dataclass"
+        },
+        "batch_size": "dataset_size__",
+        "shuffle": false,
+        "__path__": "general_utils.ml.config.DataLoaderConfig",
+        "__kind__": "dataclass"
+      },
+      "kind": "class",
+      "recovery_mode": "call",
+      "locked": true,
+      "if_recover_while_locked": "print",
+      "__path__": "general_utils.config.CallableConfig",
+      "__kind__": "dataclass"
+    },
+    "switch_label": "switch_label___",
+    "log_outputs": false,
+    "criteria": {
+      "accuracy": {
+        "path": "engine.utils.compute_accuracy",
+        "args_cfg": null,
+        "kind": "function",
+        "recovery_mode": "get_callable",
+        "locked": false,
+        "if_recover_while_locked": "print",
+        "__path__": "general_utils.config.CallableConfig",
+        "__kind__": "dataclass"
+      }
+    },
+    "deterministic": true,
+    "device": {
+      "path": "torch.device",
+      "args_cfg": {
+        "device": "gpu__",
+        "__path__": "general_utils.config.TorchDeviceConfig",
+        "__kind__": "dataclass"
+      },
+      "kind": "class",
+      "recovery_mode": "call",
+      "locked": true,
+      "if_recover_while_locked": "print",
+      "__path__": "general_utils.config.CallableConfig",
+      "__kind__": "dataclass"
+    },
+    "move_results_to_cpu": true,
+    "logger": {
+      "path": "general_utils.ml.logging.Logger",
+      "args_cfg": {
+        "log_dir": "log_dir_name__",
+        "log_name": "test",
+        "verbose_batch": false,
+        "verbose_epoch": true,
+        "print_flush_epoch": false,
+        "print_flush_batch": false,
+        "__path__": "general_utils.ml.config.LoggerConfig",
+        "__kind__": "dataclass"
+      },
+      "kind": "class",
+      "recovery_mode": "call",
+      "locked": true,
+      "if_recover_while_locked": "print",
+      "__path__": "general_utils.config.CallableConfig",
+      "__kind__": "dataclass"
+    },
+    "compute_mean_for": [
+      "cross_entropy_loss",
+      "accuracy"
+    ],
+    "h_0": null,
+    "__path__": "engine.config.EvalFnConfig",
+    "__kind__": "dataclass"
+  },
+  "test_split_seed_idx": 0,
+  "__path__": "engine.config.TestingConfig",
+  "__kind__": "dataclass"
+}
