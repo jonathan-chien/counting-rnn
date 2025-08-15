@@ -8,6 +8,7 @@ from data.sequences import Hypercube, Embedder
 from data import utils as data_utils
 from general_utils.config import CallableConfig, TensorConfig
 from general_utils import fileio as fileio_utils
+from general_utils import records as records_utils
 from general_utils import serialization as serialization_utils
 from general_utils import tensor as tensor_utils
 
@@ -130,6 +131,15 @@ def main():
         seed_idx=0, 
         print_to_console=True, 
         save_path=None
+    )
+
+    # Deserialize and summarize config to .xlsx file.
+    records_utils.summarize_cfg_to_xlsx(
+        data_cfg_filepath, 
+        config_kind='dataset', 
+        config_id=str(data_cfg_filepath).strip('.json'),
+        note='',
+        xlsx_filepath='configs/logs.xlsx'
     )
 
 if __name__ == '__main__':

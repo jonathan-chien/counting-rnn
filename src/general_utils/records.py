@@ -12,10 +12,10 @@ from general_utils import configops as configops_utils
 # Define registry of extractor functions.
 REGISTRY = {
     'dataset': {
-        'hypercube_dim': 'sequences_cfg.elem.hypercube_args_cfg.num_dims',
-        'pos_vertices': 'sequences_cfg.elem.hypercube_args_cfg.inclusion_set',
-        'pos_vertices_pmf': 'sequences_cfg.elem.hypercube_args_cfg.vertices_pmfs.0',
-        'neg_vertices_pmf': 'sequences_cfg.elem.hypercube_args_cfg.vertices_pmfs.1',
+        'hypercube_dim': 'sequences_cfg.elem.args_cfg.num_dims',
+        'pos_vertices': 'sequences_cfg.elem.args_cfg.inclusion_set',
+        'pos_vertices_pmf': 'sequences_cfg.elem.args_cfg.vertices_pmfs.0',
+        'neg_vertices_pmf': 'sequences_cfg.elem.args_cfg.vertices_pmfs.1',
         'pos_seq_lengths': 'sequences_cfg.seq_lengths.lengths.pos.support',
         'pos_seq_lengths_pmf': 'sequences_cfg.seq_lengths.lengths.pos.pmf',
         'neg_seq_lengths': 'sequences_cfg.seq_lengths.lengths.neg.support',
@@ -104,10 +104,10 @@ def summarize_cfg(cfg, dotted_path_registry: Dict[str, Union[str, Callable]]) ->
 # @register_extractor('dataset')
 # def extract_dataset_summary(data_cfg) -> Dict[str, Any]:
 #     return {
-#         'hypercube_dim': _get(data_cfg, 'sequences_cfg.elem.hypercube_args_cfg.num_dims'),
-#         'pos_vertices': _get(data_cfg, 'sequences_cfg.elem.hypercube_args_cfg.inclusion_set'),
-#         'pos_vertices_pmf': _get(data_cfg, 'sequences_cfg.elem.hypercube_args_cfg.vertices_pmfs.0'),
-#         'neg_vertices_pmf': _get(data_cfg, 'sequences_cfg.elem.hypercube_args_cfg.vertices_pmfs.1'),
+#         'hypercube_dim': _get(data_cfg, 'sequences_cfg.elem.args_cfg.num_dims'),
+#         'pos_vertices': _get(data_cfg, 'sequences_cfg.elem.args_cfg.inclusion_set'),
+#         'pos_vertices_pmf': _get(data_cfg, 'sequences_cfg.elem.args_cfg.vertices_pmfs.0'),
+#         'neg_vertices_pmf': _get(data_cfg, 'sequences_cfg.elem.args_cfg.vertices_pmfs.1'),
 #         'pos_seq_lengths': _get(data_cfg, 'sequences_cfg.seq_lengths.lengths.pos.support'),
 #         'pos_seq_lengths_pmf': _get(data_cfg, 'sequences_cfg.seq_lengths.lengths.pos.pmf'),
 #         'neg_seq_lengths': _get(data_cfg, 'sequences_cfg.seq_lengths.lengths.neg.support'),
@@ -158,16 +158,16 @@ class ConfigSummaryRow:
     config_id: str
     note: str
 
-def summarize_cfg_to_csv(
+def summarize_cfg_to_xlsx(
     cfg_filepath,
     *,
     config_kind: str,
     config_id: str,
     note: str,
-    xlsx_filepath: Path = Path('configs/logs.csv')
+    xlsx_filepath: Union[str, Path] = Path('configs/logs.xlsx')
 ):
-
     cfg = serialization_utils.deserialize(cfg_filepath)
+    xlsx_filepath = Path(xlsx_filepath)
 
     # Default items in each row.
     base_row = asdict(
@@ -191,13 +191,13 @@ def summarize_cfg_to_csv(
     summary = summarize_cfg(cfg, REGISTRY[config_kind])
 
     new_row = {**base_row, **summary}
-    _append_row_to_sheet_upgrading_shchema(
+    _append_row_to_sheet_upgrading_schema(
         xlsx_filepath=xlsx_filepath, 
         sheet_name=config_kind, 
         new_row=new_row
     )
 
-def _append_row_to_sheet_upgrading_shchema(
+def _append_row_to_sheet_upgrading_schema(
     *,
     xlsx_filepath: Path, # Path to xlsx file
     sheet_name: str,

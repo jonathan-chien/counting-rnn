@@ -5,6 +5,7 @@ from dataclasses import is_dataclass
 
 from general_utils import validation as validation_utils
 
+
 def traverse_dotted_path(root, dotted_path: str):
 
     validation_utils.validate_str(dotted_path)
