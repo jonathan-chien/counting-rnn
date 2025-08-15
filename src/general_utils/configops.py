@@ -10,7 +10,7 @@ def traverse_dotted_path(root, dotted_path: str):
 
     validation_utils.validate_str(dotted_path)
     if dotted_path == '':
-        raise ValueError("Empty dotted path.")
+        return root
     
     dotted_path_parts = dotted_path.split('.')
 
@@ -30,7 +30,7 @@ def traverse_dotted_path(root, dotted_path: str):
         if branch is None:
             # Raise exception if None encountered on a non-leaf node.
             raise ValueError(
-                "None value encounted for branch when attempting to access with " 
+                "None value encountered for branch when attempting to access with " 
                 f"{part} at position {i_part} in dotted_path: '{dotted_path}'."
             )
 
@@ -61,8 +61,7 @@ def traverse_dotted_path(root, dotted_path: str):
                 # If part is not wildcard, assume it is an index.
                 try:
                     idx = int(part)
-                    validation_utils.validate_int(idx)
-                except (ValueError, TypeError):
+                except ValueError:
                     raise ValueError(
                         "Expected a str representation of an int at position "
                         f"{i_part} in dotted path: '{dotted_path}', but got {part}."
@@ -102,51 +101,141 @@ def get_parser():
     parser.add_argument('--set', action='append', default=[])
     return parser
 
-def apply_cli_override(cfg, override_list):
+def apply_cli_override(cfg, override_list, raise_if_not_exist=True):
     """ 
     """
+    def format_path(path_string: str):
+        """ 
+        If we want e.g. data_cfg.field_1 = 2, we'd pass cfg=data_cfg,
+        override_list='--set field_1 = 2', resulting in an empty string for
+        dotted_path_to_final_branch. This is intended, as the
+        traverse_dotted_path function will then return the root object, here
+        data_cfg. For clearer error messages, the name '<root>' will be returned
+        instead of the empty string.
+        """
+        validation_utils.validate_str(path_string)
+        return '<root>' if path_string == '' else path_string
+
     cfg_copy = copy.deepcopy(cfg)
 
     for override in override_list:
+        validation_utils.validate_str(override)
         if override.count('=') != 1:
             raise ValueError(
                 "Overrides passed in with the '--set' flag must contain " 
                 f"exactly one '=', as in e.g. a=2; however, got {override}." 
             )
         
-        dotted_cfg_path_string, value_string = override.split('=')
-        dotted_cfg_path_string_parts = dotted_cfg_path_string.split('.', -1)
+        # Get dotted path to final branch and leaf name. 
+        dotted_path_to_leaf, value_string = override.split('=') 
+        dotted_path_to_leaf_parts = dotted_path_to_leaf.split('.') 
+        dotted_path_to_final_branch = '.'.join(dotted_path_to_leaf_parts[:-1]) 
+        leaf_name = dotted_path_to_leaf_parts[-1]
+        
+        # Disallow wildcard *, support for which hasn't been implemented yet.
+        if '*' in dotted_path_to_leaf_parts:
+            raise ValueError(
+                "Wildcard '*' detected in dotted path to final branch: "
+                f"'{dotted_path_to_leaf}'. This is not currently supported, "
+                "as it would require broadcast setting logic, which hasn't been implemented yet."
+            )
+        
+        # Get leaf value.
         try:
-            value = ast.literal_eval(value_string) 
+            leaf_value = ast.literal_eval(value_string) 
         except (ValueError, SyntaxError):
             # Gracefully fall back to using string for actual string inputs.
-            value = value_string
+            leaf_value = value_string
 
-        # Iteratively work to leaf. branch is referenced in error message so it must be defined first.
-        branch = cfg_copy
-        retrieval_error_message = (
-            "Unexpected condition reached during attempted traversal of cfg " 
-            "tree. Expected a dataclass or dict instance for all branches, " 
-            f"but got type {type(branch)} for {branch} in override string '{override}'."
-        )
-        for part in dotted_cfg_path_string_parts[:-1]:
-            if is_dataclass(branch):
-                branch = getattr(branch, part)
-            elif isinstance(branch, dict):
-                branch = branch[part]
-            else:
-                raise RuntimeError(retrieval_error_message)
+        # Traverse to final branch.
+        final_branch = traverse_dotted_path(cfg_copy, dotted_path_to_final_branch)
 
         # Set leaf value.
-        leaf = dotted_cfg_path_string_parts[-1]
-        if is_dataclass(branch):
-            setattr(branch, leaf, value)
-        elif isinstance(branch, dict):
-            branch[leaf] = value
+        if is_dataclass(final_branch):
+            if not hasattr(final_branch, leaf_name) and raise_if_not_exist:
+                raise AttributeError(
+                    f"Dataclass at '{format_path(dotted_path_to_final_branch)}' has no field '{leaf_name}'."
+                )
+            setattr(final_branch, leaf_name, leaf_value)
+        elif isinstance(final_branch, dict):
+            if leaf_name not in final_branch and raise_if_not_exist:
+                raise KeyError(
+                    f"Key '{leaf_name}' not in dict at '{format_path(dotted_path_to_final_branch)}'."
+                )
+            final_branch[leaf_name] = leaf_value
+        elif isinstance(final_branch, list):
+            try:
+                idx = int(leaf_name)
+            except ValueError:
+                raise ValueError(
+                    f"List or tuple at {format_path(dotted_path_to_final_branch)} requires "
+                    f"an int index, but got {leaf_name} while attempting to set '{override}'"
+                )
+            if -len(final_branch) <= idx <= len(final_branch):
+                raise IndexError(
+                    f"Index {idx} out of bounds for list of length {len(final_branch)} "
+                    f"at {format_path(dotted_path_to_final_branch)} when attempting to set '{override}'."
+                )
+            final_branch[idx] = leaf_value
+        elif isinstance(final_branch, tuple):
+            raise TypeError(
+                f"Final branch in '{format_path(dotted_path_to_final_branch)}' in '{override}' "
+                "is a tuple. Support for tuples has not yet been added (requires "
+                "rebuilding due to their immutability)."
+            )
         else:
-            raise RuntimeError(retrieval_error_message)
+            raise RuntimeError(
+                f"Unexpected condition reached during attempted setting of leaf value in '{override}'. " 
+                f"Got final branch {final_branch} of type {type(final_branch)} "
+                "but currently supported types are dataclass, dict, list, and tuple."
+            )
 
     return cfg_copy
+# def apply_cli_override(cfg, override_list):
+#     """ 
+#     """
+#     cfg_copy = copy.deepcopy(cfg)
+
+#     for override in override_list:
+#         if override.count('=') != 1:
+#             raise ValueError(
+#                 "Overrides passed in with the '--set' flag must contain " 
+#                 f"exactly one '=', as in e.g. a=2; however, got {override}." 
+#             )
+        
+#         dotted_cfg_path_string, value_string = override.split('=')
+#         dotted_cfg_path_string_parts = dotted_cfg_path_string.split('.', -1)
+#         try:
+#             value = ast.literal_eval(value_string) 
+#         except (ValueError, SyntaxError):
+#             # Gracefully fall back to using string for actual string inputs.
+#             value = value_string
+
+#         # Iteratively work to leaf. branch is referenced in error message so it must be defined first.
+#         branch = cfg_copy
+#         retrieval_error_message = (
+#             "Unexpected condition reached during attempted traversal of cfg " 
+#             "tree. Expected a dataclass or dict instance for all branches, " 
+#             f"but got type {type(branch)} for {branch} in override string '{override}'."
+#         )
+#         for part in dotted_cfg_path_string_parts[:-1]:
+#             if is_dataclass(branch):
+#                 branch = getattr(branch, part)
+#             elif isinstance(branch, dict):
+#                 branch = branch[part]
+#             else:
+#                 raise RuntimeError(retrieval_error_message)
+
+#         # Set leaf value.
+#         leaf = dotted_cfg_path_string_parts[-1]
+#         if is_dataclass(branch):
+#             setattr(branch, leaf, value)
+#         elif isinstance(branch, dict):
+#             branch[leaf] = value
+#         else:
+#             raise RuntimeError(retrieval_error_message)
+
+#     return cfg_copy
 
 def parse_and_apply_cli_overrides(cfg):
     """ 
