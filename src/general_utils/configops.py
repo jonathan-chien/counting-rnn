@@ -93,12 +93,38 @@ def traverse_dotted_path(root, dotted_path: str):
         
     return branch
         
+def parse_override_list(override_list):
+    """
+    Parse command line overrides, with graceful fallback for true string values. 
+    TODO: Use this in apply_cli_override function.
+    """
+    d = {}
+    for override in override_list:
+        validation_utils.validate_str(override)
+        if override.count('=') != 1:
+            raise ValueError(
+                "Overrides must contain exactly one '=', as in e.g. a=2; " 
+                f"however, got {override}." 
+            )
+        key, val_str = override.split('=') 
+        try:
+            d[key] = ast.literal_eval(val_str)
+        except (ValueError, SyntaxError):
+            d[key] = val_str
+    print(list(d.items()))
+    return d
+
+def pick(pre_map, dotted_key, default):
+    return pre_map.get(dotted_key, default)
 
 def get_parser():
     """ 
     """
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--set', action='append', default=[])
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument('--pre', action='append', default=[], help="Pre config construction overrides.")
+    parser.add_argument('--set', action='append', default=[], help="Post config construction overrides.")
+    parser.add_argument('--sweep_pre', action='append', default=[])
+    parser.add_argument('--sweep_set', action='append', default=[])
     return parser
 
 def apply_cli_override(cfg, override_list, raise_if_not_exist=True):

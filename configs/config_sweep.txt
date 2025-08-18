@@ -1,0 +1,24 @@
+#!/bin/bash
+set -euo pipefail
+
+# ---------------------------------------------------------------------------------------
+# Usage example:
+#   ./config_sweep.sh configure_dataset.py cfg.field1.field2.value 0 20 2 [extra_args...] 
+# This runs:
+#   python configure_dataset.py --index <running_idx> --width 4  --set cfg.field1.field2.value=<x> [extra_args...]
+# ---------------------------------------------------------------------------------------
+
+script=${1:?Path to python script}
+filename_start_idx=${2:?Start index for filename}
+key=${3:?Config tree dotted path to leaf}
+start=${4:?Start (int)}
+stop=${5:?Stop (int)}
+step=${6:?Step (int)}
+shift 6
+extras=("$@")
+
+filename_idx=$filename_start_idx
+for ((k=start; k<=stop; k+=step)); do
+  python "$script" --index "$filename_idx" --width 4 --set "${key}=${k}" "${extras[@]}"
+  ((filename_idx++))
+done
