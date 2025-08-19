@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Union
+from typing import Literal, Union
 
 import torch
 
@@ -74,8 +74,16 @@ def get_filepath_with_suffix(dir, suffix, return_as='Path'):
     
     return out
     
+def get_filepaths(dir: Union[Path, str], return_as: Literal['Path', 'str'] = Path):
 
-
+    dir = Path(dir)
+    matches = [m for m in dir.glob('*') if m.is_file()]
+    if return_as == 'str':
+        return [str(m) for m in matches]
+    elif return_as == 'Path':
+        return matches
+    else:
+        raise ValueError(f"Unrecognized value '{return_as}' for `return_as`. Must be 'Path' or 'str'.")
 
 
         

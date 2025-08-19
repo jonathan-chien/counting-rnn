@@ -1,7 +1,7 @@
 import copy
 from pathlib import Path
 import re
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import torch
 
@@ -501,6 +501,46 @@ def run_and_save_testing_from_filepath(
         'dirs': dirs
     }
 
+def expand_wildcard_ref(config_dir: Union[Path, str], config_kind, ref: list, sort=False):
+    """ 
+    """
+    config_dir = Path(config_dir)
+
+    #Validate.
+    if len(ref) != 1:
+        raise ValueError(
+            "Wildcard expansion is currently supported only for one ref stem, "
+            f"but got {len(ref)} ref stems: {ref}."
+        )
+    ref_parts = ref[0].split('/')
+    if '*' not in ref_parts:
+        return ref
+    else:
+        num_wildcards = ref_parts.count('*')
+        if  num_wildcards != 1:
+            raise ValueError(
+                f"Only 1 wildcard is supported at present, but got {num_wildcards}."
+            )
+        if ref_parts[-1] != '*':
+            raise ValueError(
+                f"Wildcard '*' must be in final position of ref but got {ref}."
+            )
+        
+        # Expand into list of refs.
+        ref_base = '/'.join(ref_parts[:-1])
+        dir_path = config_dir / config_kind / ref_base
+        if not dir_path.exists():
+            raise FileNotFoundError(f"Directory {dir_path} does not exist.")
+        if not dir_path.is_dir():
+            raise NotADirectoryError(f"{dir_path} is not a directory.")
+        filepaths = fileio_utils.get_filepaths(dir_path, return_as='str')
+        expanded_refs = [ref_base + '/' + f.stem for f in filepaths]
+
+        if sort:
+            expanded_refs.sort()
+        
+        return expanded_refs
+        
 def run(
     model_cfg_ref_list,
     data_train_cfg_ref_list,
@@ -515,8 +555,13 @@ def run(
     run_id_suffix='',
     pretrained_model_filepath_list=None,
     model_suffix='_best.pt',
-    weights_only=False
+    weights_only=False,
+    cross_test=True
 ):
+    # Wildcard expansion.
+    data_train_cfg_ref_list = expand_wildcard_ref(data_train_cfg_ref_list)
+    data_test_cfg_ref_list = expand_wildcard_ref(data_test_cfg_ref_list)
+
     # Build experiment directory.
     exp_dir = fileio_utils.make_dir('experiments', exp_date, exp_id)
 
@@ -571,6 +616,8 @@ def run(
 
                         
                         for data_test_cfg_ref in data_test_cfg_ref_list:
+                            if not cross_test and data_train_cfg_ref != data_test_cfg_ref:
+                                continue
                             for testing_cfg_ref in testing_cfg_ref_list:
 
                                 # Get config filepaths.
