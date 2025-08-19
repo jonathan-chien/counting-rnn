@@ -1,0 +1,682 @@
+{
+  "sequences_cfg": {
+    "seq_lengths": {
+      "lengths": {
+        "pos": {
+          "support": {
+            "path": "torch.tensor",
+            "args_cfg": {
+              "data": [
+                1,
+                3,
+                5,
+                7,
+                9,
+                11,
+                13,
+                15,
+                17,
+                19,
+                21,
+                23,
+                25,
+                27,
+                29,
+                31,
+                33,
+                35,
+                37,
+                39,
+                41,
+                43,
+                45,
+                47,
+                49
+              ],
+              "dtype": "torch.int64",
+              "requires_grad": false,
+              "__path__": "general_utils.config.TensorArgsConfig",
+              "__kind__": "dataclass"
+            },
+            "kind": "function",
+            "recovery_mode": "call",
+            "locked": false,
+            "if_recover_while_locked": "print",
+            "__path__": "general_utils.config.TensorConfig",
+            "__kind__": "dataclass"
+          },
+          "pmf": {
+            "path": "torch.tensor",
+            "args_cfg": {
+              "data": [
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033
+              ],
+              "dtype": "torch.float32",
+              "requires_grad": false,
+              "__path__": "general_utils.config.TensorArgsConfig",
+              "__kind__": "dataclass"
+            },
+            "kind": "function",
+            "recovery_mode": "call",
+            "locked": false,
+            "if_recover_while_locked": "print",
+            "__path__": "general_utils.config.TensorConfig",
+            "__kind__": "dataclass"
+          }
+        },
+        "neg": {
+          "support": {
+            "path": "torch.tensor",
+            "args_cfg": {
+              "data": [
+                1,
+                3,
+                5,
+                7,
+                9,
+                11,
+                13,
+                15,
+                17,
+                19,
+                21,
+                23,
+                25,
+                27,
+                29,
+                31,
+                33,
+                35,
+                37,
+                39,
+                41,
+                43,
+                45,
+                47,
+                49
+              ],
+              "dtype": "torch.int64",
+              "requires_grad": false,
+              "__path__": "general_utils.config.TensorArgsConfig",
+              "__kind__": "dataclass"
+            },
+            "kind": "function",
+            "recovery_mode": "call",
+            "locked": false,
+            "if_recover_while_locked": "print",
+            "__path__": "general_utils.config.TensorConfig",
+            "__kind__": "dataclass"
+          },
+          "pmf": {
+            "path": "torch.tensor",
+            "args_cfg": {
+              "data": [
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033,
+                0.03999999910593033
+              ],
+              "dtype": "torch.float32",
+              "requires_grad": false,
+              "__path__": "general_utils.config.TensorArgsConfig",
+              "__kind__": "dataclass"
+            },
+            "kind": "function",
+            "recovery_mode": "call",
+            "locked": false,
+            "if_recover_while_locked": "print",
+            "__path__": "general_utils.config.TensorConfig",
+            "__kind__": "dataclass"
+          }
+        }
+      },
+      "__path__": "data.config.SeqLengths",
+      "__kind__": "dataclass"
+    },
+    "elem": {
+      "path": "data.sequences.Hypercube",
+      "args_cfg": {
+        "num_dims": 6,
+        "coords": {
+          "path": "torch.tensor",
+          "args_cfg": {
+            "data": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "dtype": "torch.int64",
+            "requires_grad": false,
+            "__path__": "general_utils.config.TensorArgsConfig",
+            "__kind__": "dataclass"
+          },
+          "kind": "function",
+          "recovery_mode": "call",
+          "locked": false,
+          "if_recover_while_locked": "print",
+          "__path__": "general_utils.config.TensorConfig",
+          "__kind__": "dataclass"
+        },
+        "inclusion_set": {
+          "path": "torch.tensor",
+          "args_cfg": {
+            "data": [
+              [
+                1,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0,
+                1,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                1,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                1,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                1,
+                1,
+                1
+              ],
+              [
+                1,
+                0,
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                1,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                1,
+                0,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                1,
+                0,
+                1,
+                1
+              ],
+              [
+                1,
+                0,
+                1,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                1,
+                1,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                1,
+                1,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                1,
+                1,
+                1,
+                1
+              ],
+              [
+                1,
+                1,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                1,
+                1,
+                0,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                1,
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                1,
+                1,
+                0,
+                0,
+                1,
+                1
+              ],
+              [
+                1,
+                1,
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                1,
+                0,
+                1,
+                0,
+                1
+              ],
+              [
+                1,
+                1,
+                0,
+                1,
+                1,
+                0
+              ],
+              [
+                1,
+                1,
+                0,
+                1,
+                1,
+                1
+              ],
+              [
+                1,
+                1,
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                1,
+                1,
+                1,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                1,
+                1,
+                0,
+                1,
+                0
+              ],
+              [
+                1,
+                1,
+                1,
+                0,
+                1,
+                1
+              ],
+              [
+                1,
+                1,
+                1,
+                1,
+                0,
+                0
+              ],
+              [
+                1,
+                1,
+                1,
+                1,
+                0,
+                1
+              ],
+              [
+                1,
+                1,
+                1,
+                1,
+                1,
+                0
+              ],
+              [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ]
+            ],
+            "dtype": "torch.int8",
+            "requires_grad": false,
+            "__path__": "general_utils.config.TensorArgsConfig",
+            "__kind__": "dataclass"
+          },
+          "kind": "function",
+          "recovery_mode": "call",
+          "locked": false,
+          "if_recover_while_locked": "print",
+          "__path__": "general_utils.config.TensorConfig",
+          "__kind__": "dataclass"
+        },
+        "encoding": {
+          "path": "torch.tensor",
+          "args_cfg": {
+            "data": [
+              0,
+              1
+            ],
+            "dtype": "torch.int8",
+            "requires_grad": false,
+            "__path__": "general_utils.config.TensorArgsConfig",
+            "__kind__": "dataclass"
+          },
+          "kind": "function",
+          "recovery_mode": "call",
+          "locked": false,
+          "if_recover_while_locked": "print",
+          "__path__": "general_utils.config.TensorConfig",
+          "__kind__": "dataclass"
+        },
+        "vertices_pmfs": [
+          {
+            "path": "torch.tensor",
+            "args_cfg": {
+              "data": [
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125
+              ],
+              "dtype": "torch.float32",
+              "requires_grad": false,
+              "__path__": "general_utils.config.TensorArgsConfig",
+              "__kind__": "dataclass"
+            },
+            "kind": "function",
+            "recovery_mode": "call",
+            "locked": false,
+            "if_recover_while_locked": "print",
+            "__path__": "general_utils.config.TensorConfig",
+            "__kind__": "dataclass"
+          },
+          {
+            "path": "torch.tensor",
+            "args_cfg": {
+              "data": [
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125,
+                0.03125
+              ],
+              "dtype": "torch.float32",
+              "requires_grad": false,
+              "__path__": "general_utils.config.TensorArgsConfig",
+              "__kind__": "dataclass"
+            },
+            "kind": "function",
+            "recovery_mode": "call",
+            "locked": false,
+            "if_recover_while_locked": "print",
+            "__path__": "general_utils.config.TensorConfig",
+            "__kind__": "dataclass"
+          }
+        ],
+        "__path__": "data.config.HypercubeConfig",
+        "__kind__": "dataclass"
+      },
+      "kind": "class",
+      "recovery_mode": "call",
+      "locked": false,
+      "if_recover_while_locked": "print",
+      "__path__": "general_utils.config.CallableConfig",
+      "__kind__": "dataclass"
+    },
+    "embedder": {
+      "path": "data.sequences.Embedder",
+      "args_cfg": {
+        "ambient_dim": 80,
+        "mean_center": false,
+        "offset_1": {
+          "path": "torch.tensor",
+          "args_cfg": {
+            "data": [
+              -0.5,
+              -0.5,
+              -0.5,
+              -0.5,
+              -0.5,
+              -0.5,
+              -0.5,
+              -0.5,
+              -0.5
+            ],
+            "dtype": "torch.float32",
+            "requires_grad": false,
+            "__path__": "general_utils.config.TensorArgsConfig",
+            "__kind__": "dataclass"
+          },
+          "kind": "function",
+          "recovery_mode": "call",
+          "locked": false,
+          "if_recover_while_locked": "print",
+          "__path__": "general_utils.config.TensorConfig",
+          "__kind__": "dataclass"
+        },
+        "offset_2": null,
+        "method": "random_rotation",
+        "noise_distr": {
+          "path": "torch.distributions.normal.Normal",
+          "args_cfg": {
+            "loc": 0,
+            "scale": 0.01,
+            "__path__": "data.config.NormalDistrConfig",
+            "__kind__": "dataclass"
+          },
+          "kind": "class",
+          "recovery_mode": "call",
+          "locked": false,
+          "if_recover_while_locked": "print",
+          "__path__": "general_utils.config.CallableConfig",
+          "__kind__": "dataclass"
+        },
+        "__path__": "data.config.EmbedderConfig",
+        "__kind__": "dataclass"
+      },
+      "kind": "class",
+      "recovery_mode": "call",
+      "locked": false,
+      "if_recover_while_locked": "print",
+      "__path__": "general_utils.config.CallableConfig",
+      "__kind__": "dataclass"
+    },
+    "num_seq": "num_seq___",
+    "seq_order": "permute",
+    "__path__": "data.config.SequencesConfig",
+    "__kind__": "dataclass"
+  },
+  "split_cfg": {
+    "train": 1000,
+    "val": 500,
+    "test": 500,
+    "__path__": "data.config.SplitConfig",
+    "__kind__": "dataclass"
+  },
+  "__path__": "data.config.DataConfig",
+  "__kind__": "dataclass"
+}

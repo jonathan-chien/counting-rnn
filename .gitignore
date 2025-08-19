@@ -1,7 +1,6 @@
 # Ignore these file types.
 *.log
 *.csv
-*.xlsx
 *.docx
 *.json
 *.jsonl

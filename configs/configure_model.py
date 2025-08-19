@@ -109,7 +109,7 @@ def main():
     seed_idx = 0
     model_builder.build_model_from_filepath(
         model_cfg_filepath=model_cfg_filepath, 
-        data_cfg_filepath='configs/datasets/0000-00-00/a/0000.json', 
+        data_cfg_filepath='configs/datasets/2025-08-19/a/0000.json', 
         reproducibility_cfg_filepath='configs/reproducibility/0000-00-00/a/0000.json',
         seed_idx=seed_idx, 
         device=device,
@@ -147,7 +147,6 @@ def main():
         note='',
         xlsx_filepath='configs/logs.xlsx'
     )
-    print('done')
 
 if __name__ == '__main__':
     main()
