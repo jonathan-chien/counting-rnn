@@ -21,8 +21,9 @@ class Hypercube:
             num_dims, 
             coords, 
             inclusion_set=None, 
-            encoding=torch.tensor([0, 1], dtype=torch.int8),
-            vertices_pmfs=None
+            encoding=torch.tensor([0, 1]),
+            vertices_pmfs=None,
+            dtype=torch.int8
         ):
         """ 
         Dimensions
@@ -61,7 +62,7 @@ class Hypercube:
         self.inclusion_set = inclusion_set
         self.encoding = encoding
 
-        self.set_vertices_distrs(vertices_pmfs)
+        self.set_vertices(pmfs=vertices_pmfs, dtype=dtype)
 
     def _validate(self, num_dims, inclusion_set, coords, encoding):
         """ 
@@ -125,7 +126,7 @@ class Hypercube:
         ind = matches.all(-1).any(-1)
         return ind
     
-    def set_vertices_distrs(self, pmfs=None):
+    def set_vertices(self, pmfs=None, dtype=torch.int8):
         """ 
         Set user supplied PMFs over respective sides of dichotomy, or 
         initialize uniform distribution.
@@ -137,7 +138,7 @@ class Hypercube:
             elements, respectively, consisting of a 1D tensor containing
             probability masses.
         """
-        truth_table = utils.get_lexicographic_ordering(self.num_dims, self.encoding)
+        truth_table = utils.get_lexicographic_ordering(self.num_dims, self.encoding, dtype=dtype)
         pos_ind = self.check_if_included(truth_table)
 
         if pmfs is not None:
