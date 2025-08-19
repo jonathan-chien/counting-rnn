@@ -533,8 +533,8 @@ def expand_wildcard_ref(config_dir: Union[Path, str], config_kind, ref: list, so
             raise FileNotFoundError(f"Directory {dir_path} does not exist.")
         if not dir_path.is_dir():
             raise NotADirectoryError(f"{dir_path} is not a directory.")
-        filepaths = fileio_utils.get_filepaths(dir_path, return_as='str')
-        expanded_refs = [ref_base + '/' + f.stem for f in filepaths]
+        filepaths = fileio_utils.get_filepaths(dir_path, return_as='Path')
+        expanded_refs = [ref_base + '/' + str(f.stem) for f in filepaths]
 
         if sort:
             expanded_refs.sort()
@@ -559,8 +559,8 @@ def run(
     cross_test=True
 ):
     # Wildcard expansion.
-    data_train_cfg_ref_list = expand_wildcard_ref(data_train_cfg_ref_list)
-    data_test_cfg_ref_list = expand_wildcard_ref(data_test_cfg_ref_list)
+    data_train_cfg_ref_list = expand_wildcard_ref('configs', 'datasets', data_train_cfg_ref_list)
+    data_test_cfg_ref_list = expand_wildcard_ref('configs', 'datasets', data_test_cfg_ref_list)
 
     # Build experiment directory.
     exp_dir = fileio_utils.make_dir('experiments', exp_date, exp_id)
