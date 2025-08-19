@@ -555,7 +555,8 @@ class Embedder:
         num_datapoints, num_dims = data.shape
     
         # E.g. this could be to center hypercube at 0 before rotation.
-        if self.offset_1 is not None: data += self.offset_1
+        if self.offset_1 is not None: 
+            data = data + self.offset_1
 
         if num_dims > self.ambient_dim:
             raise ValueError(
