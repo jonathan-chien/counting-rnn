@@ -33,7 +33,7 @@ def uniform_pmf(n, dtype=torch.float32):
     """
     return torch.tile(torch.tensor([1/n], dtype=dtype), (n,))
         
-def get_lexicographic_ordering(num_vars, encoding):
+def get_lexicographic_ordering(num_vars, encoding, dtype=torch.int8):
     """ 
     Returns
     -------
@@ -57,7 +57,7 @@ def get_lexicographic_ordering(num_vars, encoding):
             (2**i_var,)
         )
 
-    return truth_table
+    return truth_table.to(dtype)
 
 def convert_encoding_01_to_11(tensor):
     """Convert {0, 1} encoding to {1, -1} encoding."""
