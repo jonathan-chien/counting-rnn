@@ -1,4 +1,4 @@
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, fields, replace
 from typing import Any, Dict, List, Literal, Optional, Union
 import warnings
 warnings.simplefilter("always")
@@ -257,16 +257,17 @@ class TensorConfig(CallableConfig):
     #         if_recover_while_locked=self.if_recover_while_locked
     #     )
     #     return super(TensorConfig, temporary_tensor_config).recover()
-    def recover(self, dtype_str='raise', **kwargs):
+    def recover(self, dtype_str='raise'):
         """
-        Before 2025-08-20, this class' recover method was responsible for 
+        Before 2025-08-20, this class' recover method was responsible for
         converting string placeholders for torch.dtypes to actual torch.dtypes
         and then calling the parent class' recover method. Conversion of
         torch.dtype placeholder strings to torch.dtypes has now been centralized
         in the recursive_recover function. As such, this class' recover method
-        will now only raise if torch.dtype placeholder strings have not
-        been converted at the time of a call to this method; it will not silently
-        convert strings to torch.dtypes.
+        will now only raise if torch.dtype placeholder strings have not been
+        converted at the time of a call to this method; it will not silently
+        convert strings to torch.dtypes, though optional automatic conversion
+        preceded by a warning is supported.
         """
         if not isinstance(self.args_cfg, TensorArgsConfig):
             raise TypeError(
@@ -288,16 +289,31 @@ class TensorConfig(CallableConfig):
             elif dtype_str == 'convert':
                 warnings.warn(
                     f"A string {self.args_cfg.dtype} was detected for self.args_cfg.dtype. "
-                    "Conversion to torch.dtype will be attempted. No subsequent "
-                    "exception should be interpeted to mean success."
+                    "Conversion to torch.dtype will be attempted without mutating " 
+                    "self.args_cfg, followed by a call to CallableConfig.recover(). "
+                    "No subsequent exception should be interpreted to mean success."
                 )
-                self.args_cfg = serialization_utils.get_torch_dtype_from_str(self.args_cfg.dtype)
+                updated_args_cfg = replace(
+                    self.args_cfg, 
+                    dtype=serialization_utils.get_torch_dtype_from_str(self.args_cfg.dtype)
+                )
+                # temporary_tensor_config = type(self).from_callable(
+                #     callable_=torch.tensor,
+                #     args_cfg=updated_args_cfg,
+                #     kind=self.kind,
+                #     recovery_mode=self.recovery_mode,
+                #     locked=self.locked,
+                #     if_recover_while_locked=self.if_recover_while_locked
+                # )
+                temporary_tensor_config = replace(self, args_cfg=updated_args_cfg)
+                # return super(TensorConfig, temporary_tensor_config).recover()
+                return CallableConfig.recover(temporary_tensor_config)
             else:
                 raise ValueError(
                     f"Unrecognized value {dtype_str} for dtype_str. Must be 'raise' or 'convert'."
                 )
 
-        return super().recover(**kwargs)
+        return super().recover()
     
 
 # ----------------------------- Seed utils ---------------------------------- #
