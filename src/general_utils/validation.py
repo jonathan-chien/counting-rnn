@@ -2,10 +2,10 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
+import pandas as pd
 
-def error_message(expected: str, actual: Any):
-    return f"Expected {expected}, but got type {type(actual).__name__}."
 
+# ------------------------------ Boolean check ------------------------------- #
 def is_int(x):
     return isinstance(x, int) 
 
@@ -33,8 +33,25 @@ def is_pathlib_path(x):
 def is_pathlib_path_or_str(x):
     return is_pathlib_path(x) or is_str(x)
 
+def is_dict(x):
+    return isinstance(x, dict)
+
+def is_list(x):
+    return isinstance(x, list)
+
+def is_tuple(x):
+    return isinstance(x, tuple)
+
+def is_dataframe(x):
+    return isinstance(x, pd.DataFrame)
+
 def is_iterable(x):
     return (isinstance(x, Iterable) and not isinstance(x, (str, bytes)))
+
+
+# --------------------------- Validation (raises) ---------------------------- #
+def error_message(expected: str, actual: Any):
+    return f"Expected {expected}, but got type {type(actual).__name__}."
 
 def validate_int(x):
     if not is_int(x):
