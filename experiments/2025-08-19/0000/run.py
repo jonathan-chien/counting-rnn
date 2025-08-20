@@ -11,7 +11,7 @@ run_args = dict(
     data_train_cfg_ref_list=['2025-08-19/a/*'],
     model_cfg_ref_list=['2025-08-19/a/0000'],
     pretrained_model_filepath_list=None,
-    training_cfg_ref_list=['2025-08-11/a/0000'],
+    training_cfg_ref_list=['2025-08-19/a/0000'],
     data_test_cfg_ref_list=['2025-08-19/a/*'],
     testing_cfg_ref_list=['2025-08-11/a/0000'],
     reproducibility_cfg_ref_list=['2025-08-11/a/0000'],
@@ -29,7 +29,7 @@ exp_dir = Path(__file__).resolve().parent
 metadata_utils.collect_and_save_metadata(
     additional_info={'run_args': run_args, 'exp_dir': str(exp_dir)},
     filepath=exp_dir / 'metadata.json',
-    enforce_clean_git_tree=True,
+    enforce_clean_git_tree=False,
     overwrite=False
 )
 metadata_utils.create_textfile(
