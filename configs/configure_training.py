@@ -310,7 +310,7 @@ def main():
         compute_mean_for=['cross_entropy_loss', 'accuracy'],
         metric_tracker=metric_tracker,
         early_stopping=early_stopping,
-        num_epochs=500,
+        num_epochs=1000,
         device=device,
         deterministic=True
     )
