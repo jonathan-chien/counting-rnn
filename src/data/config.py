@@ -15,6 +15,7 @@ class HypercubeConfig(config_utils.ArgsConfig):
     inclusion_set: Optional[Union[torch.Tensor, config_utils.TensorConfig]] = None
     encoding: Union[torch.Tensor, config_utils.TensorConfig] = torch.tensor([0, 1], dtype=torch.int8)
     vertices_pmfs: Optional[Tuple[torch.Tensor]] = None
+    dtype: Union[torch.dtype, str] = 'torch.int8'
 
 @dataclass
 class SeqLengths:

@@ -36,19 +36,12 @@ def main():
     sub_dir_2 = args.sub_dir_2
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = str(args.index).zfill(args.zfill)
-    # # ---------------------------- Set directory ----------------------------- #
-    # base_dir = 'configs/datasets'
-    # # sub_dir_1 = 'aaaa'
-    # sub_dir_1 = str(date.today())
-    # sub_dir_2 = 'a'
-    # output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
-    # filename = fileio_utils.make_filename('0000')
 
     # ------------------------- Get pre sweep items -------------------------- #
     pre = configops_utils.parse_override_list(args.pre or [])
 
     # ------------------------ Build auxiliary objects ----------------------- #
-    hypercube_num_dims = configops_utils.pick(pre, 'sequences_cfg.elem.args_cfg.num_dims', 2)
+    hypercube_num_dims = configops_utils.select(pre, 'sequences_cfg.elem.args_cfg.num_dims', 2)
 
     num_vertices = 2**hypercube_num_dims
     MANUAL_LABELS = False
@@ -95,11 +88,11 @@ def main():
     )
 
 
-    pos_seq_len_max = configops_utils.pick(pre, 'sequences_cfg.seq_lengths.lengths.pos.support.max', 5)
+    pos_seq_len_max = configops_utils.select(pre, 'sequences_cfg.seq_lengths.lengths.pos.support.max', 5)
     # neg_seq_len_max = configops_utils.pick(pre, 'sequences_cfg.seq_lengths.lengths.neg.support.max', 5)
     neg_seq_len_max = pos_seq_len_max
-    parity_pos = configops_utils.pick(pre, 'sequences_cfg.seq_lengths.lengths.pos.support.parity', None)
-    parity_neg = configops_utils.pick(pre, 'sequences_cfg.seq_lengths.lengths.neg.support.parity', None)
+    parity_pos = configops_utils.select(pre, 'sequences_cfg.seq_lengths.lengths.pos.support.parity', None)
+    parity_neg = configops_utils.select(pre, 'sequences_cfg.seq_lengths.lengths.neg.support.parity', None)
     seq_lengths = SeqLengths(
         lengths={
             'pos' : {

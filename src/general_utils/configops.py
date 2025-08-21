@@ -114,7 +114,7 @@ def parse_override_list(override_list):
     print(list(d.items()))
     return d
 
-def pick(pre_map, dotted_key, default):
+def select(pre_map, dotted_key, default):
     return pre_map.get(dotted_key, default)
 
 def get_parser():
