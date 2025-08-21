@@ -76,34 +76,34 @@ def handle_dataclass_with_transform_to_dict(d, recurse):
 dataclass_branch_with_transform_to_dict = (is_dataclass, handle_dataclass_with_transform_to_dict)
 
 # --------------------------------------------------
-def is_dtype_annotation(annotation):
-    # Return true if annotation is just torch.dtype.
-    if annotation is torch.dtype:
-        return True
+# def is_dtype_annotation(annotation):
+#     # Return true if annotation is just torch.dtype.
+#     if annotation is torch.dtype:
+#         return True
     
-    # Else, return true if is Union and any element is torch.dtype.
-    origin = get_origin(annotation)
-    if origin is Union: # Optional[x] ~ Union[x, None]
-        return any(elem is torch.dtype for elem in get_args(annotation))
+#     # Else, return true if is Union and any element is torch.dtype.
+#     origin = get_origin(annotation)
+#     if origin is Union: # Optional[x] ~ Union[x, None]
+#         return any(elem is torch.dtype for elem in get_args(annotation))
     
-    return False
+#     return False
 
-def get_torch_dtype_from_str(s: str):
-    if not isinstance(s, str):
-        return s
+# def get_torch_dtype_from_str(s: str):
+#     if not isinstance(s, str):
+#         return s
     
-    dtype_name = s.split('.')[-1]
-    try:
-        dtype = getattr(torch, dtype_name)
-    except AttributeError:
-        raise ValueError(f"Invalid torch.dtype string: {s}.")
+#     dtype_name = s.split('.')[-1]
+#     try:
+#         dtype = getattr(torch, dtype_name)
+#     except AttributeError:
+#         raise ValueError(f"Invalid torch.dtype string: {s}.")
 
-    if isinstance(dtype, torch.dtype):
-        return dtype
-    else:
-        raise ValueError(
-            f"torch.dtype string {s} could not be resolved to a valid torch.dtype."
-        )
+#     if isinstance(dtype, torch.dtype):
+#         return dtype
+#     else:
+#         raise ValueError(
+#             f"torch.dtype string {s} could not be resolved to a valid torch.dtype."
+#         )
     
 def handle_dataclass_with_factory_config(d, recurse):
     # Global import on 06/21/25 causes circular import error.
@@ -112,14 +112,14 @@ def handle_dataclass_with_factory_config(d, recurse):
     # Descend recursively into dataclass first.
     d_transformed = recursion_utils.handle_dataclass(d, recurse)
 
-    # Convert dtype strings to torch.dtypes.
-    updates = {}
-    for f in fields(d_transformed):
-        value = getattr(d_transformed, f.name)
-        if is_dtype_annotation(f.type) and isinstance(value, str):
-            updates[f.name] = get_torch_dtype_from_str(value)
-    if updates:
-        d_transformed = replace(d_transformed, **updates)
+    # # Convert dtype strings to torch.dtypes.
+    # updates = {}
+    # for f in fields(d_transformed):
+    #     value = getattr(d_transformed, f.name)
+    #     if is_dtype_annotation(f.type) and isinstance(value, str):
+    #         updates[f.name] = get_torch_dtype_from_str(value)
+    # if updates:
+    #     d_transformed = replace(d_transformed, **updates)
 
     # Better to check this here, so that this condition is always checked for
     # any dataclass. Otherwise, if separate branch conditionals are used in the
@@ -251,11 +251,6 @@ def load_from_path(path: str, module_depth: int = 1):
         obj = getattr(obj, attr)
 
     return obj
-
-
-    
-
-
 
 def tagged_dict_to_dataclass_instance(x):
     """ 
