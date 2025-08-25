@@ -93,41 +93,62 @@ def traverse_dotted_path(root, dotted_path: str):
         
     return branch
         
-def parse_override_list(override_list):
+def parse_override_kv_pairs(override_kv_pair_list):
     """
-    Parse command line overrides, with graceful fallback for true string values. 
+    Parse command line overrides in the form of a list/tuple of [KEY, VALUE] pairs, with graceful fallback for true string values. 
     TODO: Use this in apply_cli_override function.
-    """
+    # """
+    # d = {}
+    # for override in override_list:
+    #     validation_utils.validate_str(override)
+    #     if override.count('=') != 1:
+    #         raise ValueError(
+    #             "Overrides must contain exactly one '=', as in e.g. a=2; " 
+    #             f"however, got {override}." 
+    #         )
+    #     key, val_str = override.split('=') 
+    #     try:
+    #         d[key] = ast.literal_eval(val_str)
+    #     except (ValueError, SyntaxError):
+    #         d[key] = val_str
+    # print(list(d.items()))
+    # return d
     d = {}
-    for override in override_list:
-        validation_utils.validate_str(override)
-        if override.count('=') != 1:
+
+    if not override_kv_pair_list:
+        return d
+    
+    for kv_pair in override_kv_pair_list:
+        if not (isinstance(kv_pair, (list, tuple)) and len(kv_pair) == 2):
             raise ValueError(
-                "Overrides must contain exactly one '=', as in e.g. a=2; " 
-                f"however, got {override}." 
+                "Override must take the form of a KEY, VALUE pair "
+                f"(list/tuple of length 2) but got {kv_pair!r}."
             )
-        key, val_str = override.split('=') 
+        
+        key, val_str = kv_pair
         try:
             d[key] = ast.literal_eval(val_str)
         except (ValueError, SyntaxError):
             d[key] = val_str
-    print(list(d.items()))
+
     return d
 
 def select(pre_map, dotted_key, default):
     return pre_map.get(dotted_key, default)
 
-def get_parser():
+def make_parent_parser():
     """ 
     """
     parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument('--pre', action='append', default=[], help="Pre config construction overrides.")
-    parser.add_argument('--set', action='append', default=[], help="Post config construction overrides.")
-    parser.add_argument('--sweep_pre', action='append', default=[])
-    parser.add_argument('--sweep_set', action='append', default=[])
+    parser.add_argument('--pre', nargs=2, action='append', default=[], help="Pre config construction overrides.")
+    parser.add_argument('--set', nargs=2, action='append', default=[], help="Post config construction overrides.")
+    parser.add_argument('--idx', type=int, required=True, help="Zero-based integer to use for filename.")
+    parser.add_argument('--zfill', type=int, default=4, help="Zero-pad width for filename (default=4).")
+    # parser.add_argument('--sweep_pre', action='append', default=[])
+    # parser.add_argument('--sweep_set', action='append', default=[])
     return parser
 
-def apply_cli_override(cfg, override_list, raise_if_not_exist=True):
+def apply_cli_override(cfg, override_kv_pair_list, raise_if_not_exist=True):
     """ 
     """
     def format_path(path_string: str):
@@ -144,16 +165,11 @@ def apply_cli_override(cfg, override_list, raise_if_not_exist=True):
 
     cfg_copy = copy.deepcopy(cfg)
 
-    for override in override_list:
-        validation_utils.validate_str(override)
-        if override.count('=') != 1:
-            raise ValueError(
-                "Overrides passed in with the '--set' flag must contain " 
-                f"exactly one '=', as in e.g. a=2; however, got {override}." 
-            )
-        
+    kv_dict = parse_override_kv_pairs(override_kv_pair_list)
+    for key, value in kv_dict.items():
         # Get dotted path to final branch and leaf name. 
-        dotted_path_to_leaf, value_string = override.split('=') 
+        validation_utils.validate_str(key)
+        dotted_path_to_leaf, leaf_value = key, value
         dotted_path_to_leaf_parts = dotted_path_to_leaf.split('.') 
         dotted_path_to_final_branch = '.'.join(dotted_path_to_leaf_parts[:-1]) 
         leaf_name = dotted_path_to_leaf_parts[-1]
@@ -166,12 +182,12 @@ def apply_cli_override(cfg, override_list, raise_if_not_exist=True):
                 "as it would require broadcast setting logic, which hasn't been implemented yet."
             )
         
-        # Get leaf value.
-        try:
-            leaf_value = ast.literal_eval(value_string) 
-        except (ValueError, SyntaxError):
-            # Gracefully fall back to using string for actual string inputs.
-            leaf_value = value_string
+        # # Get leaf value.
+        # try:
+        #     leaf_value = ast.literal_eval(value_string) 
+        # except (ValueError, SyntaxError):
+        #     # Gracefully fall back to using string for actual string inputs.
+        #     leaf_value = value_string
 
         # Traverse to final branch.
         final_branch = traverse_dotted_path(cfg_copy, dotted_path_to_final_branch)
@@ -195,23 +211,23 @@ def apply_cli_override(cfg, override_list, raise_if_not_exist=True):
             except ValueError:
                 raise ValueError(
                     f"List or tuple at {format_path(dotted_path_to_final_branch)} requires "
-                    f"an int index, but got {leaf_name} while attempting to set '{override}'"
+                    f"an int index, but got {leaf_name} while attempting to set override {key} {value}."
                 )
-            if -len(final_branch) <= idx <= len(final_branch):
+            if not(-len(final_branch) <= idx < len(final_branch)):
                 raise IndexError(
                     f"Index {idx} out of bounds for list of length {len(final_branch)} "
-                    f"at {format_path(dotted_path_to_final_branch)} when attempting to set '{override}'."
+                    f"at {format_path(dotted_path_to_final_branch)} while attempting to set override {key} {value}."
                 )
             final_branch[idx] = leaf_value
         elif isinstance(final_branch, tuple):
             raise TypeError(
-                f"Final branch in '{format_path(dotted_path_to_final_branch)}' in '{override}' "
+                f"Final branch in '{format_path(dotted_path_to_final_branch)}' for key value pair {key} {value} "
                 "is a tuple. Support for tuples has not yet been added (requires "
                 "rebuilding due to their immutability)."
             )
         else:
             raise RuntimeError(
-                f"Unexpected condition reached during attempted setting of leaf value in '{override}'. " 
+                f"Unexpected condition reached during attempted setting of leaf value {value} for key {key}. " 
                 f"Got final branch {final_branch} of type {type(final_branch)} "
                 "but currently supported types are dataclass, dict, list, and tuple."
             )
@@ -266,7 +282,7 @@ def apply_cli_override(cfg, override_list, raise_if_not_exist=True):
 def parse_and_apply_cli_overrides(cfg):
     """ 
     """
-    parser = get_parser()
+    parser = make_parent_parser()
     args = parser.parse_args()
     override_list = args.set or []
     return apply_cli_override(cfg, override_list), override_list

@@ -17,10 +17,8 @@ from general_utils import tensor as tensor_utils
 
 def build_arg_parser():
     parser = argparse.ArgumentParser(
-        parents=[configops_utils.get_parser()],
+        parents=[configops_utils.make_parent_parser()],
     )
-    parser.add_argument('--index', type=int, required=True, help="Zero-based integer to use for filename.")
-    parser.add_argument('--zfill', type=int, default=4, help="Zero-pad width for filename (default=4).")
     parser.add_argument('--base_dir', default='configs/datasets')
     parser.add_argument('--sub_dir_1', default=str(date.today()))
     parser.add_argument('--sub_dir_2', default='a')
@@ -35,10 +33,10 @@ def main():
     sub_dir_1 = args.sub_dir_1
     sub_dir_2 = args.sub_dir_2
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
-    filename = str(args.index).zfill(args.zfill)
+    filename = str(args.idx).zfill(args.zfill)
 
     # ------------------------- Get pre sweep items -------------------------- #
-    pre = configops_utils.parse_override_list(args.pre or [])
+    pre = configops_utils.parse_override_kv_pairs(args.pre or [])
 
     # ------------------------ Build auxiliary objects ----------------------- #
     hypercube_num_dims = configops_utils.select(pre, 'sequences_cfg.elem.args_cfg.num_dims', 2)
