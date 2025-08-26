@@ -1,5 +1,7 @@
 import argparse
+from dataclasses import dataclass, replace
 from datetime import date
+from typing import Literal, Optional, Union
 
 import torch
 
@@ -7,10 +9,209 @@ from data import builder as data_builder
 from data.config import DataConfig, EmbedderConfig, HypercubeConfig, NormalDistrConfig, SeqLengths, SequencesConfig, SplitConfig
 from data.sequences import Hypercube, Embedder
 from data import utils as data_utils
-from general_utils.config.types import CallableConfig, TensorConfig
+from general_utils.config.types import CallableConfig, ContainerConfig, TensorConfig
 from general_utils import config as config_utils
 from general_utils import fileio as fileio_utils
 from general_utils import tensor as tensor_utils
+from general_utils import validation as validation_utils
+
+
+@dataclass
+class Spec(ContainerConfig):
+    hypercube: ContainerConfig
+    seq_lengths: ContainerConfig
+    embedder: ContainerConfig
+    sequences: ContainerConfig
+    split: ContainerConfig
+
+@dataclass
+class HypercubeSpec:
+    num_dims: int = 2
+    random_labels: bool = False
+    pos_vert_labels: Union[list, Literal["auto"]] = 'auto'
+    coords = Union[list, Literal["auto"]] = 'auto'
+    pos_vert_pmf = Union[list, Literal["auto"]] = 'auto'
+    neg_vert_pmf = Union[list, Literal["auto"]] = 'auto'
+    device: str = 'cpu'
+    dtype_bit = torch.int8
+    dtype_index = torch.int64
+    dtype_pmf = torch.float32
+    torch_generator_seed = 314159265
+
+def get_hypercube_spec():
+    """ Add manual specifications here, will be overridden by CLI."""
+    return replace(HypercubeSpec(), **{})
+
+def build_hypercube_args_config(spec):
+    """ 
+    Compute things.
+    """
+    num_dims = spec.num_dims
+    num_vertices = 2**num_dims
+    half = num_vertices // 2
+
+    # Local normalizers. Private, pure python.
+    def _norm_coords(s: HypercubeSpec):
+        if s.coords == 'auto':
+            return list(range(num_dims))
+        vals = list(s.coords)
+        if len(vals) != num_dims:
+            raise ValueError(
+                f"`coords` must be of length {num_dims}, got length {len(vals)}."
+            )
+        if not all(isinstance(x, int) for x in vals):
+            raise TypeError("`coords` must contain only ints.")
+        return vals
+    
+    def _norm_pos_labels(s: HypercubeSpec):
+        if s.pos_vert_labels == 'auto':
+            if s.random_labels:
+                g = torch.Generator()
+                g.manual_seed(314159265)
+                perm = torch.randperm(num_vertices, generator=g).tolist()
+                return sorted(perm[half:])
+            else:
+                return list(range(half, num_vertices))
+        vals = s.pos_vert_labels   
+        if not all(isinstance(x, int) for x in vals):
+            raise TypeError("Elements of `pos_vert_labels` must be int.")
+        if not all(0 <= x <  num_vertices for x in vals):
+            raise ValueError("Elements of `pos_vert_labels` must be in range(0, num_vertices).")
+        return vals
+    
+    def _norm_pmf(values):
+        if values == 'auto':
+            return [1.0 / half] * half
+        pmf = [float(x) for x in values]
+        return pmf
+    
+    # Normalize inputs in python.
+    coords_py = _norm_coords(spec)
+    pos_labels_py = _norm_pos_labels(spec)
+    pos_pmf_py = _norm_pmf(spec.pos_vert_pmf, half)
+    neg_pmf_py = _norm_pmf(spec.neg_vert_pmf, half)
+
+    # Convert to tensors.
+    coords_t = torch.tensor(coords_py, dtype=spec.dtype_bit, device=spec.device)
+    pos_labels_t = torch.tensor(pos_labels_py, dtype=spec.dtype_index, device=spec.device)
+
+    # Get inclusion set. 
+    encoding_t = torch.tensor([0, 1], dtype=spec.dtype_bit, device=spec.device)
+    vertices = data_utils.get_lexicographic_ordering(num_dims, encoding_t, dtype=spec.dtype_bit)
+    inclusion_set_t = vertices.index_select(0, pos_labels_t)
+
+    # Get PMFs over vertices.
+    pos_pmf_t = torch.tensor(pos_pmf_py, dtype=spec.dtype_pmf, device=spec.device)
+    neg_pmf_t = torch.tensor(neg_pmf_py, dtype=spec.dtype_pmf, device=spec.device)
+
+    return tensor_utils.recursive_tensor_to_tensor_config(
+        HypercubeConfig(
+            num_dims=num_dims,
+            coords=coords_t,
+            inclusion_set=inclusion_set_t,
+            encoding=encoding_t,
+            vertices_pmfs=(pos_pmf_t, neg_pmf_t)
+        )
+    )
+
+
+
+
+    # def get_coords(hc_spec):
+    #     """ 
+    #     hc_spec.coords should be list or 'auto'
+    #     """
+    #     return (
+    #         torch.arange(hc_spec.num_dims, dtype=torch.int64) 
+    #         if hc_spec.coords == 'auto'
+    #         else torch.tensor(hc_spec.get_coords)
+    #     )
+        
+    # def get_vertex_labels(hc_spec):
+    #     """ 
+    #     """
+    #     if hc_spec.pos_vert_labels == 'auto':
+    #         if hc_spec.random:
+    #             vertices_labels = torch.randperm(num_vertices, dtype=torch.int64)
+    #             pos_vertex_labels = vertices_labels[num_vertices//2:]
+    #             neg_vertex_labels = vertices_labels[:num_vertices//2]
+    #         else:
+    #             pos_vertex_labels = torch.arange(start=num_vertices//2, end=num_vertices)
+    #             neg_vertex_labels = torch.arange(num_vertices//2)
+    #     else:
+    #         validation_utils.validate_iterable_contents(
+    #             hc_spec.pos_vert_labels, 
+    #             validation_utils.is_nonneg_int, 
+    #             "a nonneg int"
+            
+    #         ) 
+    #         pos_vertex_labels = torch.tensor(hc_spec.pos_vert_labels)
+    #         neg_vertex_labels = torch.arange(num_vertices)[~torch.isin(torch.arange(num_vertices), pos_vertex_labels)]
+                
+    #     return pos_vertex_labels, neg_vertex_labels
+    
+    # def get_vertex_pmf(hc_spec):
+    #     if hc_spec.pos_vert_pmf == 'auto':
+    #         pos_vert_pmf = data_utils.uniform_pmf(int(num_vertices/2))
+    #     else:
+    #         validation_utils.validate_iterable_contents(
+    #             hc_spec.pos_vert_pmf,
+    #             validation_utils.is_nonneg_float,
+    #             "a nonneg float"
+    #         )
+    #         pos_vert_pmf = torch.tensor(hc_spec.pos_vert_pmf)
+    #     if hc_spec.neg_vert_pmf == 'auto':
+    #         neg_vert_pmf = data_utils.uniform_pmf(int(num_vertices/2))
+    #     else:
+    #         validation_utils.validate_iterable_contents(
+    #             hc_spec.neg_vert_pmf,
+    #             validation_utils.is_nonneg_float,
+    #             "a nonneg float"
+    #         )
+    #         neg_vert_pmf = torch.tensor(hc_spec.neg_vert_pmf)
+
+    #     return pos_vert_pmf, neg_vert_pmf
+    
+    # coords=TensorConfig.from_tensor(get_coords(hc_spec))
+    # pos_vert_labels = get_vertex_labels(hc_spec)[0]
+    # inclusion_set=TensorConfig.from_tensor(
+    #     data_utils.get_lexicographic_ordering(
+    #         hc_spec.num_dims, 
+    #         encoding=torch.tensor([0, 1]),
+    #         dtype=torch.int8
+    #     )[pos_vert_labels, :]
+    # ),
+    # encoding=TensorConfig.from_tensor(
+    #     torch.tensor([0, 1], dtype=torch.int8)
+    # )
+    # pos_vert_pmf, neg_vert_pmf = get_vertex_pmf(hc_spec)
+    # vertices_pmfs=(
+    #     TensorConfig.from_tensor(pos_vert_pmf),
+    #     TensorConfig.from_tensor(neg_vert_pmf)
+    # )
+        
+    
+    # hypercube_args_cfg = HypercubeConfig(
+    #     num_dims=hc_spec.num_dims,
+    #     coords=coords,
+    #     inclusion_set=inclusion_set,
+    #     encoding=encoding,
+    #     vertices_pmfs=vertices_pmfs
+    # )
+
+    
+    # return hypercube_args_cfg
+
+
+@dataclass
+class SeqLengthSpec:
+    pos_seq_len_max: int = 10 # Default value if no CLI override
+    neg_seq_len_max: int = 10 # Default value if no CLI override
+    parity_pos: Optional[str] = None
+    parity_neg: Optional[str] = None
+
+
+
 
 
 def build_arg_parser():
@@ -23,47 +224,117 @@ def build_arg_parser():
     
     return parser
 
+# def resolve_hypercube_spec(spec):
+#     """ 
+#     Compute things.
+#     """
+#     def get_vertex_labels(num_vertices, random):
+#         """ 
+#         """
+#         if random:
+#             vertices_labels = torch.randperm(num_vertices, dtype=torch.int64)
+#             pos_vertex_labels = vertices_labels[num_vertices//2:]
+#             neg_vertex_labels = vertices_labels[:num_vertices//2]
+#         else:
+#             pos_vertex_labels = torch.arange(start=num_vertices//2, end=num_vertices)
+#             neg_vertex_labels = torch.arange(num_vertices//2)
+            
+#         return pos_vertex_labels, neg_vertex_labels
+    
+#     s = replace(spec)
+
+#     s.num_vertices = 2**s.num_hypercube_dims
+#     if s.pos_vert_labels == 'auto':
+#         s.pos_vert_labels, s.neg_vert_labels = get_vertex_labels(
+#             s.num_vertices, 
+#             s.random_labels
+#         )
+#     if s.pos_vert_pmf == 'auto':
+#         s.pos_vert_pmf = data_utils.uniform_pmf(int(s.num_vertices/2))
+#     if s.neg_vert_pmf == 'auto':
+#         s.pos_vert_pmf = data_utils.uniform_pmf(int(s.num_vertices/2))
+
 def main():
     args = build_arg_parser().parse_args()
 
-    # ---------------------------- Set directory ----------------------------- #
+    # ---------------------------- Set directory ---------------------------- #
     base_dir = args.base_dir
     sub_dir_1 = args.sub_dir_1
     sub_dir_2 = args.sub_dir_2
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = str(args.idx).zfill(args.zfill)
 
-    # ------------------------- Get pre sweep items -------------------------- #
-    pre = config_utils.ops.parse_override_kv_pairs(args.pre or [])
+    # ------------------------- Get pre sweep items ------------------------- #
+    set_ = config_utils.ops.parse_override_kv_pairs(args.set or [])
 
-    # ------------------------ Build auxiliary objects ----------------------- #
-    hypercube_num_dims = config_utils.ops.select(pre, 'sequences_cfg.elem.args_cfg.num_dims', 2)
+    # ----------------------------------------------------------------------- #
+    # --------------------------- Set parameters ---------------------------- #
+    # ----------------------------------------------------------------------- #
 
-    num_vertices = 2**hypercube_num_dims
-    MANUAL_LABELS = False
-    RANDOM_LABELS = True
-    if MANUAL_LABELS:
-        vertices_labels = torch.tensor([], dtype=torch.int64)
+    # ------------------------------ Hypercube ------------------------------ #
+    num_hypercube_dims = config_utils.ops.select(set_, 'num_hypercube_dims', 2)
+    random_labels = config_utils.ops.select(set_, 'random_vertex_labels', False)
+    # pos_vert_labels, neg_vert_labels = (
+    #     get_vertex_labels(num_vertices=2**num_hypercube_dims, random=random_labels) 
+    #     if hypercu
+    # )
+    coords = torch.arange(num_hypercube_dims, dtype=torch.int64)
+    pos_vert_pmf = data_utils.uniform_pmf(int(2**num_hypercube_dims/2))
+    neg_vert_pmf = data_utils.uniform_pmf(int(2**num_hypercube_dims/2))
+
+    # --------------------------- Sequence Lengths -------------------------- #
+    pos_seq_len_max = config_utils.ops.select(set_, 'sequences_cfg.seq_lengths.lengths.pos.support.max', 5)
+    neg_seq_len_max = pos_seq_len_max
+    parity_pos = config_utils.ops.select(set_, 'sequences_cfg.seq_lengths.lengths.pos.support.parity', None)
+    parity_neg = config_utils.ops.select(set_, 'sequences_cfg.seq_lengths.lengths.neg.support.parity', None)
+    if parity_pos is not None:
+        pos_seq_len_support = tensor_utils.single_parity_arange(pos_seq_len_max, parity_pos)
+        
     else:
-        if RANDOM_LABELS:
-            vertices_labels = torch.randperm(num_vertices, dtype=torch.int64)
-            pos_labels = vertices_labels[num_vertices//2:]
-            neg_labels = vertices_labels[:num_vertices//2]
-        else:
-            neg_labels = torch.arange(num_vertices//2)
-            pos_labels = torch.arange(start=num_vertices//2, end=num_vertices)
+        pos_seq_len_support = torch.arange(pos_seq_len_max)
+    pos_seq_len_pmf = data_utils.uniform_pmf(len(pos_seq_len_support))
+    if parity_neg is not None:
+        neg_seq_len_support = tensor_utils.single_parity_arange(neg_seq_len_max, parity_neg)
+        
+    else:
+        neg_seq_len_support = torch.arange(neg_seq_len_max)
+    neg_seq_len_pmf = data_utils.uniform_pmf(len(neg_seq_len_support))
+
+    # ------------------------------- Embedder ------------------------------ #
+    ambient_dim = config_utils.ops.select(set_, 'ambient_dim', 10)
+
+    # ----------------------------------------------------------------------- #
+    # ----------------------------------------------------------------------- #
+    # ----------------------------------------------------------------------- #
+
+    # ----------------------- Build auxiliary objects ----------------------- #
+    # # num_hypercube_dims = config_utils.ops.select(set_, 'sequences_cfg.elem.args_cfg.num_dims', 2)
+
+    # # num_vertices = 2**num_hypercube_dims
+    # # manual_labels = False
+    # # random_labels = True
+    # if manual_labels:
+    #     vertices_labels = torch.tensor([], dtype=torch.int64)
+    # else:
+    #     if random_labels:
+    #         vertices_labels = torch.randperm(num_vertices, dtype=torch.int64)
+    #         pos_vertex_labels = vertices_labels[num_vertices//2:]
+    #         neg_vertex_labels = vertices_labels[:num_vertices//2]
+    #     else:
+    #         neg_vertex_labels = torch.arange(num_vertices//2)
+    #         pos_vertex_labels = torch.arange(start=num_vertices//2, end=num_vertices)
 
     hypercube_args_cfg = HypercubeConfig(
-        num_dims=hypercube_num_dims,
+        num_dims=num_hypercube_dims,
         coords=TensorConfig.from_tensor(
-            torch.arange(hypercube_num_dims, dtype=torch.int64)
+            torch.arange(num_hypercube_dims, dtype=torch.int64)
         ),
         inclusion_set=TensorConfig.from_tensor(
             data_utils.get_lexicographic_ordering(
-                hypercube_num_dims, 
+                num_hypercube_dims, 
                 encoding=torch.tensor([0, 1]),
                 dtype=torch.int8
-            )[pos_labels, :]
+            )[pos_vert_labels, :]
         ),
         # inclusion_set=TensorConfig.from_tensor(
         #     torch.tensor(
@@ -74,38 +345,26 @@ def main():
             torch.tensor([0, 1], dtype=torch.int8)
         ),
         vertices_pmfs=(
-            TensorConfig.from_tensor(
-                data_utils.uniform_pmf(int(num_vertices/2))
-            ),
-            TensorConfig.from_tensor(
-                data_utils.uniform_pmf(int(num_vertices/2))
-            )
+            TensorConfig.from_tensor(pos_vert_pmf),
+            TensorConfig.from_tensor(neg_vert_pmf)
         )
     )
 
 
-    pos_seq_len_max = config_utils.ops.select(pre, 'sequences_cfg.seq_lengths.lengths.pos.support.max', 5)
-    # neg_seq_len_max = config_utils.ops.pick(pre, 'sequences_cfg.seq_lengths.lengths.neg.support.max', 5)
-    neg_seq_len_max = pos_seq_len_max
-    parity_pos = config_utils.ops.select(pre, 'sequences_cfg.seq_lengths.lengths.pos.support.parity', None)
-    parity_neg = config_utils.ops.select(pre, 'sequences_cfg.seq_lengths.lengths.neg.support.parity', None)
+    # pos_seq_len_max = config_utils.ops.select(set_, 'sequences_cfg.seq_lengths.lengths.pos.support.max', 5)
+    # # neg_seq_len_max = config_utils.ops.pick(set_, 'sequences_cfg.seq_lengths.lengths.neg.support.max', 5)
+    # neg_seq_len_max = pos_seq_len_max
+    # parity_pos = config_utils.ops.select(set_, 'sequences_cfg.seq_lengths.lengths.pos.support.parity', None)
+    # parity_neg = config_utils.ops.select(set_, 'sequences_cfg.seq_lengths.lengths.neg.support.parity', None)
     seq_lengths = SeqLengths(
         lengths={
             'pos' : {
-                'support' : TensorConfig.from_tensor(
-                    tensor_utils.single_parity_arange(pos_seq_len_max, parity_pos)
-                ),
-                'pmf' : TensorConfig.from_tensor(
-                    data_utils.uniform_pmf(len(tensor_utils.single_parity_arange(pos_seq_len_max, parity_pos)))
-                )
+                'support' : TensorConfig.from_tensor(pos_seq_len_support),
+                'pmf' : TensorConfig.from_tensor(pos_seq_len_pmf)
             },
             'neg' : {
-                'support' : TensorConfig.from_tensor(
-                    tensor_utils.single_parity_arange(neg_seq_len_max, parity_neg)
-                ),
-                'pmf' : TensorConfig.from_tensor(
-                    data_utils.uniform_pmf(len(tensor_utils.single_parity_arange(neg_seq_len_max, parity_neg)))
-                )
+                'support' : TensorConfig.from_tensor(neg_seq_len_support),
+                'pmf' : TensorConfig.from_tensor(neg_seq_len_pmf)
             }
         }
     )
@@ -160,8 +419,8 @@ def main():
         split_cfg=split_cfg
     )
 
-    # -------------------------- Apply CLI overrides ------------------------- #
-    data_cfg = config_utils.ops.apply_cli_override(data_cfg, args.set or [])
+    # ----------------------- Apply late CLI overrides ---------------------- #
+    data_cfg = config_utils.ops.apply_cli_override_to_cfg(data_cfg, args.cfg or [])
 
     # ------------------------------ Serialize ------------------------------- #
     # Attempt to serialize and reconstruct full cfg tree, and use reconstructed

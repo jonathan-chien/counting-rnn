@@ -1,7 +1,7 @@
 import argparse
 import ast
 import copy
-from dataclasses import is_dataclass
+from dataclasses import is_dataclass, fields, replace
 
 from .. import validation as validation_utils
 
@@ -133,22 +133,45 @@ def parse_override_kv_pairs(override_kv_pair_list):
 
     return d
 
-def select(pre_map, dotted_key, default):
-    return pre_map.get(dotted_key, default)
+def select(set_map, key, default):
+    return set_map.get(key, default)
+
+def apply_cli_override_to_spec(spec, set_map: dict, strict=False):
+    """ 
+    """
+    if not is_dataclass(spec):
+        raise TypeError(
+            f"`spec` must be a dataclass, but got an instance of type {type(spec)}."
+        )
+    
+    spec_vals = {f.name for f in fields(spec)}
+
+    updates = {}
+    unrecognized = []
+    for key, val in set_map.items():
+        if key in spec_vals:
+            updates[key] = val
+        else:
+            unrecognized.append(key)
+    
+    if unrecognized and strict:
+        raise ValueError(f"Unrecognized values in `set_map`: {','.join(unrecognized)}")
+        
+    return replace(spec, **updates)
 
 def make_parent_parser():
     """ 
     """
     parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument('--pre', nargs=2, action='append', default=[], help="Pre config construction overrides.")
-    parser.add_argument('--set', nargs=2, action='append', default=[], help="Post config construction overrides.")
+    parser.add_argument('--set', nargs=2, action='append', default=[], help="Overrides that intercept generation logic prior to config construction.")
+    parser.add_argument('--cfg', nargs=2, action='append', default=[], help="Overrides that target fully formed config objects via dotted paths.")
     parser.add_argument('--idx', type=int, required=True, help="Zero-based integer to use for filename.")
     parser.add_argument('--zfill', type=int, default=4, help="Zero-pad width for filename (default=4).")
     # parser.add_argument('--sweep_pre', action='append', default=[])
     # parser.add_argument('--sweep_set', action='append', default=[])
     return parser
 
-def apply_cli_override(cfg, override_kv_pair_list, raise_if_not_exist=True):
+def apply_cli_override_to_cfg(cfg, override_kv_pair_list, raise_if_not_exist=True):
     """ 
     """
     def format_path(path_string: str):
@@ -285,5 +308,5 @@ def parse_and_apply_cli_overrides(cfg):
     parser = make_parent_parser()
     args = parser.parse_args()
     override_list = args.set or []
-    return apply_cli_override(cfg, override_list), override_list
+    return apply_cli_override_to_cfg(cfg, override_list), override_list
 
