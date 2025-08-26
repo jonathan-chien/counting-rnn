@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
-from general_utils.config import ArgsConfig, CallableConfig
+from general_utils.config.types import ArgsConfig, CallableConfig
 
 
 @dataclass

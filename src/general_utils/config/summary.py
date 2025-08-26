@@ -5,8 +5,8 @@ from typing import Any, Callable, Dict, Union
 
 import pandas as pd
 
-from general_utils import serialization as serialization_utils
-from general_utils import configops as configops_utils
+from . import serialization
+from . import ops 
 
 
 @dataclass(slots=True)
@@ -23,7 +23,7 @@ def summarize_cfg(cfg, dotted_path_registry: Dict[str, Union[str, Callable]]) ->
     summary = {}
     for key, val in dotted_path_registry.items():
         if isinstance(val, str):
-            summary[key] = configops_utils.traverse_dotted_path(cfg, val)
+            summary[key] = ops.traverse_dotted_path(cfg, val)
         elif callable(val):
             summary[key] = val(cfg)
         else:
@@ -44,7 +44,7 @@ def summarize_cfg_to_xlsx(
 ):
     """ 
     """
-    cfg = serialization_utils.deserialize(cfg_filepath)
+    cfg = serialization.deserialize(cfg_filepath)
     xlsx_filepath = Path(xlsx_filepath)
 
     # Default items in each row.

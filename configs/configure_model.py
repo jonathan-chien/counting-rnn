@@ -5,10 +5,8 @@ import torch
 from models import builder as model_builder
 from models.config import AutoRNNConfig, ElmanConfig, GRUConfig, FCNConfig, GELUConfig, IdentityConfig, ReLUConfig
 from models.networks import FCN
-from general_utils.config import CallableConfig
-from general_utils import configops as configops_utils
-from general_utils import records as records_utils
-from general_utils import serialization as serialization_utils
+from general_utils.config.types import CallableConfig
+from general_utils import config as config_utils
 from general_utils import fileio as fileio_utils
 
 
@@ -98,7 +96,7 @@ def main():
 
     # Convert, serialize/save, de-serialize, reconstruct.
     model_cfg_filepath = output_dir / (filename + '.json')
-    _ = serialization_utils.serialize(model_cfg, model_cfg_filepath)
+    _ = config_utils.serialization.serialize(model_cfg, model_cfg_filepath)
 
     # ---------------------------- Test instantiation --------------------------- #
     device = torch.device(
@@ -127,8 +125,8 @@ def main():
         'rnn_input_size': 'rnn.args_cfg.input_size',
         'rnn_hidden_size': 'rnn.args_cfg.hidden_size',
         'rnn_nonlinearity': (
-            lambda model_cfg: configops_utils.traverse_dotted_path(model_cfg, 'rnn.args_cfg.nonlinearity')
-            if configops_utils.traverse_dotted_path(model_cfg, 'rnn.path').endswith('RNN') 
+            lambda model_cfg: config_utils.ops.traverse_dotted_path(model_cfg, 'rnn.args_cfg.nonlinearity')
+            if config_utils.ops.traverse_dotted_path(model_cfg, 'rnn.path').endswith('RNN') 
             else None
         ),
         'readout_network': 'readout_network.path',
@@ -139,7 +137,7 @@ def main():
 
 
     # Summarize config to .xlsx file.
-    records_utils.summarize_cfg_to_xlsx(
+    config_utils.summary.summarize_cfg_to_xlsx(
         model_cfg_filepath,
         config_kind='models',
         config_id=str(model_cfg_filepath).removeprefix('configs/models/').removesuffix('.json'),

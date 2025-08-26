@@ -5,9 +5,9 @@ from typing import Iterable
 
 from .sequences import Sequences
 from .config import DataConfig, SequencesConfig
-from general_utils.ml import reproducibility as reproducibility_utils
+from general_utils import config as config_utils
+from general_utils import ml as ml_utils
 from general_utils.ml.reproducibility import ReproducibilityConfig
-from general_utils import serialization as serialization_utils
 
 
 def build_hypercube_sequences(sequences_cfg: SequencesConfig) -> Sequences:
@@ -77,7 +77,7 @@ def build_split_sequences(
     sequences = {}
     for split, seq_cfg in zip(build, sequences_cfgs):
         seq_cfg.num_seq = getattr(data_cfg.split_cfg, split)
-        reproducibility_utils.apply_reproducibility_settings(
+        ml_utils.reproducibility.apply_reproducibility_settings(
             reproducibility_cfg, 
             seed_idx=seed_idx,
             split=split
@@ -101,20 +101,20 @@ def build_sequences_from_filepath(
     # but more future proof) reproducibility config (recovery should be
     # deterministic).
     data_cfg_dict = {}
-    data_cfg_dict['base'] = serialization_utils.deserialize(data_cfg_filepath)
+    data_cfg_dict['base'] = config_utils.serialization.deserialize(data_cfg_filepath)
     reproducibility_cfg_dict = {}
-    reproducibility_cfg_dict['base'] = serialization_utils.deserialize(reproducibility_cfg_filepath)
-    reproducibility_cfg_dict['recovered'] = serialization_utils.recursive_recover(
+    reproducibility_cfg_dict['base'] = config_utils.serialization.deserialize(reproducibility_cfg_filepath)
+    reproducibility_cfg_dict['recovered'] = config_utils.serialization.recursive_recover(
         reproducibility_cfg_dict['base']
     )
 
     # Apply recovery seed to deterministically recover all elements of data config.
-    reproducibility_utils.apply_reproducibility_settings(
+    ml_utils.reproducibility.apply_reproducibility_settings(
         reproducibility_cfg_dict['recovered'], 
         seed_idx=seed_idx,
         split='recovery'
     )
-    data_cfg_dict['recovered'] = serialization_utils.recursive_recover(
+    data_cfg_dict['recovered'] = config_utils.serialization.recursive_recover(
         data_cfg_dict['base']
     )
 
@@ -150,7 +150,7 @@ def build_sequences_from_filepath(
 
     if save_path is not None:
         torch.save(sequences, save_path)
-        serialization_utils.serialize(data_cfg_dict['recovered'], save_path)
+        config_utils.serialization.serialize(data_cfg_dict['recovered'], save_path)
 
     return sequences, data_cfg_dict, reproducibility_cfg_dict
 

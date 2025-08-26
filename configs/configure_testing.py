@@ -3,16 +3,13 @@ from datetime import date
 import torch
 
 from data.sequences import Sequences
-# from engine.config import DataLoaderConfig, EvalFnConfig, LoggerConfig, LossTermConfig, TestingConfig
 from engine.config import EvalFnConfig, TestingConfig
 from engine.driver import run_and_save_testing_from_filepath
-# from engine.loss import LossTerm, spectral_entropy, wrapped_cross_entropy_loss
 from engine import utils as engine_utils
-from general_utils.config import CallableConfig, TorchDeviceConfig
-from general_utils import fileio as fileio_utils
-from general_utils import records as records_utils
-from general_utils import serialization as serialization_utils
+from general_utils import config as config_utils
+from general_utils.config.types import CallableConfig, TorchDeviceConfig
 from general_utils import ml as ml_utils
+from general_utils import fileio as fileio_utils
 
 
 def main():
@@ -139,7 +136,7 @@ def main():
 
     # ----------------------------- Serialize ------------------------------- #
     testing_cfg_filepath = output_dir / (filename + '.json')
-    serialization_utils.serialize(testing_cfg, testing_cfg_filepath)
+    config_utils.serialization.serialize(testing_cfg, testing_cfg_filepath)
 
     # -------------------- Test deserialization/execution ------------------- #
     run_and_save_testing_from_filepath(
@@ -164,7 +161,7 @@ def main():
     }
 
     # Deserialize and summarize config to .xlsx file.
-    records_utils.summarize_cfg_to_xlsx(
+    config_utils.summary.summarize_cfg_to_xlsx(
         testing_cfg_filepath, 
         config_kind='testing', 
         config_id=str(testing_cfg_filepath).removeprefix('configs/datasets/').removesuffix('.json'),

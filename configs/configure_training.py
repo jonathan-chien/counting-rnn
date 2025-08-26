@@ -6,19 +6,11 @@ import torch
 
 from data.sequences import Sequences
 from engine.driver import run_and_save_training_from_filepath
-# from engine.utils import Logger, compute_accuracy
 from engine import utils as engine_utils
-# from engine.train import EarlyStopping, MetricTracker
-# from engine.loss import LossTerm, spectral_entropy, wrapped_cross_entropy_loss
-# from engine.config import (
-#     AdamWConfig, DataLoaderConfig, EarlyStoppingConfig, LoggerConfig, LossTermConfig,
-#     MetricTrackerConfig, RequiresGradConfig, TrainFnConfig, TrainingConfig
-# )
 from engine.config import TrainFnConfig, TrainingConfig
-from general_utils.config import CallableConfig, TorchDeviceConfig
+from general_utils import config as config_utils
+from general_utils.config.types import CallableConfig, TorchDeviceConfig
 from general_utils import fileio as fileio_utils
-from general_utils import records as records_utils
-from general_utils import serialization as serialization_utils
 from general_utils import ml as ml_utils
 
 
@@ -325,7 +317,7 @@ def main():
 
     # ----------------------------- Serialize ------------------------------- #
     training_cfg_filepath = output_dir / (filename + '.json')
-    _ = serialization_utils.serialize(training_cfg, training_cfg_filepath)
+    _ = config_utils.serialization.serialize(training_cfg, training_cfg_filepath)
 
     # -------------------- Test deserialization/execution ------------------- #
     # First delete, any file with suffix best, as a different epoch being best
@@ -360,7 +352,7 @@ def main():
     }
 
     # Deserialize and summarize config to .xlsx file.
-    records_utils.summarize_cfg_to_xlsx(
+    config_utils.summary.summarize_cfg_to_xlsx(
         training_cfg_filepath, 
         config_kind='training', 
         config_id=str(training_cfg_filepath).removeprefix('configs/datasets/').removesuffix('.json'),

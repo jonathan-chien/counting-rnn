@@ -4,16 +4,16 @@ from typing import Dict, Optional, Union, Tuple
 import torch
 
 from . import utils as data_utils
-from general_utils import config as config_utils
+from general_utils.config.types import ArgsConfig, ContainerConfig, CallableConfig, TensorConfig
 from general_utils import tensor as tensor_utils
 
 
 @dataclass
-class HypercubeConfig(config_utils.ArgsConfig):
+class HypercubeConfig(ArgsConfig):
     num_dims: int
-    coords: Union[torch.Tensor, config_utils.TensorConfig]
-    inclusion_set: Optional[Union[torch.Tensor, config_utils.TensorConfig]] = None
-    encoding: Union[torch.Tensor, config_utils.TensorConfig] = torch.tensor([0, 1], dtype=torch.int8)
+    coords: Union[torch.Tensor, TensorConfig]
+    inclusion_set: Optional[Union[torch.Tensor, TensorConfig]] = None
+    encoding: Union[torch.Tensor, TensorConfig] = torch.tensor([0, 1], dtype=torch.int8)
     vertices_pmfs: Optional[Tuple[torch.Tensor]] = None
     dtype: Union[torch.dtype, str] = 'torch.int8'
 
@@ -30,7 +30,7 @@ class SeqLengths:
             'support' : 1D tensor of non-negative ints.
             'pmf' : 1D tensor of probability masses, same legnth as 'support'.
     """
-    lengths: Dict[str, Dict[str, Union[torch.Tensor, config_utils.TensorConfig]]]
+    lengths: Dict[str, Dict[str, Union[torch.Tensor, TensorConfig]]]
 
     def validate(self):
         for name, entry in self.lengths.items():
@@ -43,42 +43,42 @@ class SeqLengths:
             
 
 @dataclass
-class EmbedderConfig(config_utils.ArgsConfig):
+class EmbedderConfig(ArgsConfig):
     ambient_dim: int
     mean_center: bool = False
-    offset_1: Optional[Union[torch.Tensor, config_utils.TensorConfig]] = None
-    offset_2: Optional[Union[torch.Tensor, config_utils.TensorConfig]] = None
-    method: Union[str, Union[torch.Tensor, config_utils.TensorConfig]] = 'random_rotation'
-    noise_distr: Optional[config_utils.CallableConfig] = None
+    offset_1: Optional[Union[torch.Tensor, TensorConfig]] = None
+    offset_2: Optional[Union[torch.Tensor, TensorConfig]] = None
+    method: Union[str, Union[torch.Tensor, TensorConfig]] = 'random_rotation'
+    noise_distr: Optional[CallableConfig] = None
 
 
 @dataclass
-class SequencesConfig(config_utils.ContainerConfig):
+class SequencesConfig(ContainerConfig):
     seq_lengths: SeqLengths
     # elem_cls: type # E.g. Hypercube
     # elem_cfg: Any # E.g. HypercubeConfig
-    elem: config_utils.CallableConfig
-    embedder: config_utils.CallableConfig
+    elem: CallableConfig
+    embedder: CallableConfig
     num_seq: int
     seq_order: str = 'permute'
 
 
 @dataclass
-class NormalDistrConfig(config_utils.ArgsConfig):
+class NormalDistrConfig(ArgsConfig):
     loc : float 
     scale : float 
 
 
 
 @dataclass
-class SplitConfig(config_utils.ContainerConfig):
+class SplitConfig(ContainerConfig):
     train: int
     val: int
     test: int
 
 
 @dataclass
-class DataConfig(config_utils.ContainerConfig):
+class DataConfig(ContainerConfig):
     sequences_cfg: Dict[str, SequencesConfig]
     split_cfg: SplitConfig
     

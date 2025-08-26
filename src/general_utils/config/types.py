@@ -5,8 +5,8 @@ warnings.simplefilter("always")
 
 import torch
 
-from . serialization import get_cls_path, get_fn_path, load_from_path, shallow_asdict
-from . import serialization as serialization_utils
+from . import serialization 
+
 
 # ---------------------------- Dataclass configs ---------------------------- #
 @dataclass
@@ -86,9 +86,9 @@ class CallableConfig(FactoryConfig):
         """ 
         """
         if kind == 'class':
-            return serialization_utils.get_cls_path(callable_)
+            return serialization.get_cls_path(callable_)
         elif kind in ('function', 'static_method'):
-            return serialization_utils.get_fn_path(callable_)
+            return serialization.get_fn_path(callable_)
         else:
             raise ValueError(
                 f"Unrecognized value {kind} for kind. Must be 'class' or 'function'."
@@ -159,7 +159,7 @@ class CallableConfig(FactoryConfig):
         
         callable_ = self._get_callable()
         args_cfg_with_dtype = self._get_args_cfg_with_dtype()
-        return callable_(**{**serialization_utils.shallow_asdict(args_cfg_with_dtype), **kwargs})
+        return callable_(**{**serialization.shallow_asdict(args_cfg_with_dtype), **kwargs})
     
     def _get_callable(self):
         """ 
@@ -170,7 +170,7 @@ class CallableConfig(FactoryConfig):
             else 2 if self.kind == 'static_method' 
             else None
         )
-        return serialization_utils.load_from_path(self.path, module_depth=module_depth)
+        return serialization.load_from_path(self.path, module_depth=module_depth)
     
     def _output_if_locked(self):
         """ 
@@ -267,7 +267,7 @@ class TensorConfig(CallableConfig):
     
     # def recover(self):
     #     # Key 'dtype' points to a string, must convert to torch.dtype.
-    #     if 'dtype' not in serialization_utils.shallow_asdict(self.args_cfg):
+    #     if 'dtype' not in serialization.shallow_asdict(self.args_cfg):
     #         raise KeyError(
     #             "TensorConfig object must contain a dtype attribute for " 
     #             "accurate reconstruction."
@@ -332,7 +332,7 @@ class TensorConfig(CallableConfig):
     #             )
     #             updated_args_cfg = replace(
     #                 self.args_cfg, 
-    #                 dtype=serialization_utils.get_torch_dtype_from_str(self.args_cfg.dtype)
+    #                 dtype=serialization.get_torch_dtype_from_str(self.args_cfg.dtype)
     #             )
     #             # temporary_tensor_config = type(self).from_callable(
     #             #     callable_=torch.tensor,

@@ -1,7 +1,7 @@
 import torch
 
 from .config import ReproducibilityConfig
-from ..serialization import shallow_asdict
+from ..config.serialization import shallow_asdict
 from .. import seed as seed_utils
 
 

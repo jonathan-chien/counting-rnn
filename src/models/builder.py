@@ -1,8 +1,8 @@
 from .config import AutoRNNConfig
 from data import builder as data_builder
 from .networks import AutoRNN
-from general_utils import serialization as serialization_utils
-from general_utils.ml import reproducibility as reproducibility_utils
+from general_utils import config as config_utils
+from general_utils import ml as ml_utils
 
 
 def build_model(model_cfg: AutoRNNConfig, tokens, device) -> AutoRNN:
@@ -44,16 +44,16 @@ def build_model_from_filepath(
 
     # Load in config, insert embedding dimensions, and recover.
     model_cfg_dict = {}
-    model_cfg_dict['base'] = serialization_utils.deserialize(model_cfg_filepath)
+    model_cfg_dict['base'] = config_utils.serialization.deserialize(model_cfg_filepath)
     model_cfg_dict['base'] = insert_embedding_dim(embedding_dim, model_cfg_dict['base'])
-    model_cfg_dict['recovered'] = serialization_utils.recursive_recover(model_cfg_dict['base'])
+    model_cfg_dict['recovered'] = config_utils.serialization.recursive_recover(model_cfg_dict['base'])
 
     # Apply 'recovery' seed to support reproducible model initialization and build model. TODO: encapsulate this pattern of deserializing a cfg with dicts
-    reproducibility_cfg_dict['base'] = serialization_utils.deserialize(reproducibility_cfg_filepath)
-    reproducibility_cfg_dict['recovered'] = serialization_utils.recursive_recover(
+    reproducibility_cfg_dict['base'] = config_utils.serialization.deserialize(reproducibility_cfg_filepath)
+    reproducibility_cfg_dict['recovered'] = config_utils.serialization.recursive_recover(
         reproducibility_cfg_dict['base']
     )
-    reproducibility_utils.apply_reproducibility_settings(
+    ml_utils.reproducibility.apply_reproducibility_settings(
         reproducibility_cfg=reproducibility_cfg_dict['recovered'],
         seed_idx=seed_idx,
         split='recovery'

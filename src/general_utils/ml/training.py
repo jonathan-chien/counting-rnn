@@ -1,12 +1,10 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
 import torch
-from typing import Literal
 import warnings
 
 from .. import tensor as tensor_utils
 from .config import RequiresGradConfig
-from .. import validation as validation_utils
 
 
 class EarlyStopping:

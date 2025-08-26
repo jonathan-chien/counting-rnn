@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from general_utils.config import ArgsConfig, ContainerConfig, CallableConfig, TensorConfig
+from general_utils.config.types import ArgsConfig, ContainerConfig, CallableConfig, TensorConfig
 from general_utils.ml.config import RequiresGradConfig
 
 

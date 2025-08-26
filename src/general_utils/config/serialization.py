@@ -2,13 +2,12 @@ from dataclasses import fields, is_dataclass, replace
 import importlib
 import inspect
 import types
-from typing import Union, get_args, get_origin
 
 import torch
 
-from . import fileio as fileio_utils
-from . import recursion as recursion_utils
-from . import validation as validation_utils
+from .. import fileio as fileio_utils
+from .. import recursion as recursion_utils
+from .. import validation as validation_utils
 
 
 # ------------------------------- General ------------------------------------ #
@@ -107,7 +106,7 @@ dataclass_branch_with_transform_to_dict = (is_dataclass, handle_dataclass_with_t
     
 def handle_dataclass_with_factory_config(d, recurse):
     # Global import on 06/21/25 causes circular import error.
-    from .config import FactoryConfig
+    from .types import FactoryConfig
 
     # Descend recursively into dataclass first.
     d_transformed = recursion_utils.handle_dataclass(d, recurse)

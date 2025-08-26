@@ -5,7 +5,7 @@ import torch
 from typing import Optional, Sequence, Union
 import warnings
 
-from .. import serialization as serialization_utils
+from ..config import serialization as serialization_utils
 from .. import tensor as tensor_utils
 
 

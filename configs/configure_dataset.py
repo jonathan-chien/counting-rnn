@@ -7,17 +7,15 @@ from data import builder as data_builder
 from data.config import DataConfig, EmbedderConfig, HypercubeConfig, NormalDistrConfig, SeqLengths, SequencesConfig, SplitConfig
 from data.sequences import Hypercube, Embedder
 from data import utils as data_utils
-from general_utils.config import CallableConfig, TensorConfig
-from general_utils import configops as configops_utils
+from general_utils.config.types import CallableConfig, TensorConfig
+from general_utils import config as config_utils
 from general_utils import fileio as fileio_utils
-from general_utils import records as records_utils
-from general_utils import serialization as serialization_utils
 from general_utils import tensor as tensor_utils
 
 
 def build_arg_parser():
     parser = argparse.ArgumentParser(
-        parents=[configops_utils.make_parent_parser()],
+        parents=[config_utils.ops.make_parent_parser()],
     )
     parser.add_argument('--base_dir', default='configs/datasets')
     parser.add_argument('--sub_dir_1', default=str(date.today()))
@@ -36,10 +34,10 @@ def main():
     filename = str(args.idx).zfill(args.zfill)
 
     # ------------------------- Get pre sweep items -------------------------- #
-    pre = configops_utils.parse_override_kv_pairs(args.pre or [])
+    pre = config_utils.ops.parse_override_kv_pairs(args.pre or [])
 
     # ------------------------ Build auxiliary objects ----------------------- #
-    hypercube_num_dims = configops_utils.select(pre, 'sequences_cfg.elem.args_cfg.num_dims', 2)
+    hypercube_num_dims = config_utils.ops.select(pre, 'sequences_cfg.elem.args_cfg.num_dims', 2)
 
     num_vertices = 2**hypercube_num_dims
     MANUAL_LABELS = False
@@ -86,11 +84,11 @@ def main():
     )
 
 
-    pos_seq_len_max = configops_utils.select(pre, 'sequences_cfg.seq_lengths.lengths.pos.support.max', 5)
-    # neg_seq_len_max = configops_utils.pick(pre, 'sequences_cfg.seq_lengths.lengths.neg.support.max', 5)
+    pos_seq_len_max = config_utils.ops.select(pre, 'sequences_cfg.seq_lengths.lengths.pos.support.max', 5)
+    # neg_seq_len_max = config_utils.ops.pick(pre, 'sequences_cfg.seq_lengths.lengths.neg.support.max', 5)
     neg_seq_len_max = pos_seq_len_max
-    parity_pos = configops_utils.select(pre, 'sequences_cfg.seq_lengths.lengths.pos.support.parity', None)
-    parity_neg = configops_utils.select(pre, 'sequences_cfg.seq_lengths.lengths.neg.support.parity', None)
+    parity_pos = config_utils.ops.select(pre, 'sequences_cfg.seq_lengths.lengths.pos.support.parity', None)
+    parity_neg = config_utils.ops.select(pre, 'sequences_cfg.seq_lengths.lengths.neg.support.parity', None)
     seq_lengths = SeqLengths(
         lengths={
             'pos' : {
@@ -163,20 +161,20 @@ def main():
     )
 
     # -------------------------- Apply CLI overrides ------------------------- #
-    data_cfg = configops_utils.apply_cli_override(data_cfg, args.set or [])
+    data_cfg = config_utils.ops.apply_cli_override(data_cfg, args.set or [])
 
     # ------------------------------ Serialize ------------------------------- #
     # Attempt to serialize and reconstruct full cfg tree, and use reconstructed
     # version to build, to ensure future reproducibility.
     data_cfg_filepath = output_dir / (filename + '.json')
-    _ = serialization_utils.serialize(data_cfg, data_cfg_filepath)
+    _ = config_utils.serialization.serialize(data_cfg, data_cfg_filepath)
 
     # -------------------- Test deserialization/execution -------------------- #
     # Attempt to build dataset from serialized file.
     data_builder.build_sequences_from_filepath(
         data_cfg_filepath, 
         build=['train', 'val'], 
-        reproducibility_cfg_filepath='configs/reproducibility/2025-08-11/a/0000.json',
+        reproducibility_cfg_filepath='configs/reproducibility/2025-08-25/a/0000.json',
         seed_idx=0, 
         print_to_console=True, 
         save_path=None
@@ -199,7 +197,7 @@ def main():
     }
 
     # Deserialize and summarize config to .xlsx file.
-    records_utils.summarize_cfg_to_xlsx(
+    config_utils.summary.summarize_cfg_to_xlsx(
         data_cfg_filepath, 
         config_kind='datasets', 
         config_id=str(data_cfg_filepath).removeprefix('configs/datasets/').removesuffix('.json'),
@@ -221,16 +219,16 @@ if __name__ == '__main__':
 # from data.sequences import Hypercube, Embedder
 # from data import utils as data_utils
 # from general_utils.config import CallableConfig, TensorConfig
-# from general_utils import configops as configops_utils
+# from general_utils import configops as config_utils.ops
 # from general_utils import fileio as fileio_utils
-# from general_utils import records as records_utils
-# from general_utils import serialization as serialization_utils
+# from general_utils import records as config_utils.summary
+# from general_utils import serialization as config_utils.serialization
 # from general_utils import tensor as tensor_utils
 
 
 # def build_arg_parser():
 #     parser = argparse.ArgumentParser(
-#         parents=[configops_utils.get_parser()],
+#         parents=[config_utils.ops.get_parser()],
 #     )
 #     parser.add_argument('--index', type=int, required=True, help="Zero-based integer to use for filename.")
 #     parser.add_argument('--zfill', type=int, default=4, help="Zero-pad width for filename (default=4).")
@@ -258,7 +256,7 @@ if __name__ == '__main__':
 #     # filename = fileio_utils.make_filename('0000')
 
 #     # ------------------------- Get pre sweep items -------------------------- #
-#     pre = configops_utils.parse_override_list(args.pre or [])
+#     pre = config_utils.ops.parse_override_list(args.pre or [])
 
 #     # ------------------------ Build auxiliary objects ----------------------- #
 #     hypercube_args_cfg = HypercubeConfig(
@@ -285,8 +283,8 @@ if __name__ == '__main__':
 #     )
 
 
-#     pos_seq_len_max = configops_utils.pick(pre, 'sequences_cfg.seq_lengths.lengths.pos.support.max', 5)
-#     neg_seq_len_max = configops_utils.pick(pre, 'sequences_cfg.seq_lengths.lengths.neg.support.max', 5)
+#     pos_seq_len_max = config_utils.ops.pick(pre, 'sequences_cfg.seq_lengths.lengths.pos.support.max', 5)
+#     neg_seq_len_max = config_utils.ops.pick(pre, 'sequences_cfg.seq_lengths.lengths.neg.support.max', 5)
 #     seq_lengths = SeqLengths(
 #         lengths={
 #             'pos' : {
@@ -359,13 +357,13 @@ if __name__ == '__main__':
 #     )
 
 #     # -------------------------- Apply CLI overrides ------------------------- #
-#     data_cfg = configops_utils.apply_cli_override(data_cfg, args.set or [])
+#     data_cfg = config_utils.ops.apply_cli_override(data_cfg, args.set or [])
 
 #     # ------------------------------ Serialize ------------------------------- #
 #     # Attempt to serialize and reconstruct full cfg tree, and use reconstructed
 #     # version to build, to ensure future reproducibility.
 #     data_cfg_filepath = output_dir / (filename + '.json')
-#     _ = serialization_utils.serialize(data_cfg, data_cfg_filepath)
+#     _ = config_utils.serialization.serialize(data_cfg, data_cfg_filepath)
 
 #     # -------------------- Test deserialization/execution -------------------- #
 #     # Attempt to build dataset from serialized file.
@@ -395,7 +393,7 @@ if __name__ == '__main__':
 #     }
 
 #     # Deserialize and summarize config to .xlsx file.
-#     records_utils.summarize_cfg_to_xlsx(
+#     config_utils.summary.summarize_cfg_to_xlsx(
 #         data_cfg_filepath, 
 #         config_kind='datasets', 
 #         config_id=str(data_cfg_filepath).removeprefix('configs/datasets/').removesuffix('.json'),
@@ -426,16 +424,16 @@ if __name__ == '__main__':
 # from data.sequences import Hypercube, Embedder
 # from data import utils as data_utils
 # from general_utils.config import CallableConfig, TensorConfig
-# from general_utils import configops as configops_utils
+# from general_utils import configops as config_utils.ops
 # from general_utils import fileio as fileio_utils
-# from general_utils import records as records_utils
-# from general_utils import serialization as serialization_utils
+# from general_utils import records as config_utils.summary
+# from general_utils import serialization as config_utils.serialization
 # from general_utils import tensor as tensor_utils
 
 
 # def build_arg_parser():
 #     parser = argparse.ArgumentParser(
-#         parents=[configops_utils.get_parser()],
+#         parents=[config_utils.ops.get_parser()],
 #     )
 #     parser.add_argument('--index', type=int, required=True, help="Zero-based integer to use for filename.")
 #     parser.add_argument('--zfill', type=int, default=4, help="Zero-pad width for filename (default=4).")
@@ -558,13 +556,13 @@ if __name__ == '__main__':
 #     )
 
 #     # -------------------------- Apply CLI overrides ------------------------- #
-#     data_cfg = configops_utils.apply_cli_override(data_cfg, args.set or [])
+#     data_cfg = config_utils.ops.apply_cli_override(data_cfg, args.set or [])
 
 #     # ------------------------------ Serialize ------------------------------- #
 #     # Attempt to serialize and reconstruct full cfg tree, and use reconstructed
 #     # version to build, to ensure future reproducibility.
 #     data_cfg_filepath = output_dir / (filename + '.json')
-#     _ = serialization_utils.serialize(data_cfg, data_cfg_filepath)
+#     _ = config_utils.serialization.serialize(data_cfg, data_cfg_filepath)
 
 #     # -------------------- Test deserialization/execution -------------------- #
 #     # Attempt to build dataset from serialized file.
@@ -594,7 +592,7 @@ if __name__ == '__main__':
 #     }
 
 #     # Deserialize and summarize config to .xlsx file.
-#     records_utils.summarize_cfg_to_xlsx(
+#     config_utils.summary.summarize_cfg_to_xlsx(
 #         data_cfg_filepath, 
 #         config_kind='datasets', 
 #         config_id=str(data_cfg_filepath).removeprefix('configs/datasets/').removesuffix('.json'),

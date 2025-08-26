@@ -1,6 +1,6 @@
 import torch
 
-from .config import TensorConfig
+from .config.types import TensorConfig
 from . import recursion as recursion_utils
 
 

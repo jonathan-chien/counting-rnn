@@ -9,10 +9,10 @@ from data import builder as data_builder
 from .training import train
 from .eval import evaluate
 from models import builder as model_builder
-from general_utils import fileio as fileio_utils
-from general_utils import serialization as serialization_utils
-from general_utils import validation as validation_utils
+from general_utils import config as config_utils
 from general_utils import ml as ml_utils
+from general_utils import fileio as fileio_utils
+from general_utils import validation as validation_utils
 
 
 _GPU_PREFIX = re.compile(r'^gpu__:(\d+)$')
@@ -193,14 +193,14 @@ def run_and_save_training_from_filepath(
 
     # -------------------- Retrieve train/val config ------------------------ #
     training_cfg_dict = {}
-    training_cfg_dict['base'] = serialization_utils.deserialize(training_cfg_filepath)
-    training_cfg_dict['recovered'] = serialization_utils.recursive_recover(training_cfg_dict['base']) 
+    training_cfg_dict['base'] = config_utils.serialization.deserialize(training_cfg_filepath)
+    training_cfg_dict['recovered'] = config_utils.serialization.recursive_recover(training_cfg_dict['base']) 
 
     # --------------------- Register used (base) configs -------------------- #
-    serialization_utils.serialize(data_train_cfg_dict['base'], dirs['configs'] / 'data_train.json')
-    serialization_utils.serialize(model_cfg_dict['base'], dirs['configs'] / 'model.json')
-    serialization_utils.serialize(training_cfg_dict['base'], dirs['configs'] / 'training.json')
-    serialization_utils.serialize(reproducibility_cfg_dict['base'], dirs['configs'] / 'reproducibility.json')
+    config_utils.serialization.serialize(data_train_cfg_dict['base'], dirs['configs'] / 'data_train.json')
+    config_utils.serialization.serialize(model_cfg_dict['base'], dirs['configs'] / 'model.json')
+    config_utils.serialization.serialize(training_cfg_dict['base'], dirs['configs'] / 'training.json')
+    config_utils.serialization.serialize(reproducibility_cfg_dict['base'], dirs['configs'] / 'reproducibility.json')
 
     # ------------------ Manually recover deferred items -------------------- #
     # Fill in model parameters (optimizers instantiated here).
@@ -277,7 +277,7 @@ def run_and_save_training_from_filepath(
     
     logger_train, logger_val, metric_tracker, early_stopping = train(
         model, 
-        **serialization_utils.shallow_asdict(train_fn_cfg)
+        **config_utils.serialization.shallow_asdict(train_fn_cfg)
     )
 
     # Save logger.
@@ -352,8 +352,8 @@ def run_testing_from_filepath(
 
     # -------------------- Retrieve train/val config ------------------------ #
     testing_cfg_dict = {}
-    testing_cfg_dict['base'] = serialization_utils.deserialize(testing_cfg_filepath)
-    testing_cfg_dict['recovered'] = serialization_utils.recursive_recover(testing_cfg_dict['base']) 
+    testing_cfg_dict['base'] = config_utils.serialization.deserialize(testing_cfg_filepath)
+    testing_cfg_dict['recovered'] = config_utils.serialization.recursive_recover(testing_cfg_dict['base']) 
 
     # ------------------ Manually recover deferred items -------------------- #
     # Add dataset to dataloader. If string placeholder was used for batch size,
@@ -408,7 +408,7 @@ def run_testing_from_filepath(
 
     logger_test = evaluate(
         model, 
-        **serialization_utils.shallow_asdict(testing_cfg_dict['recovered'].eval_fn_cfg)
+        **config_utils.serialization.shallow_asdict(testing_cfg_dict['recovered'].eval_fn_cfg)
     )
 
     return logger_test, model, sequences, model_cfg_dict, data_test_cfg_dict, testing_cfg_dict, reproducibility_cfg_dict
@@ -480,10 +480,10 @@ def run_and_save_testing_from_filepath(
     )
 
     # -------------------- Register used (base) configs --------------------- #
-    serialization_utils.serialize(model_cfg_dict['base'], dirs['configs'] / 'model.json')
-    serialization_utils.serialize(data_test_cfg_dict['base'], dirs['configs'] / 'data_test.json')
-    serialization_utils.serialize(testing_cfg_dict['base'], dirs['configs'] / 'testing.json')
-    serialization_utils.serialize(reproducibility_cfg_dict['base'], dirs['configs'] / 'reproducibility.json')
+    config_utils.serialization.serialize(model_cfg_dict['base'], dirs['configs'] / 'model.json')
+    config_utils.serialization.serialize(data_test_cfg_dict['base'], dirs['configs'] / 'data_test.json')
+    config_utils.serialization.serialize(testing_cfg_dict['base'], dirs['configs'] / 'testing.json')
+    config_utils.serialization.serialize(reproducibility_cfg_dict['base'], dirs['configs'] / 'reproducibility.json')
 
     # TODO: Save logger.
     if logger_test is not None:

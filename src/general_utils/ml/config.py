@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import torch
 from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, TYPE_CHECKING
 
-from ..config import ArgsConfig, ContainerConfig, CallableConfig, SeedConfig
+from ..config.types import ArgsConfig, ContainerConfig, CallableConfig, SeedConfig
 if TYPE_CHECKING: from .training import StoppingStrategy
 
 # ---------------------------- Training/Eval -------------------------------- #
