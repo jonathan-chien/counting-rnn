@@ -1,5 +1,5 @@
 import argparse
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, replace, field, fields
 from datetime import date
 from typing import Literal, Optional, Union
 
@@ -115,6 +115,53 @@ def build_hypercube_args_config(spec):
     )
 
 
+@dataclass
+class SeqLengthSpec:
+    max_seq_lengths: dict[str, Optional[int]] = field(default_factory=lambda: {'pos': 20, 'neg': 20})
+    seq_length_supports: dict[str, Union[list[int], Literal['auto']]] = field(default_factory=lambda: {'pos': 'auto', 'neg': 'auto'})
+    parities: dict[str, Optional[str]] = field(default_factory=lambda: {'pos': None, 'neg': None})
+    seq_length_pmfs: dict[str, Union[list[float], Literal['auto']]] = field(default_factory=lambda: {'pos': 'auto', 'neg': 'auto'})
+    # max_pos_seq_len = Optional[int] = None
+    # pos_seq_len_support = Union[list[int], Literal['auto']]
+    # max_neg_seq_len = Optional[int] = None
+    # neg_seq_len_support = Union[list[int], Literal['auto']]
+    # pos_parity = Optional[str] = None
+    # neg_parity = Optional[str] = None
+
+def get_seq_len_spec_with_manual_entry():
+    return replace(SeqLengthSpec, **{})
+
+def build_seq_len_config(spec):
+
+
+
+
+    def _norm_seq_len_support(spec):
+        supports = {}
+
+        for name in spec.seq_length_support.keys():
+            if spec.seq_length_supports[name] == 'auto':
+                if spec.max_seq_len[name] is None:
+                    raise ValueError(
+                        f"Class '{name}' has seq_len_support = 'auto', so "
+                        "spec.max_pos_seq_len may not be None."
+                    )
+                if spec.parities[name] in ('odd', 'even'):
+                    supports
+                elif spec.parities[name] is None:
+                    supports[name] = list(range(0, spec.max_seq_len[name]))
+            else:
+                validation_utils.validate_iterable_contents(
+                    spec.seq_length_supports[name],
+                    validation_utils.is_nonneg_float,
+                    "a nonneg float"
+                )
+                supports[name] = spec.seq_length_supports[name]
+                
+            
+                if spec.pos_parity in ('odd', 'even'):
+                    pass
+                    # return list(range(0, sp))
 
 
     # def get_coords(hc_spec):
