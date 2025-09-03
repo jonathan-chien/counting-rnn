@@ -11,40 +11,13 @@ from data.sequences import Hypercube, Embedder
 from data import utils as data_utils
 from general_utils.config.types import CallableConfig, ContainerConfig, TensorConfig
 from general_utils import config as config_utils
+from general_utils import ml as ml_utils
 from general_utils import fileio as fileio_utils
 from general_utils import tensor as tensor_utils
 from general_utils import validation as validation_utils
 
 
-@dataclass
-class DatasetSpec(ContainerConfig):
-    hypercube: Optional[ContainerConfig] = None
-    seq_lengths: Optional[ContainerConfig] = None
-    embedder: Optional[ContainerConfig] = None
-    sequences: Optional[ContainerConfig] = None
-    split: Optional[ContainerConfig] = None
-
-
-@dataclass
-class HypercubeSpec:
-    num_dims: int = 2
-    random_labels: bool = False
-    # pos_vert_labels: Union[list, Literal["auto"]] = 'auto'
-    # coords = Union[list, Literal["auto"]] = 'auto'
-    # pos_vert_pmf = Union[list, Literal["auto"]] = 'auto'
-    # neg_vert_pmf = Union[list, Literal["auto"]] = 'auto'
-    # device: str = 'cpu'
-    # dtype_bit = torch.int8
-    # dtype_index = torch.int64
-    # dtype_pmf = torch.float32
-    # torch_generator_seed = 314159265
-
-
-@dataclass
-class SeqLengthSpec:
-    max_seq_lengths: dict[str, Optional[int]] = field(default_factory=lambda: {'pos': 20, 'neg': 20})
-    parities: dict[str, Optional[str]] = field(default_factory=lambda: {'pos': None, 'neg': None})
-
+# REPRODUCIBILITY_CFG_FILEPATH = 'configs/reproducibility/2025-08-11/a/0000.json'
 
 def build_arg_parser():
     parser = argparse.ArgumentParser(
@@ -58,6 +31,24 @@ def build_arg_parser():
     
     return parser
 
+# def apply_reproducibility_settings_from_filepath(
+#     reproducibility_cfg_filepath, 
+#     split,
+#     seed_idx
+# ):
+#     reproducibility_cfg_dict = {}
+#     reproducibility_cfg_dict['base'] = config_utils.serialization.deserialize(reproducibility_cfg_filepath)
+#     reproducibility_cfg_dict['recovered'] = config_utils.serialization.recursive_recover(
+#         reproducibility_cfg_dict['base']
+#     )
+
+#     # Apply recovery seed to deterministically recover all elements of data config.
+#     ml_utils.reproducibility.apply_reproducibility_settings(
+#         reproducibility_cfg_dict['recovered'], 
+#         seed_idx=seed_idx,
+#         split=split
+#     )
+
 def main():
     args = build_arg_parser().parse_args()
 
@@ -68,37 +59,76 @@ def main():
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = str(args.index).zfill(args.zfill)
 
-    # ------------------------- Get pre sweep items -------------------------- #
-    data_spec = DatasetSpec()
-    data_spec = config_utils.ops.apply_cli_override(args.pre or [])
+    # Parse set key-value pairs for runtime CLI injection.
+    cli = config_utils.ops.parse_override_kv_pairs(args.set or [])
 
-    # ------------------------ Build auxiliary objects ----------------------- #
+    # ---------------------- Build hypercube config ------------------------- #
+    # Get CLI overrides first.
+    num_hypercube_dims = config_utils.ops.select(cli, 'hypercube.num_dims', 2)
+    manual_labels = config_utils.ops.select(cli, 'hypercube.manual_labels', True)
+    random_labels = config_utils.ops.select(cli, 'hypercube.random_labels', True)
+    manual_pmfs = config_utils.ops.select(cli, 'hypercube.manual_pmfs', True)
+
+    # Local intermediates related to vertices.
+    num_vertices = 2**num_hypercube_dims
+    half = num_vertices // 2
+    coords = torch.arange(num_hypercube_dims, dtype=torch.int64)
+    if manual_labels:
+        pos_vert_labels = torch.tensor([2, 3])
+    else:
+        if random_labels:
+            g = torch.Generator()
+            g.manual_seed(314159265)
+            perm = torch.randperm(num_vertices, dtype=torch.int64)
+            pos_vert_labels = perm[half:]
+        else:
+            pos_vert_labels = torch.arange(half, num_vertices)
+    vertices = data_utils.get_lexicographic_ordering(
+        num_hypercube_dims, 
+        encoding=torch.tensor([0, 1]), 
+        dtype=torch.int8
+    )
+    inclusion_set = vertices.index_select(0, pos_vert_labels)
+
+    # Local intermediates related to PMFs.
+    if manual_pmfs:
+        pos_vert_pmf = torch.tensor([0., 0., 1.])
+        neg_vert_pmf = torch.tensor([1.])
+    else:
+        pos_vert_pmf = data_utils.uniform_pmf(len(pos_vert_labels))
+        neg_vert_pmf = data_utils.uniform_pmf(len(num_vertices-len(pos_vert_labels)))
+
+    # Build hypercube config object.
     hypercube_args_cfg = HypercubeConfig(
         num_dims=2,
-        coords=TensorConfig.from_tensor(
-            torch.tensor([0, 1], dtype=torch.int64)
-        ),
-        inclusion_set=TensorConfig.from_tensor(
-            torch.tensor(
-                [[0, 1], [1, 0], [1, 1]], dtype=torch.int8
-            )
-        ),
-        encoding=TensorConfig.from_tensor(
-            torch.tensor([0, 1], dtype=torch.int8)
-        ),
+        coords=TensorConfig.from_tensor(coords),
+        inclusion_set=TensorConfig.from_tensor(inclusion_set),
+        encoding=TensorConfig.from_tensor(torch.tensor([0, 1], dtype=torch.int8)),
         vertices_pmfs=(
-            TensorConfig.from_tensor(
-                data_utils.uniform_pmf(3)
-            ),
-            TensorConfig.from_tensor(
-                torch.tensor([1.], dtype=torch.float32)
-            )
+            TensorConfig.from_tensor(pos_vert_pmf),
+            TensorConfig.from_tensor(neg_vert_pmf)
         )
     )
 
+    # ------------------------ Build seq length config ---------------------- #
+    # Get CLI injectables.
+    manual_seq_lengths_support = config_utils.ops.select(cli, 'seq_lengths.manual_support', True)
+    manual_seq_lengths_pmf = config_utils.ops.select(cli, 'seq_lengths.manual_pmf', True)
 
-    pos_seq_len_max = config_utils.ops.pick(pre, 'sequences_cfg.seq_lengths.lengths.pos.support.max', 5)
-    neg_seq_len_max = config_utils.ops.pick(pre, 'sequences_cfg.seq_lengths.lengths.neg.support.max', 5)
+
+    seq_length_helper = {'pos': {}, 'neg': {}}
+    seq_length_helper['pos'].seq_len_max = config_utils.ops.select(
+        cli, 
+        'seq_lengths.pos.support.max', 
+        5
+    )
+    seq_length_helper['neg'].seq_len_max = config_utils.ops.select(
+        cli, 
+        'seq_lengths.neg.support.max', 
+        5
+    )
+    seq_length_helper['pos'].parity = config_utils.ops.select(cli, 'seq_lengths.pos.parity', None)
+    neg_seq_len_max = config_utils.ops.pick(cli, 'seq_lengths.neg.support.max', 5)
     seq_lengths = SeqLengths(
         lengths={
             'pos' : {
