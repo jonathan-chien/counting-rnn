@@ -93,6 +93,40 @@ def traverse_dotted_path(root, dotted_path: str):
         
     return branch
         
+# Could refactor this (and parse_override_kv_pairs) out into a separate cli.py
+# module in the general_utils package, though their current uses are related to 
+# construction of configs, even if they don't operate on configs directly.
+def parse_cli_value(s: str):
+    """ 
+    """
+    # Allow explictly specifying str.
+    if s.startswith('str:'):
+        return s[4:]
+    
+    # Explicit check for common literals corresponding to boolean/None.
+    lower = s.lower()
+    if lower in ('true', 'false'):
+        return lower == 'true'
+    elif lower in ('none', 'null'):
+        return None
+    
+    # Priority for int over float to prevent accidental conversion.
+    try:
+        return int(s)
+    except ValueError:
+        pass
+    try:
+        return float(s)
+    except ValueError:
+        pass
+    
+    # Handle tuples, lists, dicts, etc. with gracefull fallback to str.
+    try:
+        return ast.literal_eval(s)
+    except (ValueError, SyntaxError):
+        return s
+
+
 def parse_override_kv_pairs(override_kv_pair_list):
     """
     Parse command line overrides in the form of a list/tuple of [KEY, VALUE] pairs, with graceful fallback for true string values. 
@@ -126,10 +160,13 @@ def parse_override_kv_pairs(override_kv_pair_list):
             )
         
         key, val_str = kv_pair
-        try:
-            d[key] = ast.literal_eval(val_str)
-        except (ValueError, SyntaxError):
-            d[key] = val_str
+        if not isinstance(key, str):
+            raise ValueError(f"Override key must be a string, but got type {type(key)}.")
+        d[key] = parse_cli_value(val_str)
+        # try:
+        #     d[key] = ast.literal_eval(val_str)
+        # except (ValueError, SyntaxError):
+        #     d[key] = val_str
 
     return d
 
@@ -165,8 +202,8 @@ def make_parent_parser():
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument('--set', nargs=2, action='append', default=[], help="Overrides that intercept generation logic prior to config construction.")
     parser.add_argument('--cfg', nargs=2, action='append', default=[], help="Overrides that target fully formed config objects via dotted paths.")
-    parser.add_argument('--idx', type=int, required=True, help="Zero-based integer to use for filename.")
-    parser.add_argument('--zfill', type=int, default=4, help="Zero-pad width for filename (default=4).")
+    # parser.add_argument('--idx', type=int, required=True, help="Zero-based integer to use for filename.")
+    # parser.add_argument('--zfill', type=int, default=4, help="Zero-pad width for filename (default=4).")
     # parser.add_argument('--sweep_pre', action='append', default=[])
     # parser.add_argument('--sweep_set', action='append', default=[])
     return parser
