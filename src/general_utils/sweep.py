@@ -1,6 +1,8 @@
 import argparse 
+import ast
 from dataclasses import dataclass, fields
 import itertools
+import math
 import shlex
 import subprocess
 import sys 
@@ -121,7 +123,7 @@ def add_sweep_args(parser: argparse.ArgumentParser):
     # Fixed override args.
     # parser.add_argument('--fixed', nargs=2, action='append', default=[], metavar=('CHANNEL', 'ARG'))
 
-    # Swept overrides.
+    # Swept overrides. TODO: implement --sweep-list arg to allow passing list to sweep over.
     parser.add_argument('--sweep', nargs=5, action='append', default=[], metavar=('CHANNEL', 'KEY', 'START', 'STOP', 'STEP'))
     parser.add_argument('--start_idx', type=int, default=0, help="Start value for index over all combinations in cartesian product.")
     # parser.add_argument('--zfill', type=int, default=4, help="Int padding value for converting indices into n-digit strings, e.g. for building file/dir names.")
@@ -134,7 +136,35 @@ def add_sweep_args(parser: argparse.ArgumentParser):
 
     return parser
 
-def get_inclusive_range(start: int, stop: int, step: int):
+def parse_scalar(s: str):
+    """ 
+    """
+    # Evaluate only for int/float.
+    try:
+        v = ast.literal_eval(s)
+    except (ValueError, SyntaxError):
+        return s
+    return v if isinstance(v, (int, float)) else s
+
+# def get_inclusive_range(start: int, stop: int, step: int):
+#     # Validate step.
+#     if step == 0:
+#         raise ValueError("Step cannot be 0.")
+#     if (stop - start) * step < 0:
+#         raise ValueError(
+#             f"`step` ({step}) has the wrong sign for range `start` ({start}) to `stop` ({stop})."
+#         )
+    
+#     # Include stop index itself in range.
+#     end = stop + (1 if step > 0 else -1)
+
+#     return range(start, end, step)
+def numeric_range(
+    start: Union[float, int], stop: Union[float, int], step: Union[float, int], 
+    inclusive: bool = True, tol=1e-12, max_items: int =100_000
+):
+    """ 
+    """
     # Validate step.
     if step == 0:
         raise ValueError("Step cannot be 0.")
@@ -143,15 +173,47 @@ def get_inclusive_range(start: int, stop: int, step: int):
             f"`step` ({step}) has the wrong sign for range `start` ({start}) to `stop` ({stop})."
         )
     
-    # Include stop index itself in range.
-    end = stop + (1 if step > 0 else -1)
+    num_steps = (stop - start) / step
+    n = math.floor(num_steps + tol) + 1 if inclusive else math.floor(num_steps - tol)
 
-    return range(start, end, step)
+    if n <= 0:
+        return []
+    
+    if n > max_items:
+        raise ValueError(
+            "Provided args to numeric_range would result in producing  "
+            f"{n} items, exceeding max_items={max_items}."
+        )
+    
+    return [start + k * step for k in range(n)]
 
-def make_int_sweep(channel: str, key: str, start: int, stop: int, step: int):
+
+# def make_int_sweep(channel: str, key: str, start: int, stop: int, step: int):
+#     """ 
+#     """
+#     values = list(get_inclusive_range(start=start, stop=stop, step=step))
+#     if not values:
+#         raise ValueError(
+#             f"No values produced for channel '{channel}' and key '{key}'; "
+#             f"got start={start}, stop={stop}, step={step}."
+#         )
+#     return ParamSweep(
+#         channel=channel,
+#         key=key,
+#         values=values
+#     )
+def make_num_sweep(channel: str, key: str, start: int, stop: int, step: int):
     """ 
     """
-    values = list(get_inclusive_range(start=start, stop=stop, step=step))
+    sta = parse_scalar(start)
+    sto = parse_scalar(stop)
+    ste = parse_scalar(step)
+    if not all(isinstance(s, (int, float)) for s in (sta, sto, ste)):
+        raise ValueError(
+            "numeric_sweep expects an int/float for its start/stop/step args "
+            f"but got {start}, {stop}, {step}."
+        )
+    values = numeric_range(start=sta, stop=sto, step=ste)
     if not values:
         raise ValueError(
             f"No values produced for channel '{channel}' and key '{key}'; "
@@ -169,12 +231,12 @@ def parse_numeric_sweeps(args) -> Sequence[ParamSweep]:
     sweeps_list = []
     for channel, key, start, stop, step in args.sweep:
         sweeps_list.append(
-            make_int_sweep(
+            make_num_sweep(
                 channel=channel,
                 key=key,
-                start=int(start),
-                stop=int(stop),
-                step=int(step)
+                start=start,
+                stop=stop,
+                step=step
             )
         )
     return sweeps_list

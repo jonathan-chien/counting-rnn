@@ -1,6 +1,6 @@
+import argparse
 from datetime import date
 from pathlib import Path
-import sys
 
 import torch
 
@@ -13,15 +13,35 @@ from general_utils.config.types import CallableConfig, TorchDeviceConfig
 from general_utils import fileio as fileio_utils
 from general_utils import ml as ml_utils
 
+def build_arg_parser():
+    parser = argparse.ArgumentParser(
+        parents=[config_utils.ops.make_parent_parser()]
+    )
+    parser.add_argument('--idx', type=int, required=True, help="Zero-based integer to use for filename.")
+    parser.add_argument('--zfill', type=int, default=4, help="Zero-pad width for filename (default=4).")
+    parser.add_argument('--base_dir', default='configs/training')
+    parser.add_argument('--sub_dir_1', default=str(date.today()))
+    parser.add_argument('--sub_dir_2', default='a')
+
+    return parser
 
 def main():
+    args = build_arg_parser().parse_args()
+
     # --------------------------- Set directory ----------------------------- #
-    base_dir = 'configs/training'
-    sub_dir_1 = str(date.today())
-    # sub_dir_1 = '0000-00-00'
-    sub_dir_2 = 'a'
+    # base_dir = 'configs/training'
+    # sub_dir_1 = str(date.today())
+    # sub_dir_2 = 'a'
+    # output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
+    # filename = fileio_utils.make_filename('0000')
+    base_dir = args.base_dir
+    sub_dir_1 = args.sub_dir_1
+    sub_dir_2 = args.sub_dir_2
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
-    filename = fileio_utils.make_filename('0000')
+    filename = str(args.idx).zfill(args.zfill)
+
+    # Parse key value pairs from the 'set' channel for runtime CLI injection.
+    cli = config_utils.ops.parse_override_kv_pairs(args.ch0 or [])
 
     # ----------------------------------------------------------------------- #
     REQUIRES_GRAD_REGISTRY = {
@@ -63,7 +83,7 @@ def main():
     # TODO: check how device is handled; consider making it more robust
 
     # ------------------------- Set training parameters --------------------- #
-    loss_term_1 = CallableConfig.from_callable(
+    loss_term_0 = CallableConfig.from_callable(
         ml_utils.loss.LossTerm,
         ml_utils.config.LossTermConfig(
             name='cross_entropy',
@@ -93,7 +113,8 @@ def main():
         recovery_mode='call'
     )
 
-    loss_term_2 = CallableConfig.from_callable(
+    weight_1_exp = config_utils.ops.select(cli, 'loss_term_1.weight.exp', 0.)
+    loss_term_1 = CallableConfig.from_callable(
         ml_utils.loss.LossTerm,
         ml_utils.config.LossTermConfig(
             name='spectral_entropy',
@@ -103,7 +124,7 @@ def main():
                 kind='function',
                 recovery_mode='get_callable'
             ),
-            weight=1.,
+            weight=10**weight_1_exp,
             optimizer=CallableConfig.from_callable(
                 torch.optim.Adam,
                 ml_utils.config.AdamConfig(
@@ -123,7 +144,6 @@ def main():
         recovery_mode='call'
     )
 
-
     early_stopping = CallableConfig.from_callable(
         ml_utils.training.EarlyStopping,
         ml_utils.config.EarlyStoppingConfig(
@@ -138,9 +158,6 @@ def main():
                 kind='class',
                 recovery_mode='call'
             ),
-            # patience=4,
-            # tol=1e-5,
-            # mode='min',
             min_epochs_before_stopping=25,
             verbose=True,
             disabled=False
@@ -148,20 +165,6 @@ def main():
         kind='class',
         recovery_mode='call'
     )
-    # early_stopping = CallableConfig.from_callable(
-    #     ml_utils.training.EarlyStopping,
-    #     ml_utils.config.EarlyStoppingConfig(
-    #         metric_name='cross_entropy_loss',
-    #         patience=4,
-    #         tol=1e-5,
-    #         mode='min',
-    #         min_epochs_before_stopping=20,
-    #         verbose=True,
-    #         disabled=False
-    #     ),
-    #     kind='class',
-    #     recovery_mode='call'
-    # )
 
     metric_tracker = CallableConfig.from_callable(
         ml_utils.training.MetricTracker,
@@ -249,11 +252,6 @@ def main():
     device = CallableConfig.from_callable(
         torch.device,
         TorchDeviceConfig(
-            # device=(
-            #     'cuda:0' if torch.cuda.is_available() 
-            #     else 'mps:0' if torch.backends.mps.is_available() 
-            #     else 'cpu'
-            # )
             device='gpu__'
         ),
         kind='class',
@@ -265,7 +263,7 @@ def main():
     evaluation = dict(
         dataloader=dataloader_val,
         switch_label='switch_label___',
-        loss_terms=[loss_term_1],
+        loss_terms=[loss_term_0, loss_term_1],
         logger=logger_val,
         log_outputs=False,
         criteria={
@@ -286,7 +284,7 @@ def main():
 
     train_fn_cfg = TrainFnConfig(
         dataloader=dataloader_train,
-        loss_terms=[loss_term_1],
+        loss_terms=[loss_term_0, loss_term_1],
         evaluation=evaluation,
         h_0=None,
         logger_train=logger_train,
@@ -327,7 +325,7 @@ def main():
         file.unlink()
 
     _ = run_and_save_training_from_filepath(
-        model_cfg_filepath='configs/models/0000-00-00/a/0000.json',
+        model_cfg_filepath='configs/models/0000-00-00/b/0000.json',
         data_train_cfg_filepath='configs/datasets/0000-00-00/a/0000.json',
         training_cfg_filepath=training_cfg_filepath,
         reproducibility_cfg_filepath='configs/reproducibility/0000-00-00/a/0000.json',

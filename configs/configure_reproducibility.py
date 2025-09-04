@@ -10,7 +10,8 @@ from general_utils import fileio as fileio_utils
 def main():
     # ---------------------------- Set directory ---------------------------- #
     base_dir = 'configs/reproducibility'
-    sub_dir_1 = str(date.today())
+    # sub_dir_1 = str(date.today())
+    sub_dir_1 = '0000-00-00'
     sub_dir_2 = 'a'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = fileio_utils.make_filename('0000')

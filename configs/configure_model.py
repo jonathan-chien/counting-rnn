@@ -13,9 +13,9 @@ from general_utils import fileio as fileio_utils
 def main():
     # ---------------------------- Set directory ---------------------------- #
     base_dir = 'configs/models'
-    # sub_dir_1 = 'demo'
     sub_dir_1 = str(date.today())
-    sub_dir_2 = 'a'
+    sub_dir_1 = '0000-00-00'
+    sub_dir_2 = 'b'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = fileio_utils.make_filename('0000')
 
@@ -23,8 +23,8 @@ def main():
     input_network = CallableConfig.from_callable(
         FCN, 
         FCNConfig(
-            # layer_sizes=['embedding_dim___', 10],
-            layer_sizes=None,
+            layer_sizes=['embedding_dim___', 10],
+            # layer_sizes=None,
             nonlinearities=[CallableConfig.from_callable(torch.nn.ReLU, ReLUConfig(), kind='class', recovery_mode='call')],
             dropouts=[None]
         ),
@@ -39,7 +39,7 @@ def main():
         else 'embedding_dim___'
     )
 
-    rnn_type = 'gru'
+    rnn_type = 'elman'
     if rnn_type == 'gru':
         rnn = CallableConfig.from_callable(
             torch.nn.GRU,
@@ -54,7 +54,7 @@ def main():
             kind='class',
             recovery_mode='call'
         )
-    elif rnn_type == 'rnn':
+    elif rnn_type == 'elman':
         rnn = CallableConfig.from_callable(
             torch.nn.RNN,
             ElmanConfig(
@@ -107,7 +107,7 @@ def main():
     seed_idx = 0
     model_builder.build_model_from_filepath(
         model_cfg_filepath=model_cfg_filepath, 
-        data_cfg_filepath='configs/datasets/2025-08-19/a/0000.json', 
+        data_cfg_filepath='configs/datasets/0000-00-00/a/0000.json', 
         reproducibility_cfg_filepath='configs/reproducibility/0000-00-00/a/0000.json',
         seed_idx=seed_idx, 
         device=device,

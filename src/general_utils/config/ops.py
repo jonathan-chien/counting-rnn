@@ -200,8 +200,8 @@ def make_parent_parser():
     """ 
     """
     parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument('--set', nargs=2, action='append', default=[], help="Overrides that intercept generation logic prior to config construction.")
-    parser.add_argument('--cfg', nargs=2, action='append', default=[], help="Overrides that target fully formed config objects via dotted paths.")
+    parser.add_argument('--ch0', nargs=2, action='append', default=[], help="Overrides that intercept generation logic prior to config construction.")
+    parser.add_argument('--ch1', nargs=2, action='append', default=[], help="Overrides that target fully formed config objects via dotted paths.")
     # parser.add_argument('--idx', type=int, required=True, help="Zero-based integer to use for filename.")
     # parser.add_argument('--zfill', type=int, default=4, help="Zero-pad width for filename (default=4).")
     # parser.add_argument('--sweep_pre', action='append', default=[])

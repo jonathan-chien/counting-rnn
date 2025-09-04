@@ -10,17 +10,15 @@ from data import builder as data_builder
 from data.config import DataConfig, EmbedderConfig, HypercubeConfig, NormalDistrConfig, SeqLengths, SequencesConfig, SplitConfig
 from data.sequences import Hypercube, Embedder
 from data import utils as data_utils
-from general_utils.config.types import CallableConfig, ContainerConfig, TensorConfig
+from general_utils.config.types import CallableConfig, TensorConfig
 from general_utils import config as config_utils
-from general_utils import ml as ml_utils
 from general_utils import fileio as fileio_utils
 from general_utils import tensor as tensor_utils
-from general_utils import validation as validation_utils
 
 
 def build_arg_parser():
     parser = argparse.ArgumentParser(
-        parents=[config_utils.ops.make_parent_parser()],
+        parents=[config_utils.ops.make_parent_parser()]
     )
     parser.add_argument('--idx', type=int, required=True, help="Zero-based integer to use for filename.")
     parser.add_argument('--zfill', type=int, default=4, help="Zero-pad width for filename (default=4).")
@@ -33,15 +31,16 @@ def build_arg_parser():
 def main():
     args = build_arg_parser().parse_args()
 
-    # ---------------------------- Set directory ----------------------------- #
+    # ---------------------------- Set directory ---------------------------- #
     base_dir = args.base_dir
-    sub_dir_1 = args.sub_dir_1
+    # sub_dir_1 = args.sub_dir_1
+    sub_dir_1 = '0000-00-00'
     sub_dir_2 = args.sub_dir_2
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = str(args.idx).zfill(args.zfill)
 
-    # Parse set key-value pairs for runtime CLI injection.
-    cli = config_utils.ops.parse_override_kv_pairs(args.set or [])
+    # Parse key-value pairs from the 'set' channel for runtime CLI injection.
+    cli = config_utils.ops.parse_override_kv_pairs(args.ch0 or [])
 
     # ---------------------- Build hypercube config ------------------------- #
     # TODO: A better scheme may be to use a dataclass/dictionary to hold
@@ -88,8 +87,8 @@ def main():
 
     # Local intermediates related to PMFs.
     if manual_pmfs:
-        pos_vert_pmf = torch.tensor([0., 0., 1.])
-        neg_vert_pmf = torch.tensor([1.])
+        pos_vert_pmf = torch.tensor([0.5, 0.5])
+        neg_vert_pmf = torch.tensor([0.5, 0.5])
     else:
         pos_vert_pmf = data_utils.uniform_pmf(len(pos_vert_labels))
         neg_vert_pmf = data_utils.uniform_pmf(num_vertices-len(pos_vert_labels))
@@ -110,13 +109,13 @@ def main():
     # Get CLI injectables.
     seq_lengths_helper = {
         'pos': {
-            'max': config_utils.ops.select(cli, 'seq_lengths.pos.support.max', None),
+            'max': config_utils.ops.select(cli, 'seq_lengths.pos.support.max', 5),
             'parity': config_utils.ops.select(cli, 'seq_lengths.pos.parity', None),
             'support': None,
             'pmf': None
         }, 
         'neg': {
-            'max': config_utils.ops.select(cli, 'seq_lengths.neg.support.max', None),
+            'max': config_utils.ops.select(cli, 'seq_lengths.neg.support.max', 5),
             'parity': config_utils.ops.select(cli, 'seq_lengths.neg.parity', None),
             'support': None,
             'pmf': None
@@ -226,7 +225,7 @@ def main():
     )
 
     # -------------------------- Apply CLI overrides ------------------------- #
-    data_cfg = config_utils.ops.apply_cli_override(data_cfg, args.cfg or [])
+    data_cfg = config_utils.ops.apply_cli_override(data_cfg, args.ch1 or [])
 
     # ------------------------------ Serialize ------------------------------- #
     # Attempt to serialize and reconstruct full cfg tree, and use reconstructed
@@ -239,7 +238,7 @@ def main():
     data_builder.build_sequences_from_filepath(
         data_cfg_filepath, 
         build=['train', 'val'], 
-        reproducibility_cfg_filepath='configs/reproducibility/2025-08-25/a/0000.json',
+        reproducibility_cfg_filepath='configs/reproducibility/0000-00-00/a/0000.json',
         seed_idx=0, 
         print_to_console=True, 
         save_path=None
