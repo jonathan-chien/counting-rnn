@@ -507,10 +507,10 @@ def expand_wildcard_ref(config_dir: Union[Path, str], config_kind, ref: list, so
     config_dir = Path(config_dir)
 
     #Validate.
-    if len(ref) != 1:
+    if len(ref) != 1 and any('*' in part for part in ref):
         raise ValueError(
-            "Wildcard expansion is currently supported only for one ref stem, "
-            f"but got {len(ref)} ref stems: {ref}."
+            "Wildcard expansion is currently supported only for one arg "
+            f"consisting of a single ref stem, but got {len(ref)} items: {ref}."
         )
     ref_parts = ref[0].split('/')
     if '*' not in ref_parts:
