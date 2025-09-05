@@ -7,7 +7,16 @@
             "path": "torch.tensor",
             "args_cfg": {
               "data": [
-                1
+                1,
+                3,
+                5,
+                7,
+                9,
+                11,
+                13,
+                15,
+                17,
+                19
               ],
               "dtype": "torch.int64",
               "requires_grad": false,
@@ -25,7 +34,16 @@
             "path": "torch.tensor",
             "args_cfg": {
               "data": [
-                1.0
+                0.10000000149011612,
+                0.10000000149011612,
+                0.10000000149011612,
+                0.10000000149011612,
+                0.10000000149011612,
+                0.10000000149011612,
+                0.10000000149011612,
+                0.10000000149011612,
+                0.10000000149011612,
+                0.10000000149011612
               ],
               "dtype": "torch.float32",
               "requires_grad": false,
@@ -45,7 +63,11 @@
             "path": "torch.tensor",
             "args_cfg": {
               "data": [
-                1
+                1,
+                3,
+                5,
+                7,
+                9
               ],
               "dtype": "torch.int64",
               "requires_grad": false,
@@ -63,7 +85,11 @@
             "path": "torch.tensor",
             "args_cfg": {
               "data": [
-                1.0
+                0.20000000298023224,
+                0.20000000298023224,
+                0.20000000298023224,
+                0.20000000298023224,
+                0.20000000298023224
               ],
               "dtype": "torch.float32",
               "requires_grad": false,
@@ -111,11 +137,11 @@
             "data": [
               [
                 1,
-                1
+                0
               ],
               [
-                0,
-                0
+                1,
+                1
               ]
             ],
             "dtype": "torch.int8",
@@ -203,7 +229,7 @@
     "embedder": {
       "path": "data.sequences.Embedder",
       "args_cfg": {
-        "ambient_dim": 80,
+        "ambient_dim": 5,
         "mean_center": false,
         "offset_1": {
           "path": "torch.tensor",
@@ -260,9 +286,9 @@
     "__kind__": "dataclass"
   },
   "split_cfg": {
-    "train": 1000,
-    "val": 500,
-    "test": 500,
+    "train": 5000,
+    "val": 2500,
+    "test": 2500,
     "__path__": "data.config.SplitConfig",
     "__kind__": "dataclass"
   },

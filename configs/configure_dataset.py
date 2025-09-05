@@ -109,13 +109,13 @@ def main():
     seq_lengths_helper = {
         'pos': {
             'max': config_utils.ops.select(cli, 'seq_lengths.pos.support.max', 20),
-            'parity': config_utils.ops.select(cli, 'seq_lengths.pos.parity', None),
+            'parity': config_utils.ops.select(cli, 'seq_lengths.pos.parity', 'even'),
             'support': None,
             'pmf': None
         }, 
         'neg': {
             'max': config_utils.ops.select(cli, 'seq_lengths.neg.support.max', 10),
-            'parity': config_utils.ops.select(cli, 'seq_lengths.neg.parity', None),
+            'parity': config_utils.ops.select(cli, 'seq_lengths.neg.parity', 'even'),
             'support': None,
             'pmf': None
         }
