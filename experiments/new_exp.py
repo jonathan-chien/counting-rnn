@@ -58,7 +58,7 @@ metadata_utils.create_textfile(
 training, testing, returned_exp_dir = run(**run_args)
 
 # Verify that experimental results were logged in the same directory as this script.
-if str(exp_dir) != str(returned_exp_dir):
+if str(exp_dir) != str(returned_exp_dir.resolve()):
     raise RuntimeError(
         "Mismatch between intended and actual location of experimental results.\\n"
         f"- Expected: {exp_dir} (location of this script)\\n"
