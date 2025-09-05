@@ -97,13 +97,13 @@ def main():
             ),
             weight=1.,
             optimizer=CallableConfig.from_callable(
-                torch.optim.AdamW,
-                ml_utils.config.AdamWConfig(
+                torch.optim.Adam,
+                ml_utils.config.AdamConfig(
                     lr=0.001, 
                     betas=(0.9, 0.999), 
                     eps=1e-08, 
                     amsgrad=False,
-                    weight_decay=0.01
+                    # weight_decay=0.01
                 ),
                 kind='class',
                 recovery_mode='call',
@@ -365,8 +365,9 @@ def main():
     # Add README.md file.
     metadata_utils.create_textfile(
         """ 
+        Single primary loss term.
         """,
-        filepath=Path(__file__).resolve().parent / 'README.md',
+        filepath=output_dir / 'README.md',
         dedent=True,
         overwrite=False,
     )
