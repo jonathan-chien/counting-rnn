@@ -29,6 +29,7 @@ run_args = dict(
     pretrained_model_filepath_list=None,
     training_cfg_ref_list=[],
     data_test_cfg_ref_list=[],
+    cross_test=True,
     testing_cfg_ref_list=[],
     reproducibility_cfg_ref_list=[],
     seed_idx_list=$seed_idx_list,
