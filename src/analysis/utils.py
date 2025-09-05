@@ -58,6 +58,7 @@ def pca(data, num_comps=None, corr=False):
             'v': v,
             'pcs': pcs, 
             'loadings': loadings, 
+            'sigmas': s
         }
     elif isinstance(num_comps, int):
         if not (num_comps > 0 and num_comps <= data.shape[1]):
@@ -71,6 +72,7 @@ def pca(data, num_comps=None, corr=False):
             'v': v[:, :num_comps],
             'pcs': pcs[:, :num_comps], 
             'loadings': loadings[:, :num_comps], 
+            'sigmas': s[:num_comps]
         }
     else:
         raise TypeError(
