@@ -11,11 +11,11 @@ run_args = dict(
     data_train_cfg_ref_list=['2025-09-05/a/0000'],
     model_cfg_ref_list=['2025-09-05/b/0000'],
     pretrained_model_filepath_list=None,
-    training_cfg_ref_list=['2025-09-05/b/0000'],
+    training_cfg_ref_list=['2025-09-05/a/0000'],
     data_test_cfg_ref_list=['2025-09-05/a/0000'],
-    testing_cfg_ref_list=['0000-00-00/b/0000'],
+    testing_cfg_ref_list=['0000-00-00/a/0000'],
     reproducibility_cfg_ref_list=['0000-00-00/a/0000'],
-    seed_idx_list=[0, 1, 2],
+    seed_idx_list=[0, 1, 2, 3, 4],
     exp_date='2025-09-05',
     exp_id='0000',
     run_id_suffix='',
@@ -32,7 +32,11 @@ metadata_utils.collect_and_save_metadata(
     overwrite=False
 )
 metadata_utils.create_textfile(
-    """""",
+    """
+    20 hidden unit Elman RNN with tanh nonlinearity and 0.5 dropout but 
+    no weight decay or other regularization. Train and test on sequences with
+    0 to 20 positive class tokens and 0 to 10 negative class tokens.
+    """,
     filepath=exp_dir / 'README.md',
     dedent=True,
     overwrite=False,
