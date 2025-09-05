@@ -36,8 +36,11 @@ def pca(data, num_comps=None, corr=False):
     v : torch.Tensor
         Of shape (M, P). Columns are retained right eigenvectors of the data
         cov/corr matrix.
-    eigenspectrum torch.Tensor
+    eigenspectrum: torch.Tensor
         Of shape (N,). All eigenvalues of data cov/corr matrix.
+    sigmas: torch.Tensor
+        Of shape (P,). Singulvar values of the mean-centered (and normalized if 
+        corr=True) data matrix.
     """
     if corr:
         data_ = data / torch.norm(data, p=2, dim=0, keepdim=True)
