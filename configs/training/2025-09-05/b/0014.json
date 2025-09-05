@@ -71,6 +71,52 @@
         "if_recover_while_locked": "print",
         "__path__": "general_utils.config.types.CallableConfig",
         "__kind__": "dataclass"
+      },
+      {
+        "path": "general_utils.ml.loss.LossTerm",
+        "args_cfg": {
+          "name": "spectral_entropy",
+          "loss_fn": {
+            "path": "general_utils.ml.loss.spectral_entropy",
+            "args_cfg": null,
+            "kind": "function",
+            "recovery_mode": "get_callable",
+            "locked": false,
+            "if_recover_while_locked": "print",
+            "__path__": "general_utils.config.types.CallableConfig",
+            "__kind__": "dataclass"
+          },
+          "mode": "train",
+          "weight": 0.1,
+          "optimizer": {
+            "path": "torch.optim.adam.Adam",
+            "args_cfg": {
+              "lr": 0.001,
+              "betas": [
+                0.9,
+                0.999
+              ],
+              "eps": 1e-08,
+              "amsgrad": false,
+              "__path__": "general_utils.ml.config.AdamConfig",
+              "__kind__": "dataclass"
+            },
+            "kind": "class",
+            "recovery_mode": "call",
+            "locked": true,
+            "if_recover_while_locked": "print",
+            "__path__": "general_utils.config.types.CallableConfig",
+            "__kind__": "dataclass"
+          },
+          "__path__": "general_utils.ml.config.LossTermConfig",
+          "__kind__": "dataclass"
+        },
+        "kind": "class",
+        "recovery_mode": "call",
+        "locked": false,
+        "if_recover_while_locked": "print",
+        "__path__": "general_utils.config.types.CallableConfig",
+        "__kind__": "dataclass"
       }
     ],
     "evaluation": {
@@ -117,6 +163,52 @@
             },
             "mode": "train",
             "weight": 1.0,
+            "optimizer": {
+              "path": "torch.optim.adam.Adam",
+              "args_cfg": {
+                "lr": 0.001,
+                "betas": [
+                  0.9,
+                  0.999
+                ],
+                "eps": 1e-08,
+                "amsgrad": false,
+                "__path__": "general_utils.ml.config.AdamConfig",
+                "__kind__": "dataclass"
+              },
+              "kind": "class",
+              "recovery_mode": "call",
+              "locked": true,
+              "if_recover_while_locked": "print",
+              "__path__": "general_utils.config.types.CallableConfig",
+              "__kind__": "dataclass"
+            },
+            "__path__": "general_utils.ml.config.LossTermConfig",
+            "__kind__": "dataclass"
+          },
+          "kind": "class",
+          "recovery_mode": "call",
+          "locked": false,
+          "if_recover_while_locked": "print",
+          "__path__": "general_utils.config.types.CallableConfig",
+          "__kind__": "dataclass"
+        },
+        {
+          "path": "general_utils.ml.loss.LossTerm",
+          "args_cfg": {
+            "name": "spectral_entropy",
+            "loss_fn": {
+              "path": "general_utils.ml.loss.spectral_entropy",
+              "args_cfg": null,
+              "kind": "function",
+              "recovery_mode": "get_callable",
+              "locked": false,
+              "if_recover_while_locked": "print",
+              "__path__": "general_utils.config.types.CallableConfig",
+              "__kind__": "dataclass"
+            },
+            "mode": "train",
+            "weight": 0.1,
             "optimizer": {
               "path": "torch.optim.adam.Adam",
               "args_cfg": {

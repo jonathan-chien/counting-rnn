@@ -33,8 +33,7 @@ def main():
 
     # ---------------------------- Set directory ---------------------------- #
     base_dir = args.base_dir
-    # sub_dir_1 = args.sub_dir_1
-    sub_dir_1 = '0000-00-00'
+    sub_dir_1 = args.sub_dir_1
     sub_dir_2 = args.sub_dir_2
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = str(args.idx).zfill(args.zfill)
@@ -62,7 +61,7 @@ def main():
     num_hypercube_dims = config_utils.ops.select(cli, 'hypercube.num_dims', 2)
     manual_labels = config_utils.ops.select(cli, 'hypercube.manual_labels', True)
     random_labels = config_utils.ops.select(cli, 'hypercube.random_labels', True)
-    manual_pmfs = config_utils.ops.select(cli, 'hypercube.manual_pmfs', True)
+    manual_pmfs = config_utils.ops.select(cli, 'hypercube.manual_pmfs', False)
 
     # Local intermediates related to vertices.
     num_vertices = 2**num_hypercube_dims
@@ -109,13 +108,13 @@ def main():
     # Get CLI injectables.
     seq_lengths_helper = {
         'pos': {
-            'max': config_utils.ops.select(cli, 'seq_lengths.pos.support.max', 5),
+            'max': config_utils.ops.select(cli, 'seq_lengths.pos.support.max', 20),
             'parity': config_utils.ops.select(cli, 'seq_lengths.pos.parity', None),
             'support': None,
             'pmf': None
         }, 
         'neg': {
-            'max': config_utils.ops.select(cli, 'seq_lengths.neg.support.max', 5),
+            'max': config_utils.ops.select(cli, 'seq_lengths.neg.support.max', 10),
             'parity': config_utils.ops.select(cli, 'seq_lengths.neg.parity', None),
             'support': None,
             'pmf': None
@@ -213,9 +212,9 @@ def main():
 
     # ----------------------------- Split sizes ------------------------------ #
     split_cfg = SplitConfig(
-        train=1000,
-        val=500,
-        test=500
+        train=5000,
+        val=2500,
+        test=2500
     )
 
     # --------------------------- Top level config --------------------------- #

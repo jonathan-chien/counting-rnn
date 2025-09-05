@@ -140,14 +140,14 @@ def main():
 
     # -------------------- Test deserialization/execution ------------------- #
     run_and_save_testing_from_filepath(
-        model_cfg_filepath='configs/models/0000-00-00/a/0000.json',
+        model_cfg_filepath='configs/models/0000-00-00/b/0000.json',
         # model_filepath='experiments/__00/0000/output/seed00/models/0_best.pt',
         data_test_cfg_filepath='configs/datasets/0000-00-00/a/0000.json',
         testing_cfg_filepath=testing_cfg_filepath,
         reproducibility_cfg_filepath='configs/reproducibility/0000-00-00/a/0000.json',
         seed_idx=0,
         exp_dir='experiments/0000-00-00/0000/',
-        train_run_id='md00000000a0000_dr00000000a0000_tr00000000a0000_re00000000a0000',
+        train_run_id='md00000000b0000_dr00000000a0000_tr00000000b0000_re00000000a0000',
         model_suffix='_best.pt',
         weights_only=False
     )

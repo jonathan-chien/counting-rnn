@@ -263,7 +263,7 @@ def main():
     evaluation = dict(
         dataloader=dataloader_val,
         switch_label='switch_label___',
-        loss_terms=[loss_term_0, loss_term_1],
+        loss_terms=[loss_term_0],
         logger=logger_val,
         log_outputs=False,
         criteria={
@@ -284,7 +284,7 @@ def main():
 
     train_fn_cfg = TrainFnConfig(
         dataloader=dataloader_train,
-        loss_terms=[loss_term_0, loss_term_1],
+        loss_terms=[loss_term_0],
         evaluation=evaluation,
         h_0=None,
         logger_train=logger_train,
@@ -300,7 +300,7 @@ def main():
         compute_mean_for=['cross_entropy_loss', 'accuracy'],
         metric_tracker=metric_tracker,
         early_stopping=early_stopping,
-        num_epochs=1000,
+        num_epochs=500,
         device=device,
         deterministic=True
     )
@@ -325,7 +325,7 @@ def main():
         file.unlink()
 
     _ = run_and_save_training_from_filepath(
-        model_cfg_filepath='configs/models/0000-00-00/b/0000.json',
+        model_cfg_filepath='configs/models/0000-00-00/a/0000.json',
         data_train_cfg_filepath='configs/datasets/0000-00-00/a/0000.json',
         training_cfg_filepath=training_cfg_filepath,
         reproducibility_cfg_filepath='configs/reproducibility/0000-00-00/a/0000.json',

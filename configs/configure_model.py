@@ -14,7 +14,6 @@ def main():
     # ---------------------------- Set directory ---------------------------- #
     base_dir = 'configs/models'
     sub_dir_1 = str(date.today())
-    sub_dir_1 = '0000-00-00'
     sub_dir_2 = 'b'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = fileio_utils.make_filename('0000')
@@ -23,8 +22,8 @@ def main():
     input_network = CallableConfig.from_callable(
         FCN, 
         FCNConfig(
-            layer_sizes=['embedding_dim___', 10],
-            # layer_sizes=None,
+            # layer_sizes=['embedding_dim___', 10],
+            layer_sizes=None,
             nonlinearities=[CallableConfig.from_callable(torch.nn.ReLU, ReLUConfig(), kind='class', recovery_mode='call')],
             dropouts=[None]
         ),
