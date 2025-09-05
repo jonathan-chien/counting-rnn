@@ -9,9 +9,11 @@ from engine.driver import run_and_save_training_from_filepath
 from engine import utils as engine_utils
 from engine.config import TrainFnConfig, TrainingConfig
 from general_utils import config as config_utils
-from general_utils.config.types import CallableConfig, TorchDeviceConfig
-from general_utils import fileio as fileio_utils
 from general_utils import ml as ml_utils
+from general_utils import fileio as fileio_utils
+from general_utils import metadata as metadata_utils
+from general_utils.config.types import CallableConfig, TorchDeviceConfig
+
 
 def build_arg_parser():
     parser = argparse.ArgumentParser(
@@ -95,12 +97,13 @@ def main():
             ),
             weight=1.,
             optimizer=CallableConfig.from_callable(
-                torch.optim.Adam,
-                ml_utils.config.AdamConfig(
+                torch.optim.AdamW,
+                ml_utils.config.AdamWConfig(
                     lr=0.001, 
                     betas=(0.9, 0.999), 
                     eps=1e-08, 
-                    amsgrad=False
+                    amsgrad=False,
+                    weight_decay=0.01
                 ),
                 kind='class',
                 recovery_mode='call',
@@ -355,8 +358,17 @@ def main():
         config_kind='training', 
         config_id=str(training_cfg_filepath).removeprefix('configs/datasets/').removesuffix('.json'),
         dotted_path_registry=REGISTRY,
-        note='',
+        note="",
         xlsx_filepath='configs/logs.xlsx'
+    )
+
+    # Add README.md file.
+    metadata_utils.create_textfile(
+        """ 
+        """,
+        filepath=Path(__file__).resolve().parent / 'README.md',
+        dedent=True,
+        overwrite=False,
     )
 
 if __name__ == '__main__':
