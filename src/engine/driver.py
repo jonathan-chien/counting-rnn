@@ -142,9 +142,9 @@ def run_and_save_training_from_filepath(
     # ------------------------- Build directories --------------------------- #
     # Get train run ID from config names.
     model_id = get_id_from_filepath(model_cfg_filepath, depth=3, prefix='md')
-    data_train_id = get_id_from_filepath(data_train_cfg_filepath, depth=3, prefix='dr')
+    data_train_id = get_id_from_filepath(data_train_cfg_filepath, depth=3, prefix='dn')
     training_id = get_id_from_filepath(training_cfg_filepath, depth=3, prefix='tr')
-    reproducibility_id = get_id_from_filepath(reproducibility_cfg_filepath, depth=3, prefix='re')
+    reproducibility_id = get_id_from_filepath(reproducibility_cfg_filepath, depth=3, prefix='rn')
     train_run_id = '_'.join([model_id, data_train_id, training_id, reproducibility_id]) + train_run_id_suffix
 
     dirs = {}
@@ -442,9 +442,9 @@ def run_and_save_testing_from_filepath(
         model_filepath = get_model_filepath(exp_dir, seed_idx, train_run_id, model_suffix)
     
     # Build test run ID.
-    data_test_id = get_id_from_filepath(data_test_cfg_filepath, depth=3)
-    testing_id = get_id_from_filepath(testing_cfg_filepath, depth=3)
-    reproducibility_id = get_id_from_filepath(reproducibility_cfg_filepath, depth=3)
+    data_test_id = get_id_from_filepath(data_test_cfg_filepath, depth=3, prefix='dt')
+    testing_id = get_id_from_filepath(testing_cfg_filepath, depth=3, prefix='te')
+    reproducibility_id = get_id_from_filepath(reproducibility_cfg_filepath, depth=3, prefix='rt')
     test_run_id = '_'.join([train_run_id, data_test_id, testing_id, reproducibility_id]) + test_run_id_suffix
 
     dirs = {}
