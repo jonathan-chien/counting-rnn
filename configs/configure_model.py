@@ -58,7 +58,7 @@ def main():
             torch.nn.RNN,
             ElmanConfig(
                 input_size=rnn_input_size,
-                hidden_size=20,
+                hidden_size=100,
                 num_layers=1,
                 bias=True,
                 nonlinearity='tanh',
