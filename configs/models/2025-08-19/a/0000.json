@@ -15,7 +15,7 @@
           "recovery_mode": "call",
           "locked": false,
           "if_recover_while_locked": "print",
-          "__path__": "general_utils.config.types.CallableConfig",
+          "__path__": "general_utils.config.CallableConfig",
           "__kind__": "dataclass"
         }
       ],
@@ -29,35 +29,34 @@
     "recovery_mode": "call",
     "locked": false,
     "if_recover_while_locked": "print",
-    "__path__": "general_utils.config.types.CallableConfig",
+    "__path__": "general_utils.config.CallableConfig",
     "__kind__": "dataclass"
   },
   "rnn": {
-    "path": "torch.nn.modules.rnn.RNN",
+    "path": "torch.nn.modules.rnn.GRU",
     "args_cfg": {
       "input_size": "embedding_dim___",
-      "hidden_size": 1000,
+      "hidden_size": 20,
       "num_layers": 1,
       "bias": true,
       "batch_first": true,
       "dropout": 0,
       "bidirectional": false,
-      "nonlinearity": "tanh",
-      "__path__": "models.config.ElmanConfig",
+      "__path__": "models.config.GRUConfig",
       "__kind__": "dataclass"
     },
     "kind": "class",
     "recovery_mode": "call",
     "locked": false,
     "if_recover_while_locked": "print",
-    "__path__": "general_utils.config.types.CallableConfig",
+    "__path__": "general_utils.config.CallableConfig",
     "__kind__": "dataclass"
   },
   "readout_network": {
     "path": "models.networks.FCN",
     "args_cfg": {
       "layer_sizes": [
-        1000,
+        20,
         20,
         2
       ],
@@ -73,7 +72,7 @@
           "recovery_mode": "call",
           "locked": false,
           "if_recover_while_locked": "print",
-          "__path__": "general_utils.config.types.CallableConfig",
+          "__path__": "general_utils.config.CallableConfig",
           "__kind__": "dataclass"
         },
         {
@@ -86,7 +85,7 @@
           "recovery_mode": "call",
           "locked": false,
           "if_recover_while_locked": "print",
-          "__path__": "general_utils.config.types.CallableConfig",
+          "__path__": "general_utils.config.CallableConfig",
           "__kind__": "dataclass"
         }
       ],
@@ -101,7 +100,7 @@
     "recovery_mode": "call",
     "locked": false,
     "if_recover_while_locked": "print",
-    "__path__": "general_utils.config.types.CallableConfig",
+    "__path__": "general_utils.config.CallableConfig",
     "__kind__": "dataclass"
   },
   "__path__": "models.config.AutoRNNConfig",

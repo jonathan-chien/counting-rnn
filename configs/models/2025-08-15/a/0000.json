@@ -15,7 +15,7 @@
           "recovery_mode": "call",
           "locked": false,
           "if_recover_while_locked": "print",
-          "__path__": "general_utils.config.types.CallableConfig",
+          "__path__": "general_utils.config.CallableConfig",
           "__kind__": "dataclass"
         }
       ],
@@ -29,7 +29,7 @@
     "recovery_mode": "call",
     "locked": false,
     "if_recover_while_locked": "print",
-    "__path__": "general_utils.config.types.CallableConfig",
+    "__path__": "general_utils.config.CallableConfig",
     "__kind__": "dataclass"
   },
   "rnn": {
@@ -49,7 +49,7 @@
     "recovery_mode": "call",
     "locked": false,
     "if_recover_while_locked": "print",
-    "__path__": "general_utils.config.types.CallableConfig",
+    "__path__": "general_utils.config.CallableConfig",
     "__kind__": "dataclass"
   },
   "readout_network": {
@@ -72,7 +72,7 @@
           "recovery_mode": "call",
           "locked": false,
           "if_recover_while_locked": "print",
-          "__path__": "general_utils.config.types.CallableConfig",
+          "__path__": "general_utils.config.CallableConfig",
           "__kind__": "dataclass"
         },
         {
@@ -85,7 +85,7 @@
           "recovery_mode": "call",
           "locked": false,
           "if_recover_while_locked": "print",
-          "__path__": "general_utils.config.types.CallableConfig",
+          "__path__": "general_utils.config.CallableConfig",
           "__kind__": "dataclass"
         }
       ],
@@ -100,7 +100,7 @@
     "recovery_mode": "call",
     "locked": false,
     "if_recover_while_locked": "print",
-    "__path__": "general_utils.config.types.CallableConfig",
+    "__path__": "general_utils.config.CallableConfig",
     "__kind__": "dataclass"
   },
   "__path__": "models.config.AutoRNNConfig",

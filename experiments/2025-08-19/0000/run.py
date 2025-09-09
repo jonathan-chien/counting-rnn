@@ -1,0 +1,51 @@
+import os
+
+from pathlib import Path
+
+from engine.driver import run
+from general_utils import metadata as metadata_utils
+
+
+# ----------------------------- Set run args -------------------------------- #
+run_args = dict(
+    data_train_cfg_ref_list=['2025-08-19/a/*'],
+    model_cfg_ref_list=['2025-08-19/a/0000'],
+    pretrained_model_filepath_list=None,
+    training_cfg_ref_list=['2025-08-19/a/0000'],
+    data_test_cfg_ref_list=['2025-08-19/a/*'],
+    testing_cfg_ref_list=['2025-08-11/a/0000'],
+    reproducibility_cfg_ref_list=['2025-08-11/a/0000'],
+    seed_idx_list=[0],
+    exp_date='2025-08-19',
+    exp_id='0000',
+    run_id_suffix='',
+    model_suffix='_best.pt',
+    weights_only=False,
+    cross_test=False
+)
+
+# ------------------------ Collect and save metadata ------------------------ #
+exp_dir = Path(__file__).resolve().parent
+metadata_utils.collect_and_save_metadata(
+    additional_info={'run_args': run_args, 'exp_dir': str(exp_dir)},
+    filepath=exp_dir / 'metadata.json',
+    enforce_clean_git_tree=False,
+    overwrite=False
+)
+metadata_utils.create_textfile(
+    """Grid search over hypercube dimension and sequence length.""",
+    filepath=exp_dir / 'README.md',
+    dedent=True,
+    overwrite=False,
+)
+
+# --------------------------------- Run ------------------------------------- #
+training, testing, returned_exp_dir = run(**run_args)
+
+# Verify that experimental results were logged in the same directory as this script.
+if str(exp_dir) != str(returned_exp_dir):
+    raise RuntimeError(
+        "Mismatch between intended and actual location of experimental results.\n"
+        f"- Expected: {exp_dir} (location of this script)\n"
+        f"- Received: {returned_exp_dir} (returned by the run/run_curriculum function)\n\n"
+    )
