@@ -61,7 +61,7 @@ def build_model_from_filepath(
     )
     model_cfg_dict['recovered'] = config_utils.serialization.recursive_recover(model_cfg_dict['base'])
     model = AutoRNN(
-        **model_cfg_dict['recovered'],
+        **config_utils.serialization.shallow_asdict(model_cfg_dict['recovered']),
         tokens=tokens
     ).to(device)
     
