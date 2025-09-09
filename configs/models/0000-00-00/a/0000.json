@@ -36,7 +36,7 @@
     "__kind__": "dataclass"
   },
   "rnn": {
-    "path": "torch.nn.modules.rnn.GRU",
+    "path": "torch.nn.modules.rnn.RNN",
     "args_cfg": {
       "input_size": 10,
       "hidden_size": 20,
@@ -45,7 +45,8 @@
       "batch_first": true,
       "dropout": 0,
       "bidirectional": false,
-      "__path__": "models.config.GRUConfig",
+      "nonlinearity": "tanh",
+      "__path__": "models.config.ElmanConfig",
       "__kind__": "dataclass"
     },
     "kind": "class",

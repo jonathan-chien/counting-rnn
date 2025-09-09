@@ -1,1 +1,0 @@
-Grid search over hypercube dimension and sequence length.

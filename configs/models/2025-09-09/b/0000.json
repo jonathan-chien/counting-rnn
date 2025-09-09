@@ -33,17 +33,16 @@
     "__kind__": "dataclass"
   },
   "rnn": {
-    "path": "torch.nn.modules.rnn.RNN",
+    "path": "torch.nn.modules.rnn.GRU",
     "args_cfg": {
       "input_size": "embedding_dim___",
-      "hidden_size": 100,
+      "hidden_size": 20,
       "num_layers": 1,
       "bias": true,
       "batch_first": true,
       "dropout": 0,
       "bidirectional": false,
-      "nonlinearity": "tanh",
-      "__path__": "models.config.ElmanConfig",
+      "__path__": "models.config.GRUConfig",
       "__kind__": "dataclass"
     },
     "kind": "class",
@@ -57,7 +56,7 @@
     "path": "models.networks.FCN",
     "args_cfg": {
       "layer_sizes": [
-        100,
+        20,
         20,
         2
       ],
