@@ -5,15 +5,15 @@ from general_utils import config as config_utils
 from general_utils import ml as ml_utils
 
 
-def build_model(model_cfg: AutoRNNConfig, tokens, device) -> AutoRNN:
-    """ 
-    """
-    return AutoRNN(
-        input_network=model_cfg.input_network,
-        rnn=model_cfg.rnn,
-        readout_network=model_cfg.readout_network,
-        tokens=tokens
-    ).to(device)
+# def build_model(model_cfg: AutoRNNConfig, tokens, device) -> AutoRNN:
+#     """ 
+#     """
+#     return AutoRNN(
+#         input_network=model_cfg.input_network,
+#         rnn=model_cfg.rnn,
+#         readout_network=model_cfg.readout_network,
+#         tokens=tokens
+#     ).to(device)
 
 def insert_embedding_dim(embedding_dim, model_cfg):
     if model_cfg.input_network.args_cfg.layer_sizes is None:
@@ -42,27 +42,34 @@ def build_model_from_filepath(
     embedding_dim = sequences['train'].transform.ambient_dim
     tokens = data_builder.get_autoregressive_tokens(sequences['train']).to(device)
 
-    # Load in config, insert embedding dimensions, and recover.
-    model_cfg_dict = {}
-    model_cfg_dict['base'] = config_utils.serialization.deserialize(model_cfg_filepath)
-    model_cfg_dict['base'] = insert_embedding_dim(embedding_dim, model_cfg_dict['base'])
-    model_cfg_dict['recovered'] = config_utils.serialization.recursive_recover(model_cfg_dict['base'])
-
-    # Apply 'recovery' seed to support reproducible model initialization and build model. TODO: encapsulate this pattern of deserializing a cfg with dicts
+    # Get 'recovery' seed to support reproducible model initialization (TODO:
+    # encapsulate this pattern of deserializing a cfg with dicts).
     reproducibility_cfg_dict['base'] = config_utils.serialization.deserialize(reproducibility_cfg_filepath)
     reproducibility_cfg_dict['recovered'] = config_utils.serialization.recursive_recover(
         reproducibility_cfg_dict['base']
     )
+    
+    # Load in config, insert embedding dimension. Then apply recovery seed and
+    # recover. 
+    model_cfg_dict = {}
+    model_cfg_dict['base'] = config_utils.serialization.deserialize(model_cfg_filepath)
+    model_cfg_dict['base'] = insert_embedding_dim(embedding_dim, model_cfg_dict['base'])
     ml_utils.reproducibility.apply_reproducibility_settings(
         reproducibility_cfg=reproducibility_cfg_dict['recovered'],
         seed_idx=seed_idx,
         split='recovery'
     )
-    model = build_model(
-        model_cfg_dict['recovered'], 
-        tokens=tokens, 
-        device=device
-    )
+    model_cfg_dict['recovered'] = config_utils.serialization.recursive_recover(model_cfg_dict['base'])
+    model = AutoRNN(
+        **model_cfg_dict['recovered'],
+        tokens=tokens
+    ).to(device)
+    
+    # model = build_model(
+    #     model_cfg_dict['recovered'], 
+    #     tokens=tokens, 
+    #     device=device
+    # )
 
     if test_pass:
         SEQ_IDX = 0
