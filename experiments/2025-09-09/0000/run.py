@@ -9,7 +9,7 @@ from general_utils import metadata as metadata_utils
 # ----------------------------- Set run args -------------------------------- #
 run_args = dict(
     data_train_cfg_ref_list=['2025-09-05/a/0000'],
-    model_cfg_ref_list=['2025-09-05/b/0000'],
+    model_cfg_ref_list=['2025-09-09/a/0000'],
     pretrained_model_filepath_list=None,
     training_cfg_ref_list=['2025-09-05/a/0000'],
     data_test_cfg_ref_list=['2025-09-05/a/0000'],
