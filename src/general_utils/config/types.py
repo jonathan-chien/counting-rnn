@@ -1,4 +1,4 @@
-from dataclasses import dataclass, fields, replace
+from dataclasses import dataclass, fields, replace, asdict
 from typing import Any, Dict, List, Literal, Optional, Union, get_args, get_origin
 import warnings
 warnings.simplefilter("always")
@@ -16,9 +16,13 @@ class ArgsConfig:
     
     Attribute names should exactly match parameter names for function or method.
     """
-    pass
-
-
+    def shallow_asdict(self):
+        return serialization.shallow_asdict(self)
+    
+    def deep_asdict(self):
+        return asdict(self)
+    
+    
 @dataclass 
 class ContainerConfig:
     """
@@ -33,13 +37,12 @@ class FactoryConfig:
     """
     Type III
 
-    Since TensorConfig subclasses CallableConfig, all instances of the former
-    are instances of the latter. However, this may lead to confusion if, e.g.,
-    a function like is_callable_config is called. This should return True for
-    TensorConfig objects, but this may not necessarily be intuitive, as
-    CallableConfig and TensorConfig objects are often used side by side. For
-    improved readability, CallableConfig and thus all of its child classes
-    subclass the FactoryConfig base class, which can be referenced in
+    Since TensorConfig subclasses CallableConfig, instances of the former are
+    instances of the latter. Thus, a function like is_callable_config should
+    return True for TensorConfig objects, but this may not necessarily be
+    intuitive, as CallableConfig and TensorConfig objects are often used side
+    by side. For improved readability, CallableConfig and thus all of its child
+    classes subclass the FactoryConfig base class, which can be referenced in
     isinstance checks. These collectively constitute the Type III dataclasses.
     """
     pass
@@ -159,7 +162,7 @@ class CallableConfig(FactoryConfig):
         
         callable_ = self._get_callable()
         args_cfg_with_dtype = self._get_args_cfg_with_dtype()
-        return callable_(**{**serialization.shallow_asdict(args_cfg_with_dtype), **kwargs})
+        return callable_(**{**args_cfg_with_dtype.shallow_asdict(), **kwargs})
     
     def _get_callable(self):
         """ 
