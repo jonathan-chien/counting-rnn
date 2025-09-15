@@ -34,9 +34,9 @@ metadata_utils.collect_and_save_metadata(
 )
 metadata_utils.create_textfile(
     """
-    20 hidden unit Elman RNN with tanh nonlinearity and 0.5 dropout but 
-    no weight decay or other regularization. Train on odd sequence lengths in 
-    [1, 19], test on even lengths in [0, 20].
+    20 hidden unit Elman RNN with tanh nonlinearity and 0.5 dropout at readout
+    network but no weight decay or other regularization. Train on odd sequence
+    lengths in [1, 19], test on even lengths in [0, 20].
     """,
     filepath=exp_dir / 'README.md',
     dedent=True,
