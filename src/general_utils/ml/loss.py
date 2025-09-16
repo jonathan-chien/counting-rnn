@@ -99,11 +99,11 @@ def spectral_entropy(output, target, model):
     denominator = torch.sum(s).clamp(min=eps)
     p = (s / denominator).clamp(min=eps)
     h = -torch.sum(p * torch.log(p))
-    
+
     return h
 
 def nuclear_norm(output, target, model):
     
     weight_hh = get_weight_hh(model)
-    _, s, _ = torch.linalg.svd(weight_hh)
+    s = torch.linalg.svdvals(weight_hh)
     return torch.sum(s)
