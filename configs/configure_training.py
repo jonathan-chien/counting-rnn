@@ -301,7 +301,7 @@ def main():
 
     train_fn_cfg = TrainFnConfig(
         dataloader=dataloader_train,
-        loss_terms=[loss_term_0, loss_term_1],
+        loss_terms=[loss_term_0],
         evaluation=evaluation,
         h_0=None,
         logger_train=logger_train,
