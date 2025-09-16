@@ -1,93 +1,172 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from pathlib import Path
 import torch
+from typing import Union
 import warnings
 
 from .. import tensor as tensor_utils
+from .. import validation as validation_utils
 from .config import RequiresGradConfig
 
 
-class EarlyStopping:
+# class EarlyStopping:
+#     """ 
+#     """
+#     def __init__(
+#         self, 
+#         metric_name: str,
+#         strategy,
+#         min_epochs_before_stopping: int = 1,
+#         verbose=True,
+#         disabled=False
+#     ):
+#         """ 
+#         verbose is not used in any internal methods. Rather since this is an
+#         auxiliary class meant to function in a training environment, that
+#         environment can access the verbose attribute to know whether or not
+#         to print to console. 
+#         """
+#         self.metric_name = metric_name
+#         self.strategy = strategy
+#         self.min_epochs_before_stopping = min_epochs_before_stopping
+#         self.verbose = verbose
+#         self.disabled = disabled
+
+#         self.condition_reached_at_epoch = None
+
+#     def update(self, x):
+#         """ 
+#         """
+#         self.strategy.update(x)
+
+#     def should_stop(self, epoch_idx):
+#         """ 
+#         """
+#         if self.disabled or epoch_idx + 1 < self.min_epochs_before_stopping: 
+#             return False
+#         if self.strategy.should_stop():
+#             self.condition_reached_at_epoch = epoch_idx
+#             return True
+
+#         # diffs = torch.diff(self.recent_vals, n=1)
+#         # if (
+#         #     (self.mode == 'min' and (diffs > self.tol).all())
+#         #     or (self.mode == 'max' and (diffs < -self.tol).all())
+#         # ):
+#         #     self.stopped_after_epoch = epoch_idx
+#         #     return True
+
+#         # return False
+        
+#     def print_to_console(self):
+#         if self.condition_reached_at_epoch is None:
+#             raise RuntimeError(
+#                 "Attempting to print to console that early stopping condition " 
+#                 "has been reached, but self.should_stop has not returned True yet."
+#             )
+#         self.strategy.print_to_console(self.condition_reached_at_epoch)
+
+# @dataclass(frozen=False)
+# class EarlyStoppingCommon:
+#     metric_name: str
+#     warmup: int 
+#     verbose: bool 
+#     disabled: bool 
+#     condition_reached_at_update: Union[None, int]
+#     num_updates: int
+
+class EarlyStopping(ABC):
     """ 
     """
+
     def __init__(
         self, 
-        metric_name: str,
-        strategy,
-        min_epochs_before_stopping: int = 1,
-        verbose=True,
-        disabled=False
+        metric_name: str, 
+        warmup: int = 0, 
+        verbose: bool = True, 
+        disabled: bool = False
     ):
-        """ 
-        verbose is not used in any internal methods. Rather since this is an
-        auxiliary class meant to function in a training environment, that
-        environment can access the verbose attribute to know whether or not
-        to print to console. 
-        """
+        validation_utils.validate_str(metric_name)
+        validation_utils.validate_nonneg_int(warmup)
+        # self.common = EarlyStoppingCommon(
+        #     metric_name=metric_name,
+        #     warmup=warmup,
+        #     verbose=verbose,
+        #     disabled=disabled,
+        #     condition_reached_at_update=None, # When stopping condition is first reached
+        #     num_updates = 0
+        # )
         self.metric_name = metric_name
-        self.strategy = strategy
-        self.min_epochs_before_stopping = min_epochs_before_stopping
+        self.warmup = warmup
         self.verbose = verbose
         self.disabled = disabled
 
-        self.condition_reached_at_epoch = None
+        self.condition_reached_at_update = None
+        self.num_updates = 0
 
-    def update(self, x):
-        """ 
-        """
-        self.strategy.update(x)
-
-    def should_stop(self, epoch_idx):
-        """ 
-        """
-        if self.disabled or epoch_idx + 1 < self.min_epochs_before_stopping: 
-            return False
-        if self.strategy.should_stop():
-            self.condition_reached_at_epoch = epoch_idx
-            return True
-
-        # diffs = torch.diff(self.recent_vals, n=1)
-        # if (
-        #     (self.mode == 'min' and (diffs > self.tol).all())
-        #     or (self.mode == 'max' and (diffs < -self.tol).all())
-        # ):
-        #     self.stopped_after_epoch = epoch_idx
-        #     return True
-
-        # return False
+    # def update(self, x: float):
         
-    def print_to_console(self):
-        if self.condition_reached_at_epoch is None:
-            raise RuntimeError(
-                "Attempting to print to console that early stopping condition " 
-                "has been reached, but self.should_stop has not returned True yet."
-            )
-        self.strategy.print_to_console(self.condition_reached_at_epoch)
+    #     self.num_updates += 1
+    #     self._update_rule(x)
 
-
-class StoppingStrategy(ABC):
-    """ 
-    """
-    @abstractmethod
-    def update(self, x: float):
+    def should_stop(self, x: float) -> bool:
         """ 
+        Accepts new value and returns boolean indicating whether stopping 
+        condition has been reached.
+        """
+        validation_utils.validate_float(x)
+
+        # Always update, even if disabled, so any best value tracking
+        # implemented by child classes can still be carried out.
+        self._update_rule(x)
+        self.num_updates += 1
+
+        if self.disabled:
+            return False
+        
+        should_stop = self._stopping_rule()
+
+        if should_stop and self.condition_reached_at_update is None:
+            self.condition_reached_at_update = self.num_updates
+        
+        return should_stop
+    
+    def reset(self):
+        """ 
+        Child classes should implement their own reset() methods that call
+        super().reset() and then clear any other internal state attributes
+        based on their respective policies.
+        """
+        self.condition_reached_at_update = None
+        self.num_updates = 0
+          
+    # ---------------Abstract methods defining stopping policy--------------- #
+    @abstractmethod
+    def _update_rule(self, x: float):
+        """ 
+        Takes in new value for tracked quantity and updates state so that 
+        object is ready for call to self._stopping_rule().
         """
         pass
 
     @abstractmethod
-    def should_stop(self):
+    def _stopping_rule(self):
         """ 
+        Boolean function, returns True if stopping condition reached, else False.
         """
         pass
 
     @abstractmethod
-    def print_to_console(self, condition_reached_at_epoch: int):
+    def print_to_console(self, update_name='update'):
         """ 
+        Deferred to allow child class to print more detailed stopping info 
+        based on its policy.
         """
         pass
 
-
-class NoImprovementStopping(StoppingStrategy):
+    
+class NoImprovementStopping(EarlyStopping):
     """ 
     """
     def __init__(
@@ -95,8 +174,12 @@ class NoImprovementStopping(StoppingStrategy):
         patience: int,
         mode : str,
         tol: float = 1e-4,
-        verbose: bool = True
+        **kwargs # common attributes in base class passed in here
     ):
+        super().__init__(**kwargs)
+
+        validation_utils.validate_pos_int(patience)
+        validation_utils.validate_nonneg_float(tol)
         self.patience = patience
         self.mode = mode
         self.tol = tol
@@ -104,14 +187,14 @@ class NoImprovementStopping(StoppingStrategy):
             raise ValueError(
                 f"Unrecognized value {self.mode} for mode. Should be 'min' or 'max'."
             )
-        self.verbose = verbose
 
         self.best_value = None
         self.counter = 0
         self.recent_vals = torch.full((self.patience + 1,), torch.nan)
 
-    def is_improvement(self, x):
+    def _is_improvement(self, x):
         """
+        Check whether new value is improvement on previous best value.
         """
         diff = x - self.best_value
         # Only count as improvement if better than best by at least tol.
@@ -120,44 +203,59 @@ class NoImprovementStopping(StoppingStrategy):
         else: # A check for correct values is perfomed in constructor
             return (diff - self.tol > 0, diff)
 
-    def update(self, x: float):
+    def _update_rule(self, x: float):
         """ 
+        If no improvement after warmup period, increment counter.
         """
-        if self.best_value is None:
+        if self.best_value is None: # First update
             self.best_value = x
         else:
-            improved, diff = self.is_improvement(x)
+            warming_up = self.num_updates < self.warmup
+            improved, diff = self._is_improvement(x)
             if improved:
                 self.best_value = x
-                self.counter = 0
-                if self.verbose:
-                    print(f"Target improved by {diff}. Setting early stopping counter to 0.")
-            else:
+
+                if warming_up:
+                    # Counter should be at 0 during warmup, just print diff.
+                    if self.verbose:
+                        print(f"Warming up. Target improved by {diff}.")
+                else:
+                    # After warmup period, may need to reset counter.
+                    self.counter = 0
+                    if self.verbose:
+                        print(f"Target improved by {diff}. Setting early stopping counter to 0.")
+            elif not warming_up: # Not improved and not warming up
                 self.counter += 1
                 if self.verbose:
-                    print(f"Early stopping counter: {self.counter}.")
+                    print(f"Early stopping counter: {self.counter}/{self.patience}.")
 
         # Tracking of recent vals is not necessary for stopping logic but useful to print.
         self.recent_vals = self.recent_vals.roll(-1)
-        self.recent_vals[-1] = tensor_utils.tensor_to_cpu_python_scalar(x)
+        self.recent_vals[-1] = x
 
-    def should_stop(self):
+    def _stopping_rule(self):
         """ 
         """
-        return self.counter == self.patience
+        if self.counter > self.patience:
+            raise RuntimeError(
+                f"Unexpected runtime condition, where self.counter ({self.counter}) "
+                f"exceeds self.patience ({self.patience})."
+            )
+        return self.counter >= self.patience
     
-    def print_to_console(self, condition_reached_at_epoch: int):
+    def print_to_console(self, update_name='update'):
         """ 
         """
         print(
-            f"Early stopping condition reached after epoch {condition_reached_at_epoch} with tol = {self.tol}.\n"
-            f"Tracked value over last {self.patience+1} epochs: {self.recent_vals}.\n"
+            f"Early stopping condition reached after {update_name} {self.condition_reached_at_update} with tol = {self.tol}.\n"
+            f"Tracked value over last {self.patience+1} {update_name}s: {self.recent_vals}.\n"
             f"Final changes prior to early stopping: {torch.diff(self.recent_vals, n=1)}."
         )
 
     def reset(self):
         """ 
         """
+        super().reset()
         self.best_value = None
         self.counter = 0
         self.recent_vals.fill_(torch.nan)

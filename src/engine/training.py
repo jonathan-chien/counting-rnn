@@ -207,10 +207,14 @@ def train(
                 metric_tracker.save(checkpoint, i_epoch, is_best=is_best)
        
         if early_stopping:
-            early_stopping.update(val_results[early_stopping.metric_name])
-            if early_stopping.should_stop(i_epoch):
+            # early_stopping.update(val_results[early_stopping.metric_name])
+            # if early_stopping.should_stop(i_epoch):
+            #     if early_stopping.verbose: 
+            #         early_stopping.print_to_console()
+            #     return logger_train, logger_val, metric_tracker, early_stopping
+            if early_stopping.should_stop(val_results[early_stopping.metric_name]):
                 if early_stopping.verbose: 
-                    early_stopping.print_to_console()
+                    early_stopping.print_to_console(update_name='epoch')
                 return logger_train, logger_val, metric_tracker, early_stopping
 
         # If logger objects print, add demarcation between epochs.
