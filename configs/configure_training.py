@@ -147,23 +147,37 @@ def main():
         recovery_mode='call'
     )
 
+    # early_stopping = CallableConfig.from_callable(
+    #     ml_utils.training.EarlyStopping,
+    #     ml_utils.config.EarlyStoppingConfig(
+    #         metric_name='cross_entropy_loss',
+    #         strategy=CallableConfig.from_callable(
+    #             ml_utils.training.NoImprovementStopping,
+    #             ml_utils.config.NoImprovementStoppingConfig(
+    #                 patience=8,
+    #                 mode='min',
+    #                 tol=1e-5,
+    #             ),
+    #             kind='class',
+    #             recovery_mode='call'
+    #         ),
+    #         min_epochs_before_stopping=25,
+    #         verbose=True,
+    #         disabled=False
+    #     ),
+    #     kind='class',
+    #     recovery_mode='call'
+    # )
     early_stopping = CallableConfig.from_callable(
-        ml_utils.training.EarlyStopping,
-        ml_utils.config.EarlyStoppingConfig(
+        ml_utils.training.NoImprovementStopping,
+        ml_utils.config.NoImprovementStoppingConfig(
             metric_name='cross_entropy_loss',
-            strategy=CallableConfig.from_callable(
-                ml_utils.training.NoImprovementStopping,
-                ml_utils.config.NoImprovementStoppingConfig(
-                    patience=8,
-                    mode='min',
-                    tol=1e-5,
-                ),
-                kind='class',
-                recovery_mode='call'
-            ),
-            min_epochs_before_stopping=25,
+            warmup=25,
             verbose=True,
-            disabled=False
+            disabled=False,
+            patience=8,
+            mode='min',
+            tol=1e-5
         ),
         kind='class',
         recovery_mode='call'
