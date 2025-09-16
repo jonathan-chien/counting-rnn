@@ -97,13 +97,13 @@ def main():
             ),
             weight=1.,
             optimizer=CallableConfig.from_callable(
-                torch.optim.Adam,
-                ml_utils.config.AdamConfig(
+                torch.optim.AdamW,
+                ml_utils.config.AdamWConfig(
                     lr=0.001, 
                     betas=(0.9, 0.999), 
                     eps=1e-08, 
                     amsgrad=False,
-                    # weight_decay=0.01
+                    weight_decay=0.01
                 ),
                 kind='class',
                 recovery_mode='call',
@@ -116,7 +116,7 @@ def main():
         recovery_mode='call'
     )
 
-    weight_1_exp = config_utils.ops.select(cli, 'loss_term_1.weight.exp', 0.)
+    weight_1_exp = config_utils.ops.select(cli, 'loss_term_1.weight.exp', -2.)
     loss_term_1 = CallableConfig.from_callable(
         ml_utils.loss.LossTerm,
         ml_utils.config.LossTermConfig(
@@ -301,7 +301,7 @@ def main():
 
     train_fn_cfg = TrainFnConfig(
         dataloader=dataloader_train,
-        loss_terms=[loss_term_0],
+        loss_terms=[loss_term_0, loss_term_1],
         evaluation=evaluation,
         h_0=None,
         logger_train=logger_train,

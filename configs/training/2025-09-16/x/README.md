@@ -1,0 +1,2 @@
+
+Single primary loss term.
