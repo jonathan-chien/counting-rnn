@@ -172,7 +172,7 @@ def main():
         ml_utils.training.NoImprovementStopping,
         ml_utils.config.NoImprovementStoppingConfig(
             metric_name='cross_entropy_loss',
-            warmup=25,
+            warmup=20,
             verbose=True,
             disabled=False,
             patience=8,
@@ -301,7 +301,7 @@ def main():
 
     train_fn_cfg = TrainFnConfig(
         dataloader=dataloader_train,
-        loss_terms=[loss_term_0],
+        loss_terms=[loss_term_0, loss_term_1],
         evaluation=evaluation,
         h_0=None,
         logger_train=logger_train,
@@ -360,9 +360,9 @@ def main():
         'learning_rates': 'train_fn_cfg.loss_terms.*.args_cfg.optimizer.args_cfg.lr',
         'train_batch_size': 'train_fn_cfg.dataloader.args_cfg.batch_size',
         'val_batch_size': 'train_fn_cfg.evaluation.dataloader.args_cfg.batch_size',
-        'early_stopping_strategy': 'train_fn_cfg.early_stopping.args_cfg.strategy.path',
-        'early_stopping_patience': 'train_fn_cfg.early_stopping.args_cfg.strategy.args_cfg.patience',
-        'early_stopping_tol': 'train_fn_cfg.early_stopping.args_cfg.strategy.args_cfg.tol',
+        'early_stopping_strategy': 'train_fn_cfg.early_stopping.path',
+        'early_stopping_patience': 'train_fn_cfg.early_stopping.args_cfg.patience',
+        'early_stopping_tol': 'train_fn_cfg.early_stopping.args_cfg.tol',
         'num_epochs': 'train_fn_cfg.num_epochs',
     }
 

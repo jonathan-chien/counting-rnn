@@ -54,11 +54,11 @@ class AdamWConfig(ArgsConfig):
 class NoImprovementStoppingConfig(ArgsConfig):
     metric_name: str
     warmup: int
-    verbose: bool = True
-    disabled: bool = False
     patience: int
     mode: str 
     tol: float = 1e-6
+    verbose: bool = True
+    disabled: bool = False
 
 
 # @dataclass
