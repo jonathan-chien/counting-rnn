@@ -175,7 +175,7 @@ def main():
             warmup=20,
             verbose=True,
             disabled=False,
-            patience=8,
+            patience=20,
             mode='min',
             tol=1e-5
         ),
