@@ -91,23 +91,18 @@ def get_weight_hh(model):
 def spectral_entropy(output, target, model):
     """ 
     """
-    EPS = 1e-12
-    # if output is not None:
-    #     raise ValueError(invalid_input_message(output, 'output'))
-    # if target is not None:
-    #     raise ValueError(invalid_input_message(target, 'target'))
-    
     weight_hh = get_weight_hh(model)
-    _, s, _ = torch.linalg.svd(weight_hh)
-    p = s / torch.sum(s)
-    h = -torch.sum(p * torch.log2(p + EPS))
+    eps = torch.finfo(weight_hh.dtype).eps
+
+    s = torch.linalg.svdvals(weight_hh)
+
+    denominator = torch.sum(s).clamp(min=eps)
+    p = (s / denominator).clamp(min=eps)
+    h = -torch.sum(p * torch.log(p))
+    
     return h
 
 def nuclear_norm(output, target, model):
-    # if output is not None:
-    #     raise ValueError(invalid_input_message(output, 'output'))
-    # if target is not None:
-    #     raise ValueError(invalid_input_message(target, 'target'))
     
     weight_hh = get_weight_hh(model)
     _, s, _ = torch.linalg.svd(weight_hh)
