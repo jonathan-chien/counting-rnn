@@ -107,3 +107,73 @@ def nuclear_norm(output, target, model):
     weight_hh = get_weight_hh(model)
     s = torch.linalg.svdvals(weight_hh)
     return torch.sum(s)
+
+def spectral_norm_power_method(output, target, model):
+
+    weight_hh = get_weight_hh(model)
+
+
+def alt_power_method(w, num_iter=10, num_init=50, method='average'):
+
+    eps = torch.finfo(w.dtype).eps
+
+    if len(w.shape) != 2:
+        raise ValueError(f"w should be a tensor of dim 2, but got dim {len(w.shape)}.")
+    _, n = w.shape # w is of shape (m, n)
+
+    # Initialize random vectors.
+    v = torch.randn(n, num_init) # W*W
+    v /= v.norm(p=2, dim=0, keepdim=True).clamp(min=eps)
+
+    for i_iter in range(num_iter):
+        u = w @ v
+        u /= u.norm(p=2, dim=0).clamp(min=eps)
+
+        v = w.mH @ u
+        v /= v.norm(p=2, dim=0, keepdim=True).clamp(min=eps)
+
+
+    if method == 'best':
+        y = w @ v
+        sigmas = y.norm(p=2, dim=0)
+
+        sigma_hat, best_idx = torch.max(sigmas, dim=0)
+        u_hat = y[:, best_idx] / sigma_hat
+        v_hat = v[:, best_idx]
+        
+        return sigma_hat.squeeze(), u_hat, v_hat
+    
+    if method == 'average':
+        # Align phase/(sign in real valued case) to that of first vector. First
+        # compute relative phase. 
+        # u_aligned = u * torch.inner(u[:, 0].conj(), u.T)
+        # v_aligned = v * torch.inner(v[:, 0].conj(), v.T)
+        a = u[:, 0].conj() @ u # (1, n) @ (n, num_inits)
+        b = v[:, 0].conj() @ v # (1, m) @ (m, num_inits)
+
+        rel_phase_u = a / torch.abs(a).clamp(min=eps)
+        rel_phase_v = b / torch.abs(b).clamp(min=eps)
+
+        u_aligned = rel_phase_u.conj() * u
+        v_aligned = rel_phase_v.conj() * v
+    
+        u_hat = torch.mean(u_aligned, dim=1)
+        v_hat = torch.mean(v_aligned, dim=1)
+        u_hat /= u_hat.norm(p=2).clamp(min=eps)
+        v_hat /= v_hat.norm(p=2).clamp(min=eps)
+
+        return u_hat.conj() @ w @ v_hat, u_hat, v_hat
+
+    elif method == 'none':
+        if num_init != 1:
+            raise ValueError(
+                f"If method == 'none', num_init must be 1, but got num_init={num_init}."
+            )
+        u_hat = u
+        v_hat = v
+
+        return u_hat[:, 0].conj() @ w @ v_hat[:, 0], u_hat[:, 0], v_hat[:, 0]
+    else:
+        raise ValueError(
+            f"Unrecognized value for `method` {method}. Must be in ('average', 'best', 'none')."
+        )
