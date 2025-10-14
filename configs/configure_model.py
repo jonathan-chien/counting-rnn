@@ -14,9 +14,9 @@ def main():
     # ---------------------------- Set directory ---------------------------- #
     base_dir = 'configs/models'
     sub_dir_1 = str(date.today())
-    sub_dir_2 = 'a'
+    sub_dir_2 = 'b'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
-    filename = fileio_utils.make_filename('0002')
+    filename = fileio_utils.make_filename('0000')
 
     # ----------------------- Configure input network ----------------------- #
     input_network = CallableConfig.from_callable(
@@ -38,7 +38,7 @@ def main():
         else 'embedding_dim___'
     )
 
-    rnn_type = 'elman'
+    rnn_type = 'gru'
     if rnn_type == 'gru':
         rnn = CallableConfig.from_callable(
             torch.nn.GRU,
@@ -58,7 +58,7 @@ def main():
             torch.nn.RNN,
             ElmanConfig(
                 input_size=rnn_input_size,
-                hidden_size=1000,
+                hidden_size=100,
                 num_layers=1,
                 bias=True,
                 nonlinearity='tanh',
@@ -75,12 +75,17 @@ def main():
     readout_network = CallableConfig.from_callable(
         FCN,
         FCNConfig(
-            layer_sizes=[rnn.args_cfg.hidden_size, 20, 2],
+            # layer_sizes=[rnn.args_cfg.hidden_size, 20, 2],
+            # nonlinearities=[
+            #     CallableConfig.from_callable(torch.nn.GELU, GELUConfig(), kind='class', recovery_mode='call'), 
+            #     CallableConfig.from_callable(torch.nn.Identity, IdentityConfig(), kind='class', recovery_mode='call')
+            # ],
+            # dropouts=[0.5, None]
+            layer_sizes=[rnn.args_cfg.hidden_size, 2],
             nonlinearities=[
-                CallableConfig.from_callable(torch.nn.GELU, GELUConfig(), kind='class', recovery_mode='call'), 
-                CallableConfig.from_callable(torch.nn.Identity, IdentityConfig(), kind='class', recovery_mode='call')
+                CallableConfig.from_callable(torch.nn.Identity, IdentityConfig(), kind='class', recovery_mode='call'),
             ],
-            dropouts=[0.5, None]
+            dropouts=[None]
         ),
         kind='class',
         recovery_mode='call'
