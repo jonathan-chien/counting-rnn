@@ -58,9 +58,9 @@ def main():
     # has been spent on development for the time being.
 
     # Get CLI overrides first.
-    num_hypercube_dims = config_utils.ops.select(cli, 'hypercube.num_dims', 2)
+    num_hypercube_dims = config_utils.ops.select(cli, 'hypercube.num_dims', 3)
     manual_labels = config_utils.ops.select(cli, 'hypercube.manual_labels', True)
-    random_labels = config_utils.ops.select(cli, 'hypercube.random_labels', True)
+    random_labels = config_utils.ops.select(cli, 'hypercube.random_labels', False)
     manual_pmfs = config_utils.ops.select(cli, 'hypercube.manual_pmfs', False)
 
     # Local intermediates related to vertices.
@@ -68,7 +68,7 @@ def main():
     half = num_vertices // 2
     coords = torch.arange(num_hypercube_dims, dtype=torch.int64)
     if manual_labels:
-        pos_vert_labels = torch.tensor([2, 3])
+        pos_vert_labels = torch.tensor([2, 3, 5, 7])
     else:
         if random_labels:
             g = torch.Generator()
@@ -108,14 +108,14 @@ def main():
     # Get CLI injectables.
     seq_lengths_helper = {
         'pos': {
-            'max': config_utils.ops.select(cli, 'seq_lengths.pos.support.max', 20),
-            'parity': config_utils.ops.select(cli, 'seq_lengths.pos.parity', 'even'),
+            'max': config_utils.ops.select(cli, 'seq_lengths.pos.support.max', 19),
+            'parity': config_utils.ops.select(cli, 'seq_lengths.pos.parity', 'odd'),
             'support': None,
             'pmf': None
         }, 
         'neg': {
-            'max': config_utils.ops.select(cli, 'seq_lengths.neg.support.max', 10),
-            'parity': config_utils.ops.select(cli, 'seq_lengths.neg.parity', 'even'),
+            'max': config_utils.ops.select(cli, 'seq_lengths.neg.support.max', 9),
+            'parity': config_utils.ops.select(cli, 'seq_lengths.neg.parity', 'odd'),
             'support': None,
             'pmf': None
         }
@@ -174,7 +174,7 @@ def main():
     
     # --------------- Build remaining auxiliary object configs -------------- #
     embedder_cfg = EmbedderConfig(
-        ambient_dim=5,
+        ambient_dim=6,
         mean_center=False,
         offset_1=TensorConfig.from_tensor(-torch.tile(torch.tensor([0.5]), (hypercube_args_cfg.num_dims + 3,))), # Plus 3 for the dimensions corresponding to special tokens
         offset_2=None,
