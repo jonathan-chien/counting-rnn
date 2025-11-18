@@ -15,7 +15,7 @@ def main():
     # ---------------------------- Set directory ---------------------------- #
     base_dir = 'configs/models'
     sub_dir_1 = str(date.today())
-    sub_dir_2 = 'b'
+    sub_dir_2 = 'a'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
     filename = fileio_utils.make_filename('0000')
 
@@ -39,7 +39,7 @@ def main():
         else 'embedding_dim___'
     )
 
-    rnn_type = 'gru'
+    rnn_type = 'elman'
     if rnn_type == 'gru':
         rnn = CallableConfig.from_callable(
             torch.nn.GRU,
@@ -59,7 +59,7 @@ def main():
             torch.nn.RNN,
             ElmanConfig(
                 input_size=rnn_input_size,
-                hidden_size=100,
+                hidden_size=20,
                 num_layers=1,
                 bias=True,
                 nonlinearity='tanh',
