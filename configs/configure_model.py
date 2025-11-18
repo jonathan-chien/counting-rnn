@@ -145,24 +145,23 @@ def main():
     # --------------------------- Summarize config --------------------------- #
     # Registry of items to extract from the config.
     REGISTRY = {
-        'input_network': 'input_network.path',
-        'input_network_layer_sizes': 'input_network.args_cfg.layer_sizes',
-        'input_network_nonlinearities': 'input_network.args_cfg.nonlinearities',
-        'input_network_dropouts' : 'input_network.args_cfg.dropouts',
-        'rnn_type': 'rnn.path',
-        'rnn_input_size': 'rnn.args_cfg.input_size',
-        'rnn_hidden_size': 'rnn.args_cfg.hidden_size',
+        'input_network': 'auto_rnn_cfg.input_network.path',
+        'input_network_layer_sizes': 'auto_rnn_cfg.input_network.args_cfg.layer_sizes',
+        'input_network_nonlinearities': 'auto_rnn_cfg.input_network.args_cfg.nonlinearities',
+        'input_network_dropouts' : 'auto_rnn_cfg.input_network.args_cfg.dropouts',
+        'rnn_type': 'auto_rnn_cfg.rnn.path',
+        'rnn_input_size': 'auto_rnn_cfg.rnn.args_cfg.input_size',
+        'rnn_hidden_size': 'auto_rnn_cfg.rnn.args_cfg.hidden_size',
         'rnn_nonlinearity': (
-            lambda model_cfg: config_utils.ops.traverse_dotted_path(model_cfg, 'rnn.args_cfg.nonlinearity')
-            if config_utils.ops.traverse_dotted_path(model_cfg, 'rnn.path').endswith('RNN') 
+            lambda model_cfg: config_utils.ops.traverse_dotted_path(model_cfg, 'auto_rnn_cfg.rnn.args_cfg.nonlinearity')
+            if config_utils.ops.traverse_dotted_path(model_cfg, 'auto_rnn_cfg.rnn.path').endswith('RNN') 
             else None
         ),
-        'readout_network': 'readout_network.path',
-        'readout_network_layer_sizes': 'readout_network.args_cfg.layer_sizes',
-        'readout_network_nonlinearities': 'readout_network.args_cfg.nonlinearities',
-        'readout_network_dropouts': 'readout_network.args_cfg.dropouts',
+        'readout_network': 'auto_rnn_cfg.readout_network.path',
+        'readout_network_layer_sizes': 'auto_rnn_cfg.readout_network.args_cfg.layer_sizes',
+        'readout_network_nonlinearities': 'auto_rnn_cfg.readout_network.args_cfg.nonlinearities',
+        'readout_network_dropouts': 'auto_rnn_cfg.readout_network.args_cfg.dropouts',
     }
-
 
     # Summarize config to .xlsx file.
     config_utils.summary.summarize_cfg_to_xlsx(

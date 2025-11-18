@@ -15,7 +15,6 @@ class InitializationStepConfig(CallableConfig):
 class InitializationConfig(ContainerConfig):
     steps: list[InitializationStepConfig]
 
-
 @dataclass
 class InitializeModuleParamsConfig(ArgsConfig):
     module_name: str
