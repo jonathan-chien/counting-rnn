@@ -5,7 +5,28 @@ from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, TYPE_CHE
 from ..config.types import ArgsConfig, ContainerConfig, CallableConfig, SeedConfig
 # if TYPE_CHECKING: from .training import EarlyStopping
 
-# ---------------------------- Training/Eval -------------------------------- #
+
+# --------------------------- Parameter initialization ---------------------- #
+@dataclass
+class InitializationStepConfig(CallableConfig):
+    pass
+
+@dataclass
+class InitializationConfig(ContainerConfig):
+    steps: list[InitializationStepConfig]
+
+
+@dataclass
+class InitializeModuleParamsConfig(ArgsConfig):
+    module_name: str
+    param_pattern: str
+
+@dataclass
+class ScaleParamsArgsConfig(InitializeModuleParamsConfig):
+    alpha: float
+
+
+# ------------------------------ Training/Eval ------------------------------ #
 @dataclass
 class LossTermConfig(ArgsConfig):
     name: str

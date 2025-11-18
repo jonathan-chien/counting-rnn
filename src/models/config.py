@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
-from general_utils.config.types import ArgsConfig, CallableConfig
+from general_utils.config.types import ArgsConfig, ContainerConfig, CallableConfig
+from general_utils.ml.config import InitializationConfig
 
 
 @dataclass
@@ -52,3 +53,8 @@ class AutoRNNConfig(ArgsConfig):
     input_network: CallableConfig
     rnn: CallableConfig
     readout_network: CallableConfig
+
+@dataclass
+class ModelConfig(ContainerConfig):
+    auto_rnn_cfg: AutoRNNConfig
+    initialization_cfg: InitializationConfig

@@ -3,9 +3,10 @@ from datetime import date
 import torch
 
 from models import builder as model_builder
-from models.config import AutoRNNConfig, ElmanConfig, GRUConfig, FCNConfig, GELUConfig, IdentityConfig, ReLUConfig
+from models.config import AutoRNNConfig, ElmanConfig, GRUConfig, FCNConfig, GELUConfig, IdentityConfig, ModelConfig, ReLUConfig
 from models.networks import FCN
-from general_utils.config.types import CallableConfig
+from general_utils.config.types import CallableConfig, ContainerConfig
+from general_utils import ml as ml_utils
 from general_utils import config as config_utils
 from general_utils import fileio as fileio_utils
 
@@ -92,10 +93,33 @@ def main():
     )
 
     # ------------------------- Instantiate and save ------------------------ #
-    model_cfg = AutoRNNConfig(
+    auto_rnn_cfg = AutoRNNConfig(
         input_network=input_network,
         rnn=rnn,
         readout_network=readout_network
+    )
+
+    # ------------------- Set initializations for parameters ---------------- #
+    initialization_cfg = ml_utils.config.InitializationConfig(
+        steps=[
+            ml_utils.config.InitializationStepConfig.from_callable(
+                ml_utils.initialization.scale_params_by_module_name,
+                args_cfg=ml_utils.config.ScaleParamsArgsConfig(
+                    module_name='rnn',
+                    param_pattern='weight_hh',
+                    alpha=0.1
+                ),
+                kind='function',
+                recovery_mode='call',
+                locked=True, # Will be recovered to call function inside init_params_from_cfg function
+                if_recover_while_locked='print'
+            )
+        ]
+    )
+
+    model_cfg = ModelConfig(
+        auto_rnn_cfg=auto_rnn_cfg,
+        initialization_cfg=initialization_cfg
     )
 
     # Convert, serialize/save, de-serialize, reconstruct.

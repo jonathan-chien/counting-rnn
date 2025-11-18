@@ -104,7 +104,7 @@ class CallableConfig(FactoryConfig):
         """
         def is_dtype_annotation(annotation):
             """
-            Check if current dataclass type annotation is torch,dtype or 
+            Check if current dataclass type annotation is torch.dtype or 
             Union[torch.dtype, ...].
             """
             # Return true if annotation is just torch.dtype.
@@ -356,6 +356,8 @@ class TensorConfig(CallableConfig):
     #     return super().recover()
     
 
+# TODO: Consider moving the following to general_utils.ml.config (where
+# reproducibility configs are also presently found).
 # ----------------------------- Seed utils ---------------------------------- #
 @dataclass
 class SeedConfig(ArgsConfig):
