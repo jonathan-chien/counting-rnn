@@ -1,0 +1,119 @@
+{
+  "auto_rnn_cfg": {
+    "input_network": {
+      "path": "models.networks.FCN",
+      "args_cfg": {
+        "layer_sizes": null,
+        "nonlinearities": [
+          {
+            "path": "torch.nn.modules.activation.ReLU",
+            "args_cfg": {
+              "inplace": false,
+              "__path__": "models.config.ReLUConfig",
+              "__kind__": "dataclass"
+            },
+            "kind": "class",
+            "recovery_mode": "call",
+            "locked": false,
+            "if_recover_while_locked": "print",
+            "__path__": "general_utils.config.types.CallableConfig",
+            "__kind__": "dataclass"
+          }
+        ],
+        "dropouts": [
+          null
+        ],
+        "__path__": "models.config.FCNConfig",
+        "__kind__": "dataclass"
+      },
+      "kind": "class",
+      "recovery_mode": "call",
+      "locked": false,
+      "if_recover_while_locked": "print",
+      "__path__": "general_utils.config.types.CallableConfig",
+      "__kind__": "dataclass"
+    },
+    "rnn": {
+      "path": "torch.nn.modules.rnn.RNN",
+      "args_cfg": {
+        "input_size": "embedding_dim___",
+        "hidden_size": 20,
+        "num_layers": 1,
+        "bias": true,
+        "batch_first": true,
+        "dropout": 0,
+        "bidirectional": false,
+        "nonlinearity": "tanh",
+        "__path__": "models.config.ElmanConfig",
+        "__kind__": "dataclass"
+      },
+      "kind": "class",
+      "recovery_mode": "call",
+      "locked": false,
+      "if_recover_while_locked": "print",
+      "__path__": "general_utils.config.types.CallableConfig",
+      "__kind__": "dataclass"
+    },
+    "readout_network": {
+      "path": "models.networks.FCN",
+      "args_cfg": {
+        "layer_sizes": [
+          20,
+          2
+        ],
+        "nonlinearities": [
+          {
+            "path": "torch.nn.modules.linear.Identity",
+            "args_cfg": {
+              "__path__": "models.config.IdentityConfig",
+              "__kind__": "dataclass"
+            },
+            "kind": "class",
+            "recovery_mode": "call",
+            "locked": false,
+            "if_recover_while_locked": "print",
+            "__path__": "general_utils.config.types.CallableConfig",
+            "__kind__": "dataclass"
+          }
+        ],
+        "dropouts": [
+          null
+        ],
+        "__path__": "models.config.FCNConfig",
+        "__kind__": "dataclass"
+      },
+      "kind": "class",
+      "recovery_mode": "call",
+      "locked": false,
+      "if_recover_while_locked": "print",
+      "__path__": "general_utils.config.types.CallableConfig",
+      "__kind__": "dataclass"
+    },
+    "__path__": "models.config.AutoRNNConfig",
+    "__kind__": "dataclass"
+  },
+  "initialization_cfg": {
+    "steps": [
+      {
+        "path": "general_utils.ml.initialization.scale_params_by_module_name",
+        "args_cfg": {
+          "module_name": "rnn",
+          "param_pattern": "weight_hh",
+          "alpha": 0.01,
+          "__path__": "general_utils.ml.config.ScaleParamsArgsConfig",
+          "__kind__": "dataclass"
+        },
+        "kind": "function",
+        "recovery_mode": "call",
+        "locked": true,
+        "if_recover_while_locked": "print",
+        "__path__": "general_utils.ml.config.InitializationStepConfig",
+        "__kind__": "dataclass"
+      }
+    ],
+    "__path__": "general_utils.ml.config.InitializationConfig",
+    "__kind__": "dataclass"
+  },
+  "__path__": "models.config.ModelConfig",
+  "__kind__": "dataclass"
+}

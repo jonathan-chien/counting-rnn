@@ -17,7 +17,7 @@ def main():
     sub_dir_1 = str(date.today())
     sub_dir_2 = 'a'
     output_dir = fileio_utils.make_dir(base_dir, sub_dir_1, sub_dir_2)
-    filename = fileio_utils.make_filename('0000')
+    filename = fileio_utils.make_filename('0001')
 
     # ----------------------- Configure input network ----------------------- #
     input_network = CallableConfig.from_callable(
@@ -107,7 +107,7 @@ def main():
                 args_cfg=ml_utils.config.ScaleParamsArgsConfig(
                     module_name='rnn',
                     param_pattern='weight_hh',
-                    alpha=0.1
+                    alpha=0.01
                 ),
                 kind='function',
                 recovery_mode='call',
